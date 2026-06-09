@@ -70,19 +70,77 @@ MODELS = [
 ]
 
 
-# Cognigy "LLM Prompt Node" support, curated from:
-# https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature
-#   "yes"     = listed by Cognigy and supports the LLM Prompt Node
-#   "no"      = listed by Cognigy but not supported (the embeddings)
-#   "unknown" = not listed on Cognigy's Azure table (the reasoning o-series)
-COGNIGY_LLM_PROMPT = {
-    "gpt-4.1": "yes", "gpt-4.1-mini": "yes", "gpt-4.1-nano": "yes",
-    "gpt-4o": "yes", "gpt-4o-mini": "yes",
-    "gpt-5": "yes", "gpt-5-mini": "yes", "gpt-5-nano": "yes",
-    "gpt-5.1": "yes", "gpt-5.4": "yes", "gpt-5.5": "yes",
-    "o1": "unknown", "o3": "unknown", "o3-mini": "unknown", "o4-mini": "unknown",
-    "text-embedding-3-large": "no", "text-embedding-3-small": "no", "text-embedding-ada-002": "no",
-}
+# Cognigy model-support is published only as a static HTML table (no API):
+#   https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature
+# We scrape it, locking onto the "Microsoft Azure OpenAI" provider section only.
+# Chat models are judged on the "LLM Prompt Node" column; embeddings on "Knowledge Search".
+COGNIGY_URL = "https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature"
+COGNIGY_PROVIDER = "Microsoft Azure OpenAI"
+
+
+def cognigy_code(model_id):
+    """Map our model id to the code Cognigy uses (only the 5.x family differs: dot -> dash)."""
+    return model_id.replace("gpt-5.", "gpt-5-")
+
+
+def fetch_cognigy_azure_support():
+    """Scrape the support matrix. Returns {cognigy_code: {"llm_prompt": bool|None,
+    "knowledge_search": bool|None}} for the Microsoft Azure OpenAI section, or None on failure.
+
+    The table groups models per provider: a header row carries the provider name (e.g.
+    "Microsoft Azure OpenAI"), and the model rows beneath it list <code>…</code> models with a
+    check-circle / x-mark icon per feature column. We only keep rows under the Azure header.
+    """
+    try:
+        req = urllib.request.Request(COGNIGY_URL, headers={"User-Agent": "Mozilla/5.0 (price-bot)"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            doc = r.read().decode("utf-8", "replace")
+        tm = re.search(r"<table.*?</table>", doc, re.S)
+        if not tm:
+            return None
+        table = tm.group(0)
+        headers = [re.sub("<[^>]+>", "", x).strip() for x in re.findall(r"<th[^>]*>(.*?)</th>", table, re.S)]
+
+        def col(name):
+            for i, hh in enumerate(headers):
+                if name in hh:
+                    return i
+            return None
+
+        li, ki = col("LLM Prompt Node"), col("Knowledge Search")
+        if li is None or ki is None:
+            return None
+
+        out, current = {}, None
+        for row in re.findall(r"<tr>(.*?)</tr>", table, re.S):
+            tds = re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)
+            if not tds:
+                continue
+            first, codes = tds[0], re.findall(r"<code>(.*?)</code>", tds[0])
+            if not codes:                                   # provider section header
+                text = re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", first)).strip()
+                if text:
+                    current = text
+                continue
+            if current != COGNIGY_PROVIDER:                 # ignore every non-Azure section
+                continue
+            cells = tds[1:]                                 # feature columns align to headers[1:]
+
+            def mark(header_idx):
+                td = cells[header_idx - 1] if 0 <= header_idx - 1 < len(cells) else ""
+                if "icons/check-circle" in td:
+                    return True
+                if "icons/x-mark" in td:
+                    return False
+                return None
+
+            lp, ks = mark(li), mark(ki)
+            for c in codes:
+                out[c] = {"llm_prompt": lp, "knowledge_search": ks}
+        return out or None
+    except Exception as e:  # network/parse failure -> caller falls back to last-known values
+        print(f"WARNING: Cognigy scrape failed: {e}", file=sys.stderr)
+        return None
 
 
 def fetch_prices(region, currency):
@@ -104,19 +162,35 @@ def fetch_prices(region, currency):
     return out
 
 
-def build_rows(prices_by_cur):
-    """prices_by_cur: {currency: {meterName: price_per_million}}."""
+def build_rows(prices_by_cur, cognigy, old_cog):
+    """prices_by_cur: {currency: {meterName: price_per_million}}.
+    cognigy: scraped Azure support map (or None). old_cog: {id: cognigy dict} from last run."""
     def lookup(meter):
         if not meter:
             return None
         return {cur: prices_by_cur[cur].get(meter) for cur in CURRENCIES}
+
+    def cog_status(m):
+        # embeddings are judged on Knowledge Search; everything else on the LLM Prompt Node
+        feat = "knowledge_search" if m["family"] == "Embedding" else "llm_prompt"
+        label = "Knowledge Search" if feat == "knowledge_search" else "Prompt Node"
+        if cognigy is None:                                  # scrape failed -> keep last-known
+            prev = old_cog.get(m["id"])
+            return prev if isinstance(prev, dict) else {"status": "unknown", "feature": None}
+        entry = cognigy.get(cognigy_code(m["id"]))
+        if not entry:                                        # not listed for Azure (the o-series)
+            return {"status": "unknown", "feature": None}
+        v = entry[feat]
+        status = "yes" if v else ("no" if v is False else "unknown")
+        return {"status": status, "feature": label if status != "unknown" else None}
+
     rows = []
     for m in MODELS:
         rows.append({
             "id": m["id"],
             "family": m["family"],
             "released": m["released"],
-            "cognigy": COGNIGY_LLM_PROMPT.get(m["id"], "unknown"),
+            "cognigy": cog_status(m),
             "inp": lookup(m["meterIn"]),
             "out": lookup(m["meterOut"]),
             "sc": SC in m["regions"],
@@ -129,7 +203,17 @@ def build_rows(prices_by_cur):
 def main():
     print(f"Fetching Data Zone prices ({', '.join(CURRENCIES)}) from Azure Retail Prices API ...", file=sys.stderr)
     prices_by_cur = {cur: fetch_prices(PRICE_REGION, cur) for cur in CURRENCIES}
-    rows = build_rows(prices_by_cur)
+
+    print("Fetching Cognigy model-support table (Microsoft Azure OpenAI) ...", file=sys.stderr)
+    cognigy = fetch_cognigy_azure_support()
+    if cognigy:
+        print(f"  parsed {len(cognigy)} Azure model entries from Cognigy.", file=sys.stderr)
+    else:
+        print("  Cognigy unavailable — keeping last-known values.", file=sys.stderr)
+
+    old = read_old_payload()
+    old_cog = {r["id"]: r.get("cognigy") for r in old["rows"]} if old and old.get("rows") else {}
+    rows = build_rows(prices_by_cur, cognigy, old_cog)
 
     missing = [r["id"] for r in rows if r["inp"] is None and r["id"] != "text-embedding-ada-002"]
     if missing:
@@ -138,7 +222,6 @@ def main():
     # Only move the timestamp when the data actually changed, so an unchanged daily
     # run produces a byte-identical file -> no git diff -> no noise commit.
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    old = read_old_payload()
     if old and old.get("rows") == rows and old.get("currencies") == CURRENCIES:
         updated = old.get("updated", now)
         print("No data change since last run; preserving timestamp.", file=sys.stderr)
@@ -343,7 +426,8 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
       <span>Prices in <b id="cur">DKK</b> / 1M tokens</span>
       <span class="srcs">Sources:
         <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard" target="_blank" rel="noopener">availability</a> ·
-        <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener">retail prices API</a>
+        <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener">retail prices API</a> ·
+        <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">Cognigy support</a>
       </span>
     </div>
   </header>
@@ -401,8 +485,8 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Cognigy LLM Prompt Node</h4><p>Whether the model is usable in Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">LLM&nbsp;Prompt&nbsp;Node</a>. <code>—</code> = not listed by Cognigy (the reasoning o-series); embeddings are listed as unsupported.</p></div>
-    <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD) and re-checks region availability.</p></div>
+    <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
+    <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
 
   <footer>
@@ -471,7 +555,7 @@ function visibleRows(){
   rows.sort((a,b)=>{
     if(k==="id") return a.id.localeCompare(b.id)*d;
     if(k==="released") return a.released.localeCompare(b.released)*d;
-    if(k==="cognigy"){const rk={yes:0,no:1,unknown:2}; return (rk[a.cognigy]-rk[b.cognigy])*d;}
+    if(k==="cognigy"){const rk={yes:0,no:1,unknown:2}; return (rk[a.cognigy.status]-rk[b.cognigy.status])*d;}
     const av=val(a[k]), bv=val(b[k]);
     if(av===null||av===undefined) return 1; if(bv===null||bv===undefined) return -1;   // n/a sinks
     return (av-bv)*d;
@@ -482,14 +566,15 @@ function visibleRows(){
 function availChip(on, region, label){
   return `<span class="chip ${region} ${on?'yes':'no'}"><span class="led"></span>${label}</span>`;
 }
-const COG = {
-  yes:{cls:"yes", txt:"✓ Prompt Node", tip:"Supported in Cognigy's LLM Prompt Node"},
-  no:{cls:"no", txt:"✗ No", tip:"Listed by Cognigy but the LLM Prompt Node is not supported"},
-  unknown:{cls:"unk", txt:"—", tip:"Not listed on Cognigy's Azure model-support page"},
-};
-function cognigyChip(s){
-  const c = COG[s] || COG.unknown;
-  return `<span class="cog ${c.cls}" title="${c.tip}">${c.txt}</span>`;
+function cognigyChip(c){
+  const st = (c && c.status) || "unknown";
+  if(st === "unknown")
+    return `<span class="cog unk" title="Not listed for Microsoft Azure OpenAI on Cognigy">—</span>`;
+  const feat = c.feature || "Prompt Node";
+  const cls = st === "yes" ? "yes" : "no";
+  const icon = st === "yes" ? "✓" : "✗";
+  const tip = `${feat} ${st === "yes" ? "supported" : "not supported"} for Microsoft Azure OpenAI (Cognigy)`;
+  return `<span class="cog ${cls}" title="${tip}">${icon} ${feat}</span>`;
 }
 
 function render(){

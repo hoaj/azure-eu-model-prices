@@ -1,0 +1,1105 @@
+- generic [active] [ref=e1]:
+  - blockquote [ref=e2]:
+    - heading [level=2] [ref=e3]: Documentation Index
+    - paragraph [ref=e4]:
+      - text: "Fetch the complete documentation index at:"
+      - link [ref=e5] [cursor=pointer]:
+        - /url: /llms.txt
+        - text: /llms.txt
+    - paragraph [ref=e6]: Use this file to discover all available pages before exploring further.
+  - generic [ref=e7]:
+    - link "Skip to main content" [ref=e8] [cursor=pointer]:
+      - /url: "#content-area"
+    - generic [ref=e10]:
+      - banner [ref=e11]:
+        - generic [ref=e12]:
+          - paragraph [ref=e14]:
+            - text: Help us improve our product documentation on
+            - code [ref=e15]: docs.cognigy.com
+            - text: by sharing your thoughts in a
+            - link "quick survey" [ref=e16] [cursor=pointer]:
+              - /url: https://forms.office.com/e/xnqneVasp2
+            - text: . Your feedback shapes the future of our content!
+          - button "Dismiss banner" [ref=e17] [cursor=pointer]:
+            - img [ref=e18]
+      - generic [ref=e22]:
+        - navigation "Pages" [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - link "Cognigy Documentation home page light logo" [ref=e26] [cursor=pointer]:
+                - /url: /
+                - generic [ref=e27]: Cognigy Documentation home page
+                - img "light logo" [ref=e28]
+              - button "Toggle dark mode" [ref=e29] [cursor=pointer]:
+                - generic [ref=e30]:
+                  - img [ref=e31]
+                  - img [ref=e38]
+            - generic [ref=e42]:
+              - button "Open search" [ref=e44] [cursor=pointer]:
+                - generic [ref=e45]:
+                  - img [ref=e46]
+                  - generic [ref=e49]: Search...
+                - generic [ref=e50]: ⌘K
+              - button "https://mintlify.s3.us-west-1.amazonaws.com/cognigy-15abf2ba/_assets/icons/dropdown/ai-logo.svg Cognigy.AI" [ref=e51] [cursor=pointer]:
+                - img "https://mintlify.s3.us-west-1.amazonaws.com/cognigy-15abf2ba/_assets/icons/dropdown/ai-logo.svg" [ref=e53]
+                - paragraph [ref=e55]: Cognigy.AI
+                - img [ref=e56]
+            - generic [ref=e58]:
+              - generic [ref=e59]:
+                - heading "Overview" [level=3] [ref=e61]
+                - list [ref=e62]:
+                  - listitem [ref=e63]:
+                    - link "Cognigy.AI" [ref=e64] [cursor=pointer]:
+                      - /url: /
+                      - generic [ref=e67]: Cognigy.AI
+                  - listitem [ref=e68]:
+                    - button "About the Cognigy.AI Platform" [ref=e69] [cursor=pointer]:
+                      - generic [ref=e70]: About the Cognigy.AI Platform
+                      - img [ref=e72]
+                  - listitem [ref=e74]:
+                    - link "Getting Started" [ref=e75] [cursor=pointer]:
+                      - /url: /ai/agents/quickstart
+                      - generic [ref=e78]: Getting Started
+              - generic [ref=e79]:
+                - heading "AI Agents" [level=3] [ref=e81]
+                - list [ref=e82]:
+                  - listitem [ref=e83]:
+                    - link "Overview" [ref=e84] [cursor=pointer]:
+                      - /url: /ai/agents/overview
+                      - generic [ref=e87]: Overview
+                  - listitem [ref=e88]:
+                    - button "Build" [expanded] [ref=e89] [cursor=pointer]:
+                      - generic [ref=e90]: Build
+                      - img [ref=e92]
+                    - list [ref=e94]:
+                      - listitem [ref=e95]:
+                        - link "Persona" [ref=e96] [cursor=pointer]:
+                          - /url: /ai/agents/develop/persona
+                          - generic [ref=e99]: Persona
+                      - listitem [ref=e100]:
+                        - link "Manage AI Agents" [ref=e101] [cursor=pointer]:
+                          - /url: /ai/agents/develop/manage-ai-agents
+                          - generic [ref=e104]: Manage AI Agents
+                      - listitem [ref=e105]:
+                        - button "Tools and Fulfillment" [ref=e106] [cursor=pointer]:
+                          - generic [ref=e107]: Tools and Fulfillment
+                          - img [ref=e109]
+                      - listitem [ref=e111]:
+                        - button "Knowledge AI" [ref=e112] [cursor=pointer]:
+                          - generic [ref=e113]: Knowledge AI
+                          - img [ref=e115]
+                      - listitem [ref=e117]:
+                        - button "AI Agent Memory" [ref=e118] [cursor=pointer]:
+                          - generic [ref=e119]: AI Agent Memory
+                          - img [ref=e121]
+                      - listitem [ref=e123]:
+                        - button "Generative AI and LLMs" [expanded] [ref=e124] [cursor=pointer]:
+                          - generic [ref=e125]: Generative AI and LLMs
+                          - img [ref=e127]
+                        - list [ref=e129]:
+                          - listitem [ref=e130]:
+                            - link "LLMs" [ref=e131] [cursor=pointer]:
+                              - /url: /ai/agents/develop/gen-ai-and-llms/llms
+                              - generic [ref=e134]: LLMs
+                          - listitem [ref=e135]:
+                            - link "Generative AI" [ref=e136] [cursor=pointer]:
+                              - /url: /ai/agents/develop/gen-ai-and-llms/generative-ai
+                              - generic [ref=e139]: Generative AI
+                          - listitem [ref=e140]:
+                            - link "Model Support by Feature" [ref=e141] [cursor=pointer]:
+                              - /url: /ai/agents/develop/gen-ai-and-llms/model-support-by-feature
+                              - generic [ref=e144]: Model Support by Feature
+                          - listitem [ref=e145]:
+                            - button "Providers" [ref=e146] [cursor=pointer]:
+                              - generic [ref=e147]: Providers
+                              - img [ref=e149]
+                          - listitem [ref=e151]:
+                            - link "LLM Fallback" [ref=e152] [cursor=pointer]:
+                              - /url: /ai/agents/develop/gen-ai-and-llms/fallback
+                              - generic [ref=e155]: LLM Fallback
+                          - listitem [ref=e156]:
+                            - link "Large Language Model Session Token Counter" [ref=e157] [cursor=pointer]:
+                              - /url: /ai/agents/develop/gen-ai-and-llms/llm-session-token-counter
+                              - generic [ref=e160]: Large Language Model Session Token Counter
+                          - listitem [ref=e161]:
+                            - link "Other Operations" [ref=e162] [cursor=pointer]:
+                              - /url: /ai/agents/develop/gen-ai-and-llms/other-operations
+                              - generic [ref=e165]: Other Operations
+                      - listitem [ref=e166]:
+                        - link "Voice" [ref=e167] [cursor=pointer]:
+                          - /url: /ai/agents/develop/voice
+                          - generic [ref=e170]: Voice
+                  - listitem [ref=e171]:
+                    - button "Test" [ref=e172] [cursor=pointer]:
+                      - generic [ref=e173]: Test
+                      - img [ref=e175]
+                  - listitem [ref=e177]:
+                    - button "Deploy" [ref=e178] [cursor=pointer]:
+                      - generic [ref=e179]: Deploy
+                      - img [ref=e181]
+                  - listitem [ref=e183]:
+                    - button "Analyze" [ref=e184] [cursor=pointer]:
+                      - generic [ref=e185]: Analyze
+                      - img [ref=e187]
+              - generic [ref=e189]:
+                - heading "Human Escalation" [level=3] [ref=e191]
+                - list [ref=e192]:
+                  - listitem [ref=e193]:
+                    - link "Handover Providers" [ref=e194] [cursor=pointer]:
+                      - /url: /ai/escalate/handovers
+                      - generic [ref=e197]: Handover Providers
+                  - listitem [ref=e198]:
+                    - link "Migration from Endpoint to Handover Provider Settings" [ref=e199] [cursor=pointer]:
+                      - /url: /ai/escalate/migration
+                      - generic [ref=e202]: Migration from Endpoint to Handover Provider Settings
+                  - listitem [ref=e203]:
+                    - button "Handover Provider Reference" [ref=e204] [cursor=pointer]:
+                      - generic [ref=e205]: Handover Provider Reference
+                      - img [ref=e207]
+                  - listitem [ref=e209]:
+                    - link "Agent Copilot" [ref=e210] [cursor=pointer]:
+                      - /url: /ai/escalate/agent-copilot
+                      - generic [ref=e213]: Agent Copilot
+                  - listitem [ref=e214]:
+                    - button "Handover Features" [ref=e215] [cursor=pointer]:
+                      - generic [ref=e216]: Handover Features
+                      - img [ref=e218]
+              - generic [ref=e220]:
+                - heading "Platform Features" [level=3] [ref=e222]
+                - list [ref=e223]:
+                  - listitem [ref=e224]:
+                    - link "Overview" [ref=e225] [cursor=pointer]:
+                      - /url: /ai/platform-features/overview
+                      - generic [ref=e228]: Overview
+                  - listitem [ref=e229]:
+                    - button "Natural Language Understanding" [ref=e230] [cursor=pointer]:
+                      - generic [ref=e231]: Natural Language Understanding
+                      - img [ref=e233]
+                  - listitem [ref=e235]:
+                    - button "CognigyScript" [ref=e236] [cursor=pointer]:
+                      - generic [ref=e237]: CognigyScript
+                      - img [ref=e239]
+                  - listitem [ref=e241]:
+                    - button "Translation and Localization" [ref=e242] [cursor=pointer]:
+                      - generic [ref=e243]: Translation and Localization
+                      - img [ref=e245]
+                  - listitem [ref=e247]:
+                    - link "Data Redaction" [ref=e248] [cursor=pointer]:
+                      - /url: /ai/platform-features/data-redaction
+                      - generic [ref=e251]: Data Redaction
+                  - listitem [ref=e252]:
+                    - link "Connections" [ref=e253] [cursor=pointer]:
+                      - /url: /ai/platform-features/connections
+                      - generic [ref=e256]: Connections
+                  - listitem [ref=e257]:
+                    - link "Packages" [ref=e258] [cursor=pointer]:
+                      - /url: /ai/platform-features/packages
+                      - generic [ref=e261]: Packages
+              - generic [ref=e262]:
+                - heading "For Developers" [level=3] [ref=e264]
+                - list [ref=e265]:
+                  - listitem [ref=e266]:
+                    - link "Extensions" [ref=e267] [cursor=pointer]:
+                      - /url: /ai/for-developers/extensions
+                      - generic [ref=e270]: Extensions
+                  - listitem [ref=e271]:
+                    - 'button "Node Execution API: Function Reference" [ref=e272] [cursor=pointer]':
+                      - generic [ref=e273]: "Node Execution API: Function Reference"
+                      - img [ref=e275]
+                  - listitem [ref=e277]:
+                    - 'button "Knowledge Connector API: Function Reference" [ref=e278] [cursor=pointer]':
+                      - generic [ref=e279]: "Knowledge Connector API: Function Reference"
+                      - img [ref=e281]
+                  - listitem [ref=e283]:
+                    - link "Functions Deprecated" [ref=e284] [cursor=pointer]:
+                      - /url: /ai/for-developers/functions
+                      - generic [ref=e286]:
+                        - generic [ref=e287]: Functions
+                        - generic [ref=e290]: Deprecated
+                  - listitem [ref=e291]:
+                    - button "Code Node" [ref=e292] [cursor=pointer]:
+                      - generic [ref=e293]: Code Node
+                      - img [ref=e295]
+                  - listitem [ref=e297]:
+                    - button "Transformers" [ref=e298] [cursor=pointer]:
+                      - generic [ref=e299]: Transformers
+                      - img [ref=e301]
+                  - listitem [ref=e303]:
+                    - button "Developer Reference" [ref=e304] [cursor=pointer]:
+                      - generic [ref=e305]: Developer Reference
+                      - img [ref=e307]
+              - generic [ref=e309]:
+                - heading "Administration and Installation" [level=3] [ref=e311]
+                - list [ref=e312]:
+                  - listitem [ref=e313]:
+                    - link "Overview" [ref=e314] [cursor=pointer]:
+                      - /url: /ai/administer/overview
+                      - generic [ref=e317]: Overview
+                  - listitem [ref=e318]:
+                    - link "Quotas and Limits" [ref=e319] [cursor=pointer]:
+                      - /url: /ai/administer/limitations
+                      - generic [ref=e322]: Quotas and Limits
+                  - listitem [ref=e323]:
+                    - link "Billing" [ref=e324] [cursor=pointer]:
+                      - /url: /ai/administer/billing
+                      - generic [ref=e327]: Billing
+                  - listitem [ref=e328]:
+                    - button "Administration" [ref=e329] [cursor=pointer]:
+                      - generic [ref=e330]: Administration
+                      - img [ref=e332]
+                  - listitem [ref=e334]:
+                    - button "Install, Configure, and Migrate" [ref=e335] [cursor=pointer]:
+                      - generic [ref=e336]: Install, Configure, and Migrate
+                      - img [ref=e338]
+          - list [ref=e340]:
+            - listitem [ref=e341]:
+              - link "Support" [ref=e342] [cursor=pointer]:
+                - /url: https://support.cognigy.com/hc/en-us/requests/new
+                - generic [ref=e345]: Support
+                - img [ref=e347]
+            - listitem [ref=e350]:
+              - link "Cognigy Academy" [ref=e351] [cursor=pointer]:
+                - /url: https://docs.cognigy.com/help/cognigy-academy
+                - generic [ref=e354]: Cognigy Academy
+                - img [ref=e356]
+            - listitem [ref=e359]:
+              - link "Cognigy Trial" [ref=e360] [cursor=pointer]:
+                - /url: https://trial.cognigy.ai/
+                - generic [ref=e363]: Cognigy Trial
+                - img [ref=e365]
+            - listitem
+        - main [ref=e368]:
+          - generic [ref=e369]:
+            - generic [ref=e371]:
+              - generic [ref=e372]: Generative AI and LLMs
+              - generic [ref=e373]:
+                - heading "Model Support by Feature" [level=1] [ref=e374]
+                - generic [ref=e375]:
+                  - button "Copy page" [ref=e376] [cursor=pointer]:
+                    - generic [ref=e377]:
+                      - img [ref=e378]
+                      - generic [ref=e381]: Copy page
+                  - button "More actions" [ref=e382] [cursor=pointer]:
+                    - img [ref=e383]
+            - generic [ref=e385]:
+              - link "Updated in 2026.10" [ref=e386] [cursor=pointer]:
+                - /url: /release-notes/2026.10
+                - generic [ref=e387]: Updated in 2026.10
+              - generic [ref=e388]:
+                - text: The table provides an overview of the LLM providers supported by Cognigy.AI, detailing the standard models and their compatibility with Cognigy.AI features. You can also add a custom model that isn’t listed in the table. To do so, select the
+                - strong [ref=e389]: Custom Model
+                - text: parameter when creating a model and specify both the model type and name. For more information about adding a custom or standard model for a selected LLM provider, refer to the
+                - link "All LLM Providers" [ref=e390] [cursor=pointer]:
+                  - /url: /ai/agents/develop/gen-ai-and-llms/providers/all-providers
+                - text: page.
+              - table [ref=e394]:
+                - rowgroup [ref=e395]:
+                  - row "Models Design-Time Features1 AI Agent Node AI Enhanced Outputs LLM Prompt Node Answer Extraction Knowledge Search Sentiment Analysis NLU Embedding Model" [ref=e396]:
+                    - columnheader "Models" [ref=e397]:
+                      - generic [ref=e398]: Models
+                    - columnheader "Design-Time Features1" [ref=e399]:
+                      - text: Design-Time Features
+                      - superscript [ref=e400]:
+                        - link "1" [ref=e401] [cursor=pointer]:
+                          - /url: "#footnote1"
+                    - columnheader "AI Agent Node" [ref=e402]
+                    - columnheader "AI Enhanced Outputs" [ref=e403]
+                    - columnheader "LLM Prompt Node" [ref=e404]
+                    - columnheader "Answer Extraction" [ref=e405]
+                    - columnheader "Knowledge Search" [ref=e406]
+                    - columnheader "Sentiment Analysis" [ref=e407]
+                    - columnheader "NLU Embedding Model" [ref=e408]
+                - rowgroup [ref=e409]:
+                  - row "cognigy-ai-logo Cognigy.AI" [ref=e410]:
+                    - cell "cognigy-ai-logo Cognigy.AI" [ref=e411]:
+                      - img "cognigy-ai-logo" [ref=e412]
+                      - strong [ref=e413]:
+                        - link "Cognigy.AI" [ref=e414] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/generative-ai#design-time-generative-ai-features
+                    - cell [ref=e415]
+                    - cell [ref=e416]
+                    - cell [ref=e417]
+                    - cell [ref=e418]
+                    - cell [ref=e419]
+                    - cell [ref=e420]
+                    - cell [ref=e421]
+                    - cell [ref=e422]
+                  - row "Platform-Provided LLM check-mark x-mark x-mark x-mark x-mark x-mark x-mark x-mark" [ref=e423]:
+                    - cell "Platform-Provided LLM" [ref=e424]
+                    - cell "check-mark" [ref=e425]:
+                      - img "check-mark" [ref=e426]
+                    - cell "x-mark" [ref=e427]:
+                      - img "x-mark" [ref=e428]
+                    - cell "x-mark" [ref=e429]:
+                      - img "x-mark" [ref=e430]
+                    - cell "x-mark" [ref=e431]:
+                      - img "x-mark" [ref=e432]
+                    - cell "x-mark" [ref=e433]:
+                      - img "x-mark" [ref=e434]
+                    - cell "x-mark" [ref=e435]:
+                      - img "x-mark" [ref=e436]
+                    - cell "x-mark" [ref=e437]:
+                      - img "x-mark" [ref=e438]
+                    - cell "x-mark" [ref=e439]:
+                      - img "x-mark" [ref=e440]
+                  - row "azure Microsoft Azure OpenAI" [ref=e441]:
+                    - cell "azure Microsoft Azure OpenAI" [ref=e442]:
+                      - img "azure" [ref=e443]
+                      - strong [ref=e444]:
+                        - link "Microsoft Azure OpenAI" [ref=e445] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/microsoft-azure-openai
+                    - cell [ref=e446]
+                    - cell [ref=e447]
+                    - cell [ref=e448]
+                    - cell [ref=e449]
+                    - cell [ref=e450]
+                    - cell [ref=e451]
+                    - cell [ref=e452]
+                    - cell [ref=e453]
+                  - row "gpt-5-52,7 gpt-5-42 gpt-5-4-mini2 gpt-5-4-nano2 gpt-5-22 gpt-5-12 gpt-52 gpt-5-nano2 gpt-5-mini2 gpt-5-chat-latest gpt-4.1-nano gpt-4.1-mini gpt-4.1 gpt-4o-mini gpt-4o check-mark check-mark check-mark check-mark check-mark x-mark check-mark x-mark" [ref=e454]:
+                    - cell "gpt-5-52,7 gpt-5-42 gpt-5-4-mini2 gpt-5-4-nano2 gpt-5-22 gpt-5-12 gpt-52 gpt-5-nano2 gpt-5-mini2 gpt-5-chat-latest gpt-4.1-nano gpt-4.1-mini gpt-4.1 gpt-4o-mini gpt-4o" [ref=e455]:
+                      - code [ref=e456]: gpt-5-5
+                      - superscript [ref=e457]:
+                        - link "2" [ref=e458] [cursor=pointer]:
+                          - /url: "#footnote2"
+                        - text: ","
+                        - link "7" [ref=e459] [cursor=pointer]:
+                          - /url: "#footnote7"
+                      - code [ref=e460]: gpt-5-4
+                      - superscript [ref=e461]:
+                        - link "2" [ref=e462] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e463]: gpt-5-4-mini
+                      - superscript [ref=e464]:
+                        - link "2" [ref=e465] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e466]: gpt-5-4-nano
+                      - superscript [ref=e467]:
+                        - link "2" [ref=e468] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e469]: gpt-5-2
+                      - superscript [ref=e470]:
+                        - link "2" [ref=e471] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e472]: gpt-5-1
+                      - superscript [ref=e473]:
+                        - link "2" [ref=e474] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e475]: gpt-5
+                      - superscript [ref=e476]:
+                        - link "2" [ref=e477] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e478]: gpt-5-nano
+                      - superscript [ref=e479]:
+                        - link "2" [ref=e480] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e481]: gpt-5-mini
+                      - superscript [ref=e482]:
+                        - link "2" [ref=e483] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e484]: gpt-5-chat-latest
+                      - code [ref=e485]: gpt-4.1-nano
+                      - code [ref=e486]: gpt-4.1-mini
+                      - code [ref=e487]: gpt-4.1
+                      - code [ref=e488]: gpt-4o-mini
+                      - code [ref=e489]: gpt-4o
+                    - cell "check-mark" [ref=e490]:
+                      - img "check-mark" [ref=e491]
+                    - cell "check-mark" [ref=e492]:
+                      - img "check-mark" [ref=e493]
+                    - cell "check-mark" [ref=e494]:
+                      - img "check-mark" [ref=e495]
+                    - cell "check-mark" [ref=e496]:
+                      - img "check-mark" [ref=e497]
+                    - cell "check-mark" [ref=e498]:
+                      - img "check-mark" [ref=e499]
+                    - cell "x-mark" [ref=e500]:
+                      - img "x-mark" [ref=e501]
+                    - cell "check-mark" [ref=e502]:
+                      - img "check-mark" [ref=e503]
+                    - cell "x-mark" [ref=e504]:
+                      - img "x-mark" [ref=e505]
+                  - row "text-embedding-ada-002 text-embedding-3-small3 text-embedding-3-large3 x-mark x-mark x-mark x-mark x-mark check-mark x-mark x-mark" [ref=e506]:
+                    - cell "text-embedding-ada-002 text-embedding-3-small3 text-embedding-3-large3" [ref=e507]:
+                      - code [ref=e508]: text-embedding-ada-002
+                      - code [ref=e509]: text-embedding-3-small
+                      - superscript [ref=e510]:
+                        - link "3" [ref=e511] [cursor=pointer]:
+                          - /url: "#footnote3"
+                      - code [ref=e512]: text-embedding-3-large
+                      - superscript [ref=e513]:
+                        - link "3" [ref=e514] [cursor=pointer]:
+                          - /url: "#footnote3"
+                    - cell "x-mark" [ref=e515]:
+                      - img "x-mark" [ref=e516]
+                    - cell "x-mark" [ref=e517]:
+                      - img "x-mark" [ref=e518]
+                    - cell "x-mark" [ref=e519]:
+                      - img "x-mark" [ref=e520]
+                    - cell "x-mark" [ref=e521]:
+                      - img "x-mark" [ref=e522]
+                    - cell "x-mark" [ref=e523]:
+                      - img "x-mark" [ref=e524]
+                    - cell "check-mark" [ref=e525]:
+                      - img "check-mark" [ref=e526]
+                    - cell "x-mark" [ref=e527]:
+                      - img "x-mark" [ref=e528]
+                    - cell "x-mark" [ref=e529]:
+                      - img "x-mark" [ref=e530]
+                  - row "open-ai OpenAI" [ref=e531]:
+                    - cell "open-ai OpenAI" [ref=e532]:
+                      - img "open-ai" [ref=e533]
+                      - strong [ref=e534]:
+                        - link "OpenAI" [ref=e535] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/openai
+                    - cell [ref=e536]
+                    - cell [ref=e537]
+                    - cell [ref=e538]
+                    - cell [ref=e539]
+                    - cell [ref=e540]
+                    - cell [ref=e541]
+                    - cell [ref=e542]
+                    - cell [ref=e543]
+                  - row "gpt-5-52,7 gpt-5-42 gpt-5-4-mini2 gpt-5-4-nano2 gpt-5-22 gpt-5-12 gpt-52 gpt-5-nano2 gpt-5-mini2 gpt-5-chat-latest gpt-4.1-nano gpt-4.1-mini gpt-4.1 gpt-4o-mini gpt-4o check-mark check-mark check-mark check-mark check-mark x-mark check-mark x-mark" [ref=e544]:
+                    - cell "gpt-5-52,7 gpt-5-42 gpt-5-4-mini2 gpt-5-4-nano2 gpt-5-22 gpt-5-12 gpt-52 gpt-5-nano2 gpt-5-mini2 gpt-5-chat-latest gpt-4.1-nano gpt-4.1-mini gpt-4.1 gpt-4o-mini gpt-4o" [ref=e545]:
+                      - code [ref=e546]: gpt-5-5
+                      - superscript [ref=e547]:
+                        - link "2" [ref=e548] [cursor=pointer]:
+                          - /url: "#footnote2"
+                        - text: ","
+                        - link "7" [ref=e549] [cursor=pointer]:
+                          - /url: "#footnote7"
+                      - code [ref=e550]: gpt-5-4
+                      - superscript [ref=e551]:
+                        - link "2" [ref=e552] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e553]: gpt-5-4-mini
+                      - superscript [ref=e554]:
+                        - link "2" [ref=e555] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e556]: gpt-5-4-nano
+                      - superscript [ref=e557]:
+                        - link "2" [ref=e558] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e559]: gpt-5-2
+                      - superscript [ref=e560]:
+                        - link "2" [ref=e561] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e562]: gpt-5-1
+                      - superscript [ref=e563]:
+                        - link "2" [ref=e564] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e565]: gpt-5
+                      - superscript [ref=e566]:
+                        - link "2" [ref=e567] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e568]: gpt-5-nano
+                      - superscript [ref=e569]:
+                        - link "2" [ref=e570] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e571]: gpt-5-mini
+                      - superscript [ref=e572]:
+                        - link "2" [ref=e573] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e574]: gpt-5-chat-latest
+                      - code [ref=e575]: gpt-4.1-nano
+                      - code [ref=e576]: gpt-4.1-mini
+                      - code [ref=e577]: gpt-4.1
+                      - code [ref=e578]: gpt-4o-mini
+                      - code [ref=e579]: gpt-4o
+                    - cell "check-mark" [ref=e580]:
+                      - img "check-mark" [ref=e581]
+                    - cell "check-mark" [ref=e582]:
+                      - img "check-mark" [ref=e583]
+                    - cell "check-mark" [ref=e584]:
+                      - img "check-mark" [ref=e585]
+                    - cell "check-mark" [ref=e586]:
+                      - img "check-mark" [ref=e587]
+                    - cell "check-mark" [ref=e588]:
+                      - img "check-mark" [ref=e589]
+                    - cell "x-mark" [ref=e590]:
+                      - img "x-mark" [ref=e591]
+                    - cell "check-mark" [ref=e592]:
+                      - img "check-mark" [ref=e593]
+                    - cell "x-mark" [ref=e594]:
+                      - img "x-mark" [ref=e595]
+                  - row "text-embedding-ada-002 text-embedding-3-small3 text-embedding-3-large3 x-mark x-mark x-mark x-mark x-mark check-mark x-mark x-mark" [ref=e596]:
+                    - cell "text-embedding-ada-002 text-embedding-3-small3 text-embedding-3-large3" [ref=e597]:
+                      - code [ref=e598]: text-embedding-ada-002
+                      - code [ref=e599]: text-embedding-3-small
+                      - superscript [ref=e600]:
+                        - link "3" [ref=e601] [cursor=pointer]:
+                          - /url: "#footnote3"
+                      - code [ref=e602]: text-embedding-3-large
+                      - superscript [ref=e603]:
+                        - link "3" [ref=e604] [cursor=pointer]:
+                          - /url: "#footnote3"
+                    - cell "x-mark" [ref=e605]:
+                      - img "x-mark" [ref=e606]
+                    - cell "x-mark" [ref=e607]:
+                      - img "x-mark" [ref=e608]
+                    - cell "x-mark" [ref=e609]:
+                      - img "x-mark" [ref=e610]
+                    - cell "x-mark" [ref=e611]:
+                      - img "x-mark" [ref=e612]
+                    - cell "x-mark" [ref=e613]:
+                      - img "x-mark" [ref=e614]
+                    - cell "check-mark" [ref=e615]:
+                      - img "check-mark" [ref=e616]
+                    - cell "x-mark" [ref=e617]:
+                      - img "x-mark" [ref=e618]
+                    - cell "x-mark" [ref=e619]:
+                      - img "x-mark" [ref=e620]
+                  - row "openai-compatibleOpenAI-Compatible" [ref=e621]:
+                    - cell "openai-compatibleOpenAI-Compatible" [ref=e622]:
+                      - img "openai-compatible" [ref=e623]
+                      - strong [ref=e624]:
+                        - link "OpenAI-Compatible" [ref=e625] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/openai-compatible
+                    - cell [ref=e626]
+                    - cell [ref=e627]
+                    - cell [ref=e628]
+                    - cell [ref=e629]
+                    - cell [ref=e630]
+                    - cell [ref=e631]
+                    - cell [ref=e632]
+                    - cell [ref=e633]
+                  - row "OpenAI-compatible LLMs x-mark check-mark x-mark check-mark check-mark check-mark x-mark x-mark" [ref=e634]:
+                    - cell "OpenAI-compatible LLMs" [ref=e635]
+                    - cell "x-mark" [ref=e636]:
+                      - img "x-mark" [ref=e637]
+                    - cell "check-mark" [ref=e638]:
+                      - img "check-mark" [ref=e639]
+                    - cell "x-mark" [ref=e640]:
+                      - img "x-mark" [ref=e641]
+                    - cell "check-mark" [ref=e642]:
+                      - img "check-mark" [ref=e643]
+                    - cell "check-mark" [ref=e644]:
+                      - img "check-mark" [ref=e645]
+                    - cell "check-mark" [ref=e646]:
+                      - img "check-mark" [ref=e647]
+                    - cell "x-mark" [ref=e648]:
+                      - img "x-mark" [ref=e649]
+                    - cell "x-mark" [ref=e650]:
+                      - img "x-mark" [ref=e651]
+                  - row "anthropic Anthropic" [ref=e652]:
+                    - cell "anthropic Anthropic" [ref=e653]:
+                      - img "anthropic" [ref=e654]
+                      - strong [ref=e655]:
+                        - link "Anthropic" [ref=e656] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/anthropic
+                    - cell [ref=e657]
+                    - cell [ref=e658]
+                    - cell [ref=e659]
+                    - cell [ref=e660]
+                    - cell [ref=e661]
+                    - cell [ref=e662]
+                    - cell [ref=e663]
+                    - cell [ref=e664]
+                  - row "claude-sonnet-4-62 claude-sonnet-4-52 claude-sonnet-4-0 check-mark check-mark check-mark check-mark check-mark x-mark check-mark x-mark" [ref=e665]:
+                    - cell "claude-sonnet-4-62 claude-sonnet-4-52 claude-sonnet-4-0" [ref=e666]:
+                      - code [ref=e667]: claude-sonnet-4-6
+                      - superscript [ref=e668]:
+                        - link "2" [ref=e669] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e670]: claude-sonnet-4-5
+                      - superscript [ref=e671]:
+                        - link "2" [ref=e672] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e673]: claude-sonnet-4-0
+                    - cell "check-mark" [ref=e674]:
+                      - img "check-mark" [ref=e675]
+                    - cell "check-mark" [ref=e676]:
+                      - img "check-mark" [ref=e677]
+                    - cell "check-mark" [ref=e678]:
+                      - img "check-mark" [ref=e679]
+                    - cell "check-mark" [ref=e680]:
+                      - img "check-mark" [ref=e681]
+                    - cell "check-mark" [ref=e682]:
+                      - img "check-mark" [ref=e683]
+                    - cell "x-mark" [ref=e684]:
+                      - img "x-mark" [ref=e685]
+                    - cell "check-mark" [ref=e686]:
+                      - img "check-mark" [ref=e687]
+                    - cell "x-mark" [ref=e688]:
+                      - img "x-mark" [ref=e689]
+                  - row "claude-haiku-4-52 x-mark check-mark x-mark check-mark check-mark x-mark x-mark x-mark" [ref=e690]:
+                    - cell "claude-haiku-4-52" [ref=e691]:
+                      - code [ref=e692]: claude-haiku-4-5
+                      - superscript [ref=e693]:
+                        - link "2" [ref=e694] [cursor=pointer]:
+                          - /url: "#footnote2"
+                    - cell "x-mark" [ref=e695]:
+                      - img "x-mark" [ref=e696]
+                    - cell "check-mark" [ref=e697]:
+                      - img "check-mark" [ref=e698]
+                    - cell "x-mark" [ref=e699]:
+                      - img "x-mark" [ref=e700]
+                    - cell "check-mark" [ref=e701]:
+                      - img "check-mark" [ref=e702]
+                    - cell "check-mark" [ref=e703]:
+                      - img "check-mark" [ref=e704]
+                    - cell "x-mark" [ref=e705]:
+                      - img "x-mark" [ref=e706]
+                    - cell "x-mark" [ref=e707]:
+                      - img "x-mark" [ref=e708]
+                    - cell "x-mark" [ref=e709]:
+                      - img "x-mark" [ref=e710]
+                  - row "google-gemini Google Gemini" [ref=e711]:
+                    - cell "google-gemini Google Gemini" [ref=e712]:
+                      - img "google-gemini" [ref=e713]
+                      - strong [ref=e714]:
+                        - link "Google Gemini" [ref=e715] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/google-gemini
+                    - cell [ref=e716]
+                    - cell [ref=e717]
+                    - cell [ref=e718]
+                    - cell [ref=e719]
+                    - cell [ref=e720]
+                    - cell [ref=e721]
+                    - cell [ref=e722]
+                    - cell [ref=e723]
+                  - row "gemini-2.5-pro2 gemini-2.5-flash2 gemini-2.5-flash-lite2 gemini-2.0-flash (deprecated) gemini-2.0-flash-lite (deprecated) x-mark check-mark x-mark check-mark check-mark x-mark x-mark x-mark" [ref=e724]:
+                    - cell "gemini-2.5-pro2 gemini-2.5-flash2 gemini-2.5-flash-lite2 gemini-2.0-flash (deprecated) gemini-2.0-flash-lite (deprecated)" [ref=e725]:
+                      - code [ref=e726]: gemini-2.5-pro
+                      - superscript [ref=e727]:
+                        - link "2" [ref=e728] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e729]: gemini-2.5-flash
+                      - superscript [ref=e730]:
+                        - link "2" [ref=e731] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e732]: gemini-2.5-flash-lite
+                      - superscript [ref=e733]:
+                        - link "2" [ref=e734] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e735]: gemini-2.0-flash
+                      - text: (
+                      - link "deprecated" [ref=e736] [cursor=pointer]:
+                        - /url: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions#legacy-stable
+                      - text: )
+                      - code [ref=e737]: gemini-2.0-flash-lite
+                      - text: (
+                      - link "deprecated" [ref=e738] [cursor=pointer]:
+                        - /url: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions#legacy-stable
+                      - text: )
+                    - cell "x-mark" [ref=e739]:
+                      - img "x-mark" [ref=e740]
+                    - cell "check-mark" [ref=e741]:
+                      - img "check-mark" [ref=e742]
+                    - cell "x-mark" [ref=e743]:
+                      - img "x-mark" [ref=e744]
+                    - cell "check-mark" [ref=e745]:
+                      - img "check-mark" [ref=e746]
+                    - cell "check-mark" [ref=e747]:
+                      - img "check-mark" [ref=e748]
+                    - cell "x-mark" [ref=e749]:
+                      - img "x-mark" [ref=e750]
+                    - cell "x-mark" [ref=e751]:
+                      - img "x-mark" [ref=e752]
+                    - cell "x-mark" [ref=e753]:
+                      - img "x-mark" [ref=e754]
+                  - row "gemini-embedding-001 x-mark x-mark x-mark x-mark x-mark check-mark x-mark x-mark" [ref=e755]:
+                    - cell "gemini-embedding-001" [ref=e756]:
+                      - code [ref=e757]: gemini-embedding-001
+                    - cell "x-mark" [ref=e758]:
+                      - img "x-mark" [ref=e759]
+                    - cell "x-mark" [ref=e760]:
+                      - img "x-mark" [ref=e761]
+                    - cell "x-mark" [ref=e762]:
+                      - img "x-mark" [ref=e763]
+                    - cell "x-mark" [ref=e764]:
+                      - img "x-mark" [ref=e765]
+                    - cell "x-mark" [ref=e766]:
+                      - img "x-mark" [ref=e767]
+                    - cell "check-mark" [ref=e768]:
+                      - img "check-mark" [ref=e769]
+                    - cell "x-mark" [ref=e770]:
+                      - img "x-mark" [ref=e771]
+                    - cell "x-mark" [ref=e772]:
+                      - img "x-mark" [ref=e773]
+                  - row "google-genai Google GenAI" [ref=e774]:
+                    - cell "google-genai Google GenAI" [ref=e775]:
+                      - img "google-genai" [ref=e776]
+                      - strong [ref=e777]:
+                        - link "Google GenAI" [ref=e778] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/google-genai
+                    - cell [ref=e779]
+                    - cell [ref=e780]
+                    - cell [ref=e781]
+                    - cell [ref=e782]
+                    - cell [ref=e783]
+                    - cell [ref=e784]
+                    - cell [ref=e785]
+                    - cell [ref=e786]
+                  - row "gemini-3.1-pro-preview2 gemini-3-flash-preview2 gemini-3.1-flash-lite-preview2 x-mark check-mark x-mark check-mark check-mark x-mark x-mark x-mark" [ref=e787]:
+                    - cell "gemini-3.1-pro-preview2 gemini-3-flash-preview2 gemini-3.1-flash-lite-preview2" [ref=e788]:
+                      - code [ref=e789]: gemini-3.1-pro-preview
+                      - superscript [ref=e790]:
+                        - link "2" [ref=e791] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e792]: gemini-3-flash-preview
+                      - superscript [ref=e793]:
+                        - link "2" [ref=e794] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e795]: gemini-3.1-flash-lite-preview
+                      - superscript [ref=e796]:
+                        - link "2" [ref=e797] [cursor=pointer]:
+                          - /url: "#footnote2"
+                    - cell "x-mark" [ref=e798]:
+                      - img "x-mark" [ref=e799]
+                    - cell "check-mark" [ref=e800]:
+                      - img "check-mark" [ref=e801]
+                    - cell "x-mark" [ref=e802]:
+                      - img "x-mark" [ref=e803]
+                    - cell "check-mark" [ref=e804]:
+                      - img "check-mark" [ref=e805]
+                    - cell "check-mark" [ref=e806]:
+                      - img "check-mark" [ref=e807]
+                    - cell "x-mark" [ref=e808]:
+                      - img "x-mark" [ref=e809]
+                    - cell "x-mark" [ref=e810]:
+                      - img "x-mark" [ref=e811]
+                    - cell "x-mark" [ref=e812]:
+                      - img "x-mark" [ref=e813]
+                  - row "alephalpha Aleph Alpha" [ref=e814]:
+                    - cell "alephalpha Aleph Alpha" [ref=e815]:
+                      - img "alephalpha" [ref=e816]
+                      - strong [ref=e817]:
+                        - link "Aleph Alpha" [ref=e818] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/aleph-alpha
+                    - cell [ref=e819]
+                    - cell [ref=e820]
+                    - cell [ref=e821]
+                    - cell [ref=e822]
+                    - cell [ref=e823]
+                    - cell [ref=e824]
+                    - cell [ref=e825]
+                    - cell [ref=e826]
+                  - row "luminous (deprecated) x-mark x-mark x-mark x-mark check-mark x-mark x-mark x-mark" [ref=e827]:
+                    - cell "luminous (deprecated)" [ref=e828]:
+                      - code [ref=e829]: luminous
+                      - text: (
+                      - link "deprecated" [ref=e830] [cursor=pointer]:
+                        - /url: https://docs.aleph-alpha.com
+                      - text: )
+                    - cell "x-mark" [ref=e831]:
+                      - img "x-mark" [ref=e832]
+                    - cell "x-mark" [ref=e833]:
+                      - img "x-mark" [ref=e834]
+                    - cell "x-mark" [ref=e835]:
+                      - img "x-mark" [ref=e836]
+                    - cell "x-mark" [ref=e837]:
+                      - img "x-mark" [ref=e838]
+                    - cell "check-mark" [ref=e839]:
+                      - img "check-mark" [ref=e840]
+                    - cell "x-mark" [ref=e841]:
+                      - img "x-mark" [ref=e842]
+                    - cell "x-mark" [ref=e843]:
+                      - img "x-mark" [ref=e844]
+                    - cell "x-mark" [ref=e845]:
+                      - img "x-mark" [ref=e846]
+                  - row "amazon-bedrock Amazon Bedrock" [ref=e847]:
+                    - cell "amazon-bedrock Amazon Bedrock" [ref=e848]:
+                      - img "amazon-bedrock" [ref=e849]
+                      - strong [ref=e850]:
+                        - link "Amazon Bedrock" [ref=e851] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/amazon-bedrock
+                    - cell [ref=e852]
+                    - cell [ref=e853]
+                    - cell [ref=e854]
+                    - cell [ref=e855]
+                    - cell [ref=e856]
+                    - cell [ref=e857]
+                    - cell [ref=e858]
+                    - cell [ref=e859]
+                  - row "anthropic.claude-3-5-sonnet-20240620-v1:0 (deprecated) amazon.nova-lite-v1:0 (deprecated) amazon.nova-pro-v1:0 (deprecated) amazon.nova-premier-v1:02 amazon.nova-2-lite-v1:0 x-mark check-mark x-mark check-mark check-mark x-mark x-mark x-mark" [ref=e860]:
+                    - cell "anthropic.claude-3-5-sonnet-20240620-v1:0 (deprecated) amazon.nova-lite-v1:0 (deprecated) amazon.nova-pro-v1:0 (deprecated) amazon.nova-premier-v1:02 amazon.nova-2-lite-v1:0" [ref=e861]:
+                      - code [ref=e862]: anthropic.claude-3-5-sonnet-20240620-v1:0
+                      - text: (
+                      - link "deprecated" [ref=e863] [cursor=pointer]:
+                        - /url: https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle.html
+                      - text: )
+                      - code [ref=e864]: amazon.nova-lite-v1:0
+                      - text: (
+                      - link "deprecated" [ref=e865] [cursor=pointer]:
+                        - /url: https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle.html
+                      - text: )
+                      - code [ref=e866]: amazon.nova-pro-v1:0
+                      - text: (
+                      - link "deprecated" [ref=e867] [cursor=pointer]:
+                        - /url: https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle.html
+                      - text: )
+                      - code [ref=e868]: amazon.nova-premier-v1:0
+                      - superscript [ref=e869]:
+                        - link "2" [ref=e870] [cursor=pointer]:
+                          - /url: "#footnote2"
+                      - code [ref=e871]: amazon.nova-2-lite-v1:0
+                    - cell "x-mark" [ref=e872]:
+                      - img "x-mark" [ref=e873]
+                    - cell "check-mark" [ref=e874]:
+                      - img "check-mark" [ref=e875]
+                    - cell "x-mark" [ref=e876]:
+                      - img "x-mark" [ref=e877]
+                    - cell "check-mark" [ref=e878]:
+                      - img "check-mark" [ref=e879]
+                    - cell "check-mark" [ref=e880]:
+                      - img "check-mark" [ref=e881]
+                    - cell "x-mark" [ref=e882]:
+                      - img "x-mark" [ref=e883]
+                    - cell "x-mark" [ref=e884]:
+                      - img "x-mark" [ref=e885]
+                    - cell "x-mark" [ref=e886]:
+                      - img "x-mark" [ref=e887]
+                  - row "amazon.titan-embed-text-v2:05 x-mark x-mark x-mark x-mark x-mark check-mark x-mark x-mark" [ref=e888]:
+                    - cell "amazon.titan-embed-text-v2:05" [ref=e889]:
+                      - code [ref=e890]: amazon.titan-embed-text-v2:0
+                      - superscript [ref=e891]:
+                        - link "5" [ref=e892] [cursor=pointer]:
+                          - /url: "#footnote5"
+                    - cell "x-mark" [ref=e893]:
+                      - img "x-mark" [ref=e894]
+                    - cell "x-mark" [ref=e895]:
+                      - img "x-mark" [ref=e896]
+                    - cell "x-mark" [ref=e897]:
+                      - img "x-mark" [ref=e898]
+                    - cell "x-mark" [ref=e899]:
+                      - img "x-mark" [ref=e900]
+                    - cell "x-mark" [ref=e901]:
+                      - img "x-mark" [ref=e902]
+                    - cell "check-mark" [ref=e903]:
+                      - img "check-mark" [ref=e904]
+                    - cell "x-mark" [ref=e905]:
+                      - img "x-mark" [ref=e906]
+                    - cell "x-mark" [ref=e907]:
+                      - img "x-mark" [ref=e908]
+                  - row "amazon.nova-micro-v1:0 (deprecated) x-mark x-mark x-mark check-mark check-mark x-mark x-mark x-mark" [ref=e909]:
+                    - cell "amazon.nova-micro-v1:0 (deprecated)" [ref=e910]:
+                      - code [ref=e911]: amazon.nova-micro-v1:0
+                      - text: (
+                      - link "deprecated" [ref=e912] [cursor=pointer]:
+                        - /url: https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle.html
+                      - text: )
+                    - cell "x-mark" [ref=e913]:
+                      - img "x-mark" [ref=e914]
+                    - cell "x-mark" [ref=e915]:
+                      - img "x-mark" [ref=e916]
+                    - cell "x-mark" [ref=e917]:
+                      - img "x-mark" [ref=e918]
+                    - cell "check-mark" [ref=e919]:
+                      - img "check-mark" [ref=e920]
+                    - cell "check-mark" [ref=e921]:
+                      - img "check-mark" [ref=e922]
+                    - cell "x-mark" [ref=e923]:
+                      - img "x-mark" [ref=e924]
+                    - cell "x-mark" [ref=e925]:
+                      - img "x-mark" [ref=e926]
+                    - cell "x-mark" [ref=e927]:
+                      - img "x-mark" [ref=e928]
+                  - row "Converse API-compatible models x-mark Partially supported6 x-mark x-mark check-mark x-mark x-mark x-mark" [ref=e929]:
+                    - cell "Converse API-compatible models" [ref=e930]:
+                      - link "Converse API" [ref=e931] [cursor=pointer]:
+                        - /url: https://docs.aws.amazon.com/bedrock/latest/userguide/models-features.html
+                      - text: "-compatible models"
+                    - cell "x-mark" [ref=e932]:
+                      - img "x-mark" [ref=e933]
+                    - cell "Partially supported6" [ref=e934]:
+                      - text: Partially supported
+                      - superscript [ref=e935]:
+                        - link "6" [ref=e936] [cursor=pointer]:
+                          - /url: "#footnote6"
+                    - cell "x-mark" [ref=e937]:
+                      - img "x-mark" [ref=e938]
+                    - cell "x-mark" [ref=e939]:
+                      - img "x-mark" [ref=e940]
+                    - cell "check-mark" [ref=e941]:
+                      - img "check-mark" [ref=e942]
+                    - cell "x-mark" [ref=e943]:
+                      - img "x-mark" [ref=e944]
+                    - cell "x-mark" [ref=e945]:
+                      - img "x-mark" [ref=e946]
+                    - cell "x-mark" [ref=e947]:
+                      - img "x-mark" [ref=e948]
+                  - row "mistral Mistral AI" [ref=e949]:
+                    - cell "mistral Mistral AI" [ref=e950]:
+                      - img "mistral" [ref=e951]
+                      - strong [ref=e952]:
+                        - link "Mistral AI" [ref=e953] [cursor=pointer]:
+                          - /url: /ai/agents/develop/gen-ai-and-llms/providers/mistral
+                    - cell [ref=e954]
+                    - cell [ref=e955]
+                    - cell [ref=e956]
+                    - cell [ref=e957]
+                    - cell [ref=e958]
+                    - cell [ref=e959]
+                    - cell [ref=e960]
+                    - cell [ref=e961]
+                  - row "pixtral-12b-2409 mistral-large-latest4 mistral-medium-latest4 mistral-small-latest4 pixtral-large-latest4 x-mark check-mark x-mark check-mark check-mark x-mark x-mark x-mark" [ref=e962]:
+                    - cell "pixtral-12b-2409 mistral-large-latest4 mistral-medium-latest4 mistral-small-latest4 pixtral-large-latest4" [ref=e963]:
+                      - code [ref=e964]: pixtral-12b-2409
+                      - code [ref=e965]: mistral-large-latest
+                      - superscript [ref=e966]:
+                        - link "4" [ref=e967] [cursor=pointer]:
+                          - /url: "#footnote4"
+                      - code [ref=e968]: mistral-medium-latest
+                      - superscript [ref=e969]:
+                        - link "4" [ref=e970] [cursor=pointer]:
+                          - /url: "#footnote4"
+                      - code [ref=e971]: mistral-small-latest
+                      - superscript [ref=e972]:
+                        - link "4" [ref=e973] [cursor=pointer]:
+                          - /url: "#footnote4"
+                      - code [ref=e974]: pixtral-large-latest
+                      - superscript [ref=e975]:
+                        - link "4" [ref=e976] [cursor=pointer]:
+                          - /url: "#footnote4"
+                    - cell "x-mark" [ref=e977]:
+                      - img "x-mark" [ref=e978]
+                    - cell "check-mark" [ref=e979]:
+                      - img "check-mark" [ref=e980]
+                    - cell "x-mark" [ref=e981]:
+                      - img "x-mark" [ref=e982]
+                    - cell "check-mark" [ref=e983]:
+                      - img "check-mark" [ref=e984]
+                    - cell "check-mark" [ref=e985]:
+                      - img "check-mark" [ref=e986]
+                    - cell "x-mark" [ref=e987]:
+                      - img "x-mark" [ref=e988]
+                    - cell "x-mark" [ref=e989]:
+                      - img "x-mark" [ref=e990]
+                    - cell "x-mark" [ref=e991]:
+                      - img "x-mark" [ref=e992]
+              - heading "Navigate to header More Information" [level=2] [ref=e993]:
+                - link "Navigate to header" [ref=e994] [cursor=pointer]:
+                  - /url: "#more-information"
+                  - img [ref=e996]
+                - generic [ref=e998] [cursor=pointer]: More Information
+              - list [ref=e999]:
+                - listitem [ref=e1000]:
+                  - link "Overview" [ref=e1001] [cursor=pointer]:
+                    - /url: /ai/agents/develop/gen-ai-and-llms/llms
+                - listitem [ref=e1002]:
+                  - link "All LLM Providers" [ref=e1003] [cursor=pointer]:
+                    - /url: /ai/agents/develop/gen-ai-and-llms/providers/all-providers
+                - listitem [ref=e1004]:
+                  - link "Other LLM Operations" [ref=e1005] [cursor=pointer]:
+                    - /url: /ai/agents/develop/gen-ai-and-llms/other-operations
+              - separator [ref=e1006]
+              - generic [ref=e1008]:
+                - superscript [ref=e1009]: "1"
+                - link "Design-time features" [ref=e1010] [cursor=pointer]:
+                  - /url: /ai/agents/develop/gen-ai-and-llms/generative-ai#design-time-generative-ai-features
+                - text: include Intent Sentence Generation, Flow Generation, Adaptive Card Generation, Lexicon Generation.
+              - generic [ref=e1011]:
+                - generic [ref=e1012]:
+                  - superscript [ref=e1013]: "2"
+                  - text: Reasoning models consume more tokens and may incur higher costs. The models are optimized for tasks that require complex problem-solving and logical reasoning. Before using these models in production, test token consumption in
+                  - link "debug mode" [ref=e1014] [cursor=pointer]:
+                    - /url: /ai/agents/test/interaction-panel/chat#debug-mode
+                  - text: and use them with caution. To reduce costs, consider using a non-reasoning model such as
+                  - code [ref=e1015]: gpt-5-chat-latest
+                  - text: . For more information about reasoning models, refer to the
+                  - link "Microsoft Azure OpenAI" [ref=e1016] [cursor=pointer]:
+                    - /url: https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning
+                  - text: ","
+                  - link "OpenAI" [ref=e1017] [cursor=pointer]:
+                    - /url: https://platform.openai.com/docs/guides/reasoning/advice-on-prompting
+                  - text: ", and"
+                  - link "Google" [ref=e1018] [cursor=pointer]:
+                    - /url: https://cloud.google.com/vertex-ai/generative-ai/docs/models
+                  - text: documentation.
+                - generic [ref=e1019]:
+                  - text: Anthropic’s
+                  - code [ref=e1020]: claude-sonnet-4-6
+                  - text: model doesn’t support
+                  - link "assistant message prefilling" [ref=e1021] [cursor=pointer]:
+                    - /url: https://platform.claude.com/docs/en/about-claude/models/migration-guide#breaking-changes-3
+                  - text: . To keep your Flows compatible, ensure that the last transcript step before the LLM call is a user message. For example, add an
+                  - link "Add Transcript Step Node" [ref=e1022] [cursor=pointer]:
+                    - /url: /ai/agents/develop/node-reference/service/add-transcript-step
+                  - text: before the LLM call and set the role to
+                  - code [ref=e1023]: user
+                  - text: .
+              - generic [ref=e1025]:
+                - superscript [ref=e1026]: "3"
+                - text: For Knowledge AI, we recommend using
+                - code [ref=e1027]: text-embedding-ada-002
+                - text: . However, if you want to use
+                - code [ref=e1028]: text-embedding-3-small
+                - text: and
+                - code [ref=e1029]: text-embedding-3-large
+                - text: ", make sure that you familiarize yourself with the restrictions of these models in"
+                - link "Which Model to Choose?" [ref=e1030] [cursor=pointer]:
+                  - /url: /ai/agents/develop/knowledge-ai/overview
+                - text: .
+              - generic [ref=e1032]:
+                - superscript [ref=e1033]: "4"
+                - text: The
+                - code [ref=e1034]: "*-latest"
+                - text: suffix indicates that the model you select in Cognigy.AI points to the latest version of the model. For more information, read
+                - link "Anthropic’s" [ref=e1035] [cursor=pointer]:
+                  - /url: https://docs.anthropic.com/en/docs/about-claude/models/overview
+                - text: or
+                - link "Mistral AI’s" [ref=e1036] [cursor=pointer]:
+                  - /url: https://docs.mistral.ai/getting-started/models/models_overview/
+                - text: models documentation.
+              - generic [ref=e1038]:
+                - superscript [ref=e1039]: "5"
+                - text: For Cognigy.AI 2025.10 and earlier versions, the option to select this model is hidden behind the
+                - code [ref=e1040]: FEATURE_ENABLE_AWS_BEDROCK_EMBEDDING_LLM_WHITELIST
+                - text: feature flag.
+              - generic [ref=e1042]:
+                - superscript [ref=e1043]: "6"
+                - text: Note that some models from the
+                - link "Converse API" [ref=e1044] [cursor=pointer]:
+                  - /url: https://docs.aws.amazon.com/bedrock/latest/userguide/models-features.html
+                - text: might not support the AI Agent Node feature.
+              - generic [ref=e1046]:
+                - superscript [ref=e1047]: "7"
+                - text: This model supports only the Responses API. When you select this model, the Responses API is selected by default, and the
+                - strong [ref=e1048]: API Type
+                - text: field is locked.
+            - generic [ref=e1049]: Last modified on June 2, 2026
+            - generic [ref=e1050]:
+              - link "Previous" [ref=e1051] [cursor=pointer]:
+                - /url: /ai/agents/develop/gen-ai-and-llms/generative-ai
+                - img [ref=e1052]
+                - generic [ref=e1054]: Previous
+              - link "All LLM Providers Next" [ref=e1055] [cursor=pointer]:
+                - /url: /ai/agents/develop/gen-ai-and-llms/providers/all-providers
+                - generic [ref=e1056]:
+                  - generic [ref=e1058]: All LLM Providers
+                  - generic [ref=e1060]:
+                    - generic [ref=e1061]: Next
+                    - img [ref=e1062]
+            - generic [ref=e1064]:
+              - generic [ref=e1065]:
+                - link "youtube" [ref=e1066] [cursor=pointer]:
+                  - /url: https://www.youtube.com/c/Cognigy
+                  - generic [ref=e1067]: youtube
+                  - img [ref=e1068]
+                - link "github" [ref=e1069] [cursor=pointer]:
+                  - /url: https://github.com/Cognigy
+                  - generic [ref=e1070]: github
+                  - img [ref=e1071]
+                - link "linkedin" [ref=e1072] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/company/cognigy
+                  - generic [ref=e1073]: linkedin
+                  - img [ref=e1074]
+              - generic [ref=e1075]: © 2026 Cognigy
+  - generic [ref=e1077]:
+    - generic [ref=e1078]:
+      - heading "Cookie Consent" [level=3] [ref=e1079]
+      - generic [ref=e1080]:
+        - text: We use cookies to recognize your repeated visits and preferences, as well as to measure the effectiveness of our documentation and whether users find what they're searching for.
+        - text: With your consent, you're helping us make our documentation better. To find out more about the cookies we use, see our
+        - link "Privacy Policy" [ref=e1081] [cursor=pointer]:
+          - /url: https://www.cognigy.com/privacy-policy
+        - text: .
+    - button "Accept" [ref=e1082] [cursor=pointer]
+  - alert [ref=e1083]
+  - generic:
+    - generic:
+      - region "Chat window":
+        - button "Open chat" [ref=e1084] [cursor=pointer]:
+          - img [ref=e1085]

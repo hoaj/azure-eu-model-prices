@@ -11,6 +11,9 @@ Live demo: _set after enabling GitHub Pages (see below)_
 - **`generate.py`** — fetches live prices from the [Azure Retail Prices API](https://prices.azure.com/api/retail/prices)
   (DKK + USD, Data Zone meters) and writes a fully self-contained **`index.html`** with the data baked in.
   No dependencies beyond the Python standard library.
+- It also scrapes the [Cognigy model-support page](https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature)
+  (no API exists — it's a static HTML table) for the **Microsoft Azure OpenAI** section: chat models are judged on
+  *LLM Prompt Node* support, embeddings on *Knowledge Search*. If the scrape fails, the last-known values are kept.
 - **`index.html`** — the artifact. Self-contained; open it directly in a browser, or serve it via GitHub Pages.
 - **`.github/workflows/update.yml`** — runs `generate.py` daily and on demand, commits the refreshed `index.html`.
 
