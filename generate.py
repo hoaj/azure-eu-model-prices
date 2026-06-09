@@ -215,9 +215,35 @@ def main():
     old_cog = {r["id"]: r.get("cognigy") for r in old["rows"]} if old and old.get("rows") else {}
     rows = build_rows(prices_by_cur, cognigy, old_cog)
 
+    # --- detect real problems; these fail the build so GitHub emails on the failure ---
+    def gha(level, msg):
+        print(f"::{level}::{msg}")                    # GitHub Actions annotation (run summary)
+        print(f"{level.upper()}: {msg}", file=sys.stderr)
+
+    problems = []
     missing = [r["id"] for r in rows if r["inp"] is None and r["id"] != "text-embedding-ada-002"]
     if missing:
-        print(f"WARNING: no price meter matched for: {missing}", file=sys.stderr)
+        problems.append(f"Azure price meter(s) missing or renamed: {missing}")
+
+    # o-series are legitimately absent from Cognigy's Azure table; everything else should resolve.
+    expected_ids = [m["id"] for m in MODELS if not m["id"].startswith("o")]
+    resolved = sum(1 for r in rows if r["id"] in expected_ids and r["cognigy"]["status"] != "unknown")
+    if cognigy is None and not old_cog:
+        problems.append("Cognigy model-support unreachable/unparseable and no prior values to fall back on.")
+    elif cognigy is not None and resolved == 0:
+        problems.append("Cognigy parsed but matched 0 Microsoft Azure OpenAI models (page structure likely changed).")
+
+    if problems:
+        for p in problems:
+            gha("error", p)
+        gha("error", "Aborting without overwriting index.html (keeping last-known-good data).")
+        sys.exit(1)
+
+    # soft issues — keep the build green, just surface a warning
+    if cognigy is None:
+        gha("warning", "Cognigy unreachable — kept last-known support values.")
+    elif resolved < len(expected_ids):
+        gha("warning", f"Cognigy resolved {resolved}/{len(expected_ids)} expected Azure models — some may have been renamed.")
 
     # Only move the timestamp when the data actually changed, so an unchanged daily
     # run produces a byte-identical file -> no git diff -> no noise commit.
@@ -470,10 +496,10 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
       <thead><tr>
         <th class="sortable" data-sort="id">Model <span class="arr">↕</span></th>
         <th class="hide">Family</th>
-        <th class="sortable hide" data-sort="released">Released <span class="arr">↕</span></th>
+        <th class="sortable hide act" data-sort="released">Released <span class="arr">↓</span></th>
         <th>Availability</th>
         <th class="sortable" data-sort="cognigy">Cognigy <span class="arr">↕</span></th>
-        <th class="num sortable act" data-sort="inp">Input <span class="arr">↑</span></th>
+        <th class="num sortable" data-sort="inp">Input <span class="arr">↕</span></th>
         <th class="num sortable" data-sort="out">Output <span class="arr">↕</span></th>
       </tr></thead>
       <tbody id="tbody"></tbody>
@@ -499,7 +525,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
 const PAYLOAD = /*DATA*/null;
 
 const $ = s => document.querySelector(s);
-const state = { region:"both", fam:"all", q:"", sort:"inp", dir:1, cur:"DKK" };
+const state = { region:"both", fam:"all", q:"", sort:"released", dir:-1, cur:"DKK" };
 let ROWS = [];
 
 const SYM = { DKK:{sym:"kr", pre:false, loc:"da-DK"}, USD:{sym:"$", pre:true, loc:"en-US"} };
