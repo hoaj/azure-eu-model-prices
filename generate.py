@@ -70,11 +70,13 @@ MODELS = [
 ]
 
 
-# Reasoning-effort support, curated from the Azure OpenAI reasoning models doc:
-#   https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning
-#   options = reasoning_effort values the model accepts ([] = not a reasoning model)
-#   default = effort applied when none is set — this is what Cognigy's LLM Prompt Node uses,
-#             since that node has no reasoning control. None = not documented by Microsoft.
+# Reasoning-effort support (curated):
+#   options = reasoning_effort values a model accepts ([] = not a reasoning model). Supported
+#             levels are per the Azure reasoning doc:
+#             https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning
+#   default = the OpenAI API default applied when none is set (https://platform.openai.com/docs/guides/reasoning);
+#             Azure and Cognigy inherit it (Cognigy's LLM Prompt Node has no reasoning control).
+#             None = not documented. (gpt-5/o-series = medium; gpt-5.1 = none; gpt-5.5 = medium.)
 REASONING = {
     "gpt-4.1": {"options": [], "default": None},
     "gpt-4.1-mini": {"options": [], "default": None},
@@ -86,7 +88,7 @@ REASONING = {
     "gpt-5-nano": {"options": ["minimal", "low", "medium", "high"], "default": "medium"},
     "gpt-5.1": {"options": ["none", "low", "medium", "high"], "default": "none"},
     "gpt-5.4": {"options": ["none", "low", "medium", "high", "xhigh"], "default": None},
-    "gpt-5.5": {"options": ["none", "low", "medium", "high", "xhigh"], "default": None},
+    "gpt-5.5": {"options": ["none", "low", "medium", "high", "xhigh"], "default": "medium"},
     "o1": {"options": ["low", "medium", "high"], "default": "medium"},
     "o3": {"options": ["low", "medium", "high"], "default": "medium"},
     "o3-mini": {"options": ["low", "medium", "high"], "default": "medium"},
@@ -652,7 +654,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Reasoning effort</h4><p>The default <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is set by Azure / the model; Cognigy inherits it (its node has no reasoning control). Most reasoning models default to <b>medium</b> — except <code>gpt-5.1</code> (<b>none</b>); <code>gpt-5.4/5.5</code> are undocumented; the gpt-4.x / gpt-4o families &amp; embeddings have no reasoning. Click the <b>▸</b> on any row to see its supported effort levels (default highlighted).</p></div>
+    <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted).</p></div>
     <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini).</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
@@ -758,7 +760,7 @@ function reasoningDetail(r){
     return `<span class="eff${def?' def':''}">${o}${def?' · default':''}</span>`;
   }).join('');
   const dnote = rz.default ? '' : `<span class="dt-note">· default not documented</span>`;
-  return `<span class="dt-label">Supported reasoning effort</span>${pills}<span class="dt-note">— set by Azure; Cognigy inherits the default</span>${dnote}`;
+  return `<span class="dt-label">Supported reasoning effort</span>${pills}<span class="dt-note">— OpenAI API default; Cognigy inherits it</span>${dnote}`;
 }
 
 function render(){
@@ -803,7 +805,7 @@ function render(){
     const rz = r.reasoning || {options:[],default:null};
     const rzIs = rz.options && rz.options.length;
     const rzTip = rzIs
-      ? `Reasoning effort: ${rz.options.join(' · ')} — default: ${rz.default || 'not documented'} (set by Azure; Cognigy inherits it)`
+      ? `Reasoning effort: ${rz.options.join(' · ')} — default: ${rz.default || 'not documented'} (OpenAI API default; Cognigy inherits it)`
       : "Not a reasoning model — no reasoning effort";
 
     const open = state.expanded.has(r.id);
