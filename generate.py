@@ -221,7 +221,10 @@ def main():
         print(f"{level.upper()}: {msg}", file=sys.stderr)
 
     problems = []
-    missing = [r["id"] for r in rows if r["inp"] is None and r["id"] != "text-embedding-ada-002"]
+    # A priced model has inp == {"DKK": .., "USD": ..}; if its meter vanished those values are
+    # None. (Models with no meter at all, e.g. ada-002, have inp == None and are skipped.)
+    missing = [r["id"] for r in rows
+               if r["inp"] is not None and r["inp"].get(CURRENCIES[0]) is None]
     if missing:
         problems.append(f"Azure price meter(s) missing or renamed: {missing}")
 
