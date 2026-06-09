@@ -513,9 +513,9 @@ tbody tr.dim:hover{opacity:.7}
 .exp{border:0; background:transparent; cursor:pointer; color:var(--muted); font:600 11px/1 "JetBrains Mono",monospace; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; border-radius:5px; margin-right:7px; vertical-align:middle; transition:transform .15s, background .15s, color .15s}
 .exp:hover{background:rgba(22,33,44,.08); color:var(--ink)}
 .exp.open{transform:rotate(90deg); color:var(--ink)}
-.model-cell{cursor:pointer; user-select:none}
-.model-cell:hover .exp{background:rgba(22,33,44,.08); color:var(--ink)}
-.model-cell:hover .model{color:var(--blue)}
+tbody tr:not(.detail){cursor:pointer}
+tbody tr:not(.detail):hover .exp{background:rgba(22,33,44,.08); color:var(--ink)}
+tbody tr:not(.detail):hover .model{color:var(--blue)}
 tr.detail td{background:#f3eee2; border-bottom:1px solid var(--line); padding:11px 18px 13px 43px; white-space:normal}
 tr.detail.dim{opacity:.5}
 .dt{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
@@ -704,8 +704,9 @@ function wire(){
   $("#curSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
     state.cur=b.dataset.cur; setOn("#curSeg",b); render();});
   $("#q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase(); render();});
-  $("#tbody").addEventListener("click",e=>{const c=e.target.closest(".model-cell"); if(!c)return;
-    const id=c.dataset.id; state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id); render();});
+  $("#tbody").addEventListener("click",e=>{const tr=e.target.closest("tr");
+    if(!tr || tr.classList.contains("detail") || !tr.dataset.id) return;
+    const id=tr.dataset.id; state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id); render();});
   document.querySelectorAll("th.sortable").forEach(th=>th.addEventListener("click",()=>{
     const k=th.dataset.sort;
     if(state.sort===k) state.dir*=-1; else {state.sort=k; state.dir = k==="id"?1:1;}
@@ -778,6 +779,7 @@ function render(){
     // in single-region view, dim models unavailable there
     const inRegion = state.region==="both" || (state.region==="swedencentral"&&r.sc) || (state.region==="westeurope"&&r.we);
     const tr=document.createElement("tr");
+    tr.dataset.id=r.id;
     if(!inRegion) tr.className="dim";
 
     let avail="<span class='avail'>";
