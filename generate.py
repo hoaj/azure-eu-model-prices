@@ -510,6 +510,17 @@ tbody tr.dim:hover{opacity:.7}
 .rz{display:inline-block; font-family:"JetBrains Mono",monospace; font-size:11.5px; font-weight:500; padding:2px 9px; border-radius:999px; border:1px solid var(--line-strong); color:var(--ink); background:rgba(22,33,44,.04); cursor:help}
 .rz.na{color:var(--no); border-color:var(--line); background:transparent}
 .rz.nd{color:var(--muted)}
+.exp{border:0; background:transparent; cursor:pointer; color:var(--muted); font:600 11px/1 "JetBrains Mono",monospace; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; border-radius:5px; margin-right:7px; vertical-align:middle; transition:transform .15s, background .15s, color .15s}
+.exp:hover{background:rgba(22,33,44,.08); color:var(--ink)}
+.exp.open{transform:rotate(90deg); color:var(--ink)}
+tr.detail td{background:#f3eee2; border-bottom:1px solid var(--line); padding:11px 18px 13px 43px; white-space:normal}
+tr.detail.dim{opacity:.5}
+.dt{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
+.dt-label{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-right:2px}
+.dt-note{font-size:12px; color:var(--muted)}
+.dt-none{font-size:13px; color:var(--muted)}
+.eff{font-family:"JetBrains Mono",monospace; font-size:11.5px; padding:3px 10px; border-radius:999px; border:1px solid var(--line-strong); color:var(--muted); background:var(--paper)}
+.eff.def{color:#1f3d77; border-color:rgba(39,80,158,.45); background:rgba(39,80,158,.10); font-weight:700}
 .fam{
   display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
   padding:3px 9px; border-radius:999px; border:1px solid;
@@ -638,7 +649,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Reasoning effort</h4><p>The default <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is set by Azure / the model; Cognigy inherits it (its node has no reasoning control). Most reasoning models default to <b>medium</b> — except <code>gpt-5.1</code> (<b>none</b>); <code>gpt-5.4/5.5</code> are undocumented; the gpt-4.x / gpt-4o families &amp; embeddings have no reasoning. Hover any model name for its exact default &amp; options.</p></div>
+    <div class="box"><h4>Reasoning effort</h4><p>The default <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is set by Azure / the model; Cognigy inherits it (its node has no reasoning control). Most reasoning models default to <b>medium</b> — except <code>gpt-5.1</code> (<b>none</b>); <code>gpt-5.4/5.5</code> are undocumented; the gpt-4.x / gpt-4o families &amp; embeddings have no reasoning. Click the <b>▸</b> on any row to see its supported effort levels (default highlighted).</p></div>
     <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini).</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
@@ -654,7 +665,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
 const PAYLOAD = /*DATA*/null;
 
 const $ = s => document.querySelector(s);
-const state = { region:"both", fam:"all", q:"", sort:"released", dir:-1, cur:"DKK" };
+const state = { region:"both", fam:"all", q:"", sort:"released", dir:-1, cur:"DKK", expanded:new Set() };
 let ROWS = [];
 
 const SYM = { DKK:{sym:"kr", pre:false, loc:"da-DK"}, USD:{sym:"$", pre:true, loc:"en-US"} };
@@ -690,6 +701,8 @@ function wire(){
   $("#curSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
     state.cur=b.dataset.cur; setOn("#curSeg",b); render();});
   $("#q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase(); render();});
+  $("#tbody").addEventListener("click",e=>{const b=e.target.closest(".exp"); if(!b)return;
+    const id=b.dataset.id; state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id); render();});
   document.querySelectorAll("th.sortable").forEach(th=>th.addEventListener("click",()=>{
     const k=th.dataset.sort;
     if(state.sort===k) state.dir*=-1; else {state.sort=k; state.dir = k==="id"?1:1;}
@@ -731,6 +744,17 @@ function cognigyChip(c){
   const icon = st === "yes" ? "✓" : "✗";
   const tip = `${feat} ${st === "yes" ? "supported" : "not supported"} for Microsoft Azure OpenAI (Cognigy)`;
   return `<span class="cog ${cls}" title="${tip}">${icon} ${feat}</span>`;
+}
+function reasoningDetail(r){
+  const rz = r.reasoning || {options:[],default:null};
+  if(!rz.options || !rz.options.length)
+    return `<span class="dt-none">No reasoning effort — not a reasoning model.</span>`;
+  const pills = rz.options.map(o=>{
+    const def = o===rz.default;
+    return `<span class="eff${def?' def':''}">${o}${def?' · default':''}</span>`;
+  }).join('');
+  const dnote = rz.default ? '' : `<span class="dt-note">· default not documented</span>`;
+  return `<span class="dt-label">Supported reasoning effort</span>${pills}<span class="dt-note">— set by Azure; Cognigy inherits the default</span>${dnote}`;
 }
 
 function render(){
@@ -777,8 +801,9 @@ function render(){
       ? `Reasoning effort: ${rz.options.join(' · ')} — default: ${rz.default || 'not documented'} (set by Azure; Cognigy inherits it)`
       : "Not a reasoning model — no reasoning effort";
 
+    const open = state.expanded.has(r.id);
     tr.innerHTML = `
-      <td><span class="model" title="${rzTip}">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
+      <td><button class="exp${open?' open':''}" data-id="${r.id}" title="Show supported reasoning effort" aria-label="Toggle reasoning effort">▸</button><span class="model" title="${rzTip}">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
       <td class="hide"><span class="fam ${r.family}">${r.family}</span></td>
       <td class="hide"><span class="rel">${r.released}</span></td>
       <td>${avail}</td>
@@ -787,6 +812,12 @@ function render(){
       <td class="num inp">${inCell}</td>
       <td class="num out">${outCell}</td>`;
     tb.appendChild(tr); shown++;
+    if(open){
+      const dtr=document.createElement("tr");
+      dtr.className="detail"+(inRegion?"":" dim");
+      dtr.innerHTML=`<td colspan="8"><div class="dt">${reasoningDetail(r)}</div></td>`;
+      tb.appendChild(dtr);
+    }
   });
 
   $("#empty").style.display = shown?"none":"block";
