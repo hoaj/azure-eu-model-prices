@@ -154,13 +154,18 @@ def tau2_slug(model_id):
 
 
 def fetch_tau2_telecom():
-    """Scrape the τ²-Bench Telecom leaderboard. Returns {slug: score_pct (float)} or None."""
+    """Scrape the τ²-Bench Telecom leaderboard. Returns {slug: {"score": pct, "name": label}} or
+    None. `name` is AA's display label, which encodes the reasoning-effort variant the score used
+    (e.g. "GPT-5.5 (xhigh)")."""
     try:
         req = urllib.request.Request(ARTIFICIAL_ANALYSIS_URL, headers={"User-Agent": "Mozilla/5.0 (price-bot)"})
         with urllib.request.urlopen(req, timeout=60) as r:
             doc = r.read().decode("utf-8", "replace")
         chunks = re.findall(r'self\.__next_f\.push\(\[1,(".*?")\]\)', doc, re.S)
         rsc = "".join(json.loads(c) for c in chunks)
+        name_by_slug = {}
+        for m in re.finditer(r'"slug":"([^"]+)","name":"([^"]+)"', rsc):
+            name_by_slug.setdefault(m.group(1), m.group(2))
         scores = {}
         for m in re.finditer(r'"tau2":\s*([0-9.]+|null)', rsc):
             val = m.group(1)
@@ -169,7 +174,7 @@ def fetch_tau2_telecom():
             back = rsc[max(0, m.start() - 6000):m.start()]   # nearest preceding slug = this object's
             sl = re.findall(r'"slug":"([^"]+)"', back)
             if sl:
-                scores.setdefault(sl[-1], round(float(val) * 100, 1))
+                scores.setdefault(sl[-1], {"score": round(float(val) * 100, 1), "name": name_by_slug.get(sl[-1])})
         return scores or None
     except Exception as e:
         print(f"WARNING: Artificial Analysis scrape failed: {e}", file=sys.stderr)
@@ -219,19 +224,25 @@ def build_rows(prices_by_cur, cognigy, tau2, old_rows):
         status = "yes" if v else ("no" if v is False else "unknown")
         return {"status": status, "feature": label if status != "unknown" else None}
 
-    def tau2_score(m):
+    def tau2_data(m):
         if tau2 is None:                                     # scrape failed -> keep last-known
-            return old_by_id.get(m["id"], {}).get("tau2")
-        return tau2.get(tau2_slug(m["id"]))                  # None if not on the leaderboard
+            prev = old_by_id.get(m["id"], {})
+            return prev.get("tau2"), prev.get("tau2_variant")
+        entry = tau2.get(tau2_slug(m["id"]))                 # None if not on the leaderboard
+        if not entry:
+            return None, None
+        return entry["score"], entry.get("name")
 
     rows = []
     for m in MODELS:
+        score, variant = tau2_data(m)
         rows.append({
             "id": m["id"],
             "family": m["family"],
             "released": m["released"],
             "cognigy": cog_status(m),
-            "tau2": tau2_score(m),
+            "tau2": score,
+            "tau2_variant": variant,
             "inp": lookup(m["meterIn"]),
             "out": lookup(m["meterOut"]),
             "sc": SC in m["regions"],
@@ -567,7 +578,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini).</p></div>
+    <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini).</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
@@ -693,8 +704,10 @@ function render(){
       ? `<span class="price">${priceHTML(vout)}</span><span class="bar"><i style="width:${(bar(vout,maxOut)*100).toFixed(1)}%"></i></span>`
       : `<span class="price na">${r.family==='Embedding'?'—':'n/a'}</span>`;
     const ts = r.tau2;
+    const tvar = r.tau2_variant ? r.tau2_variant.replace(/"/g,'&quot;') : null;
+    const ttip = tvar ? `${tvar} — τ²-Bench Telecom (Artificial Analysis)` : "τ²-Bench Telecom (Artificial Analysis)";
     const telCell = (ts!==null && ts!==undefined)
-      ? `<span class="price">${ts.toFixed(1)}<span class="cur">%</span></span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
+      ? `<span class="price" title="${ttip}">${ts.toFixed(1)}<span class="cur">%</span></span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
       : `<span class="price na">—</span>`;
 
     tr.innerHTML = `
