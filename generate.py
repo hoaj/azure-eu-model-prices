@@ -513,6 +513,9 @@ tbody tr.dim:hover{opacity:.7}
 .exp{border:0; background:transparent; cursor:pointer; color:var(--muted); font:600 11px/1 "JetBrains Mono",monospace; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; border-radius:5px; margin-right:7px; vertical-align:middle; transition:transform .15s, background .15s, color .15s}
 .exp:hover{background:rgba(22,33,44,.08); color:var(--ink)}
 .exp.open{transform:rotate(90deg); color:var(--ink)}
+.model-cell{cursor:pointer; user-select:none}
+.model-cell:hover .exp{background:rgba(22,33,44,.08); color:var(--ink)}
+.model-cell:hover .model{color:var(--blue)}
 tr.detail td{background:#f3eee2; border-bottom:1px solid var(--line); padding:11px 18px 13px 43px; white-space:normal}
 tr.detail.dim{opacity:.5}
 .dt{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
@@ -701,8 +704,8 @@ function wire(){
   $("#curSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
     state.cur=b.dataset.cur; setOn("#curSeg",b); render();});
   $("#q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase(); render();});
-  $("#tbody").addEventListener("click",e=>{const b=e.target.closest(".exp"); if(!b)return;
-    const id=b.dataset.id; state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id); render();});
+  $("#tbody").addEventListener("click",e=>{const c=e.target.closest(".model-cell"); if(!c)return;
+    const id=c.dataset.id; state.expanded.has(id)?state.expanded.delete(id):state.expanded.add(id); render();});
   document.querySelectorAll("th.sortable").forEach(th=>th.addEventListener("click",()=>{
     const k=th.dataset.sort;
     if(state.sort===k) state.dir*=-1; else {state.sort=k; state.dir = k==="id"?1:1;}
@@ -803,7 +806,7 @@ function render(){
 
     const open = state.expanded.has(r.id);
     tr.innerHTML = `
-      <td><button class="exp${open?' open':''}" data-id="${r.id}" title="Show supported reasoning effort" aria-label="Toggle reasoning effort">▸</button><span class="model" title="${rzTip}">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
+      <td class="model-cell" data-id="${r.id}"><button class="exp${open?' open':''}" aria-label="Toggle reasoning effort">▸</button><span class="model" title="${rzTip}">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
       <td class="hide"><span class="fam ${r.family}">${r.family}</span></td>
       <td class="hide"><span class="rel">${r.released}</span></td>
       <td>${avail}</td>
