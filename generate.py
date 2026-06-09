@@ -70,6 +70,32 @@ MODELS = [
 ]
 
 
+# Reasoning-effort support, curated from the Azure OpenAI reasoning models doc:
+#   https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning
+#   options = reasoning_effort values the model accepts ([] = not a reasoning model)
+#   default = effort applied when none is set — this is what Cognigy's LLM Prompt Node uses,
+#             since that node has no reasoning control. None = not documented by Microsoft.
+REASONING = {
+    "gpt-4.1": {"options": [], "default": None},
+    "gpt-4.1-mini": {"options": [], "default": None},
+    "gpt-4.1-nano": {"options": [], "default": None},
+    "gpt-4o": {"options": [], "default": None},
+    "gpt-4o-mini": {"options": [], "default": None},
+    "gpt-5": {"options": ["minimal", "low", "medium", "high"], "default": "medium"},
+    "gpt-5-mini": {"options": ["minimal", "low", "medium", "high"], "default": "medium"},
+    "gpt-5-nano": {"options": ["minimal", "low", "medium", "high"], "default": "medium"},
+    "gpt-5.1": {"options": ["none", "low", "medium", "high"], "default": "none"},
+    "gpt-5.4": {"options": ["none", "low", "medium", "high", "xhigh"], "default": None},
+    "gpt-5.5": {"options": ["none", "low", "medium", "high", "xhigh"], "default": None},
+    "o1": {"options": ["low", "medium", "high"], "default": "medium"},
+    "o3": {"options": ["low", "medium", "high"], "default": "medium"},
+    "o3-mini": {"options": ["low", "medium", "high"], "default": "medium"},
+    "o4-mini": {"options": ["low", "medium", "high"], "default": "medium"},
+    "text-embedding-3-large": {"options": [], "default": None},
+    "text-embedding-3-small": {"options": [], "default": None},
+    "text-embedding-ada-002": {"options": [], "default": None},
+}
+
 # Cognigy model-support is published only as a static HTML table (no API):
 #   https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature
 # We scrape it, locking onto the "Microsoft Azure OpenAI" provider section only.
@@ -181,6 +207,22 @@ def fetch_tau2_telecom():
         return None
 
 
+AZURE_REASONING_URL = "https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning"
+
+
+def fetch_reasoning_doc_text():
+    """Fetch the Azure reasoning doc (plain text). Used only to flag drift in the curated
+    REASONING map — the per-model effort levels/default live in prose footnotes there, so they
+    can't be reliably parsed, but we can verify our tracked reasoning models still appear."""
+    try:
+        req = urllib.request.Request(AZURE_REASONING_URL, headers={"User-Agent": "Mozilla/5.0 (price-bot)"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.read().decode("utf-8", "replace")
+    except Exception as e:
+        print(f"WARNING: Azure reasoning doc fetch failed: {e}", file=sys.stderr)
+        return None
+
+
 def fetch_prices(region, currency):
     """Return {meterName: price_per_million} for all OpenAI products in `region`."""
     out = {}
@@ -241,6 +283,7 @@ def build_rows(prices_by_cur, cognigy, tau2, old_rows):
             "family": m["family"],
             "released": m["released"],
             "cognigy": cog_status(m),
+            "reasoning": REASONING.get(m["id"], {"options": [], "default": None}),
             "tau2": score,
             "tau2_variant": variant,
             "inp": lookup(m["meterIn"]),
@@ -308,6 +351,14 @@ def main():
         gha("warning", f"Cognigy resolved {resolved}/{len(expected_ids)} expected Azure models — some may have been renamed.")
     if tau2 is None:
         gha("warning", "Artificial Analysis unreachable — kept last-known τ²-bench Telecom scores.")
+    # auto-guard: flag if a model we treat as reasoning-capable vanished from the Azure reasoning doc
+    rtext = fetch_reasoning_doc_text()
+    if rtext is None:
+        gha("warning", "Azure reasoning doc unreachable — reasoning-effort data not re-verified this run.")
+    else:
+        stale = [mid for mid, info in REASONING.items() if info["options"] and mid not in rtext]
+        if stale:
+            gha("warning", f"Reasoning-effort data may be stale — these tracked models were not found on the Azure reasoning doc: {stale}. Review the REASONING map.")
 
     # Only move the timestamp when the data actually changed, so an unchanged daily
     # run produces a byte-identical file -> no git diff -> no noise commit.
@@ -453,6 +504,9 @@ tbody tr.dim:hover{opacity:.7}
 .model{font-family:"JetBrains Mono",monospace; font-weight:500; font-size:14.5px; letter-spacing:-.01em; color:var(--ink)}
 .note{display:block; font-family:"Archivo"; font-size:11px; color:var(--muted); margin-top:2px; letter-spacing:0}
 .rel{font-family:"JetBrains Mono",monospace; font-size:13px; color:var(--muted); letter-spacing:-.02em}
+.rz{display:inline-block; font-family:"JetBrains Mono",monospace; font-size:11.5px; font-weight:500; padding:2px 9px; border-radius:999px; border:1px solid var(--line-strong); color:var(--ink); background:rgba(22,33,44,.04); cursor:help}
+.rz.na{color:var(--no); border-color:var(--line); background:transparent}
+.rz.nd{color:var(--muted)}
 .fam{
   display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
   padding:3px 9px; border-radius:999px; border:1px solid;
@@ -519,7 +573,8 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard" target="_blank" rel="noopener">availability</a> ·
         <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener">retail prices API</a> ·
         <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">Cognigy support</a> ·
-        <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-bench telecom</a>
+        <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-bench telecom</a> ·
+        <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">reasoning effort</a>
       </span>
     </div>
   </header>
@@ -563,6 +618,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <th class="sortable" data-sort="id">Model <span class="arr">↕</span></th>
         <th class="hide">Family</th>
         <th class="sortable hide act" data-sort="released">Released <span class="arr">↓</span></th>
+        <th class="sortable hide" data-sort="reasoning" title="Default reasoning_effort (what Cognigy uses). Hover a model name for all options.">Reasoning <span class="arr">↕</span></th>
         <th>Availability</th>
         <th class="sortable" data-sort="cognigy">Cognigy <span class="arr">↕</span></th>
         <th class="num sortable hide" data-sort="tau2" title="τ²-Bench Telecom score (Artificial Analysis)">Telco&nbsp;τ² <span class="arr">↕</span></th>
@@ -578,6 +634,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
+    <div class="box"><h4>Reasoning effort</h4><p>Default <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">reasoning_effort</a> the model applies — what Cognigy's LLM Prompt Node uses (it has no reasoning control). Hover a model name for all options. <code>—</code> = not a reasoning model; <code>n/d</code> = default not documented by Microsoft.</p></div>
     <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini).</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
@@ -650,6 +707,9 @@ function visibleRows(){
     if(k==="id") return a.id.localeCompare(b.id)*d;
     if(k==="released") return a.released.localeCompare(b.released)*d;
     if(k==="cognigy"){const rk={yes:0,no:1,unknown:2}; return (rk[a.cognigy.status]-rk[b.cognigy.status])*d;}
+    if(k==="reasoning"){const rk={none:0,minimal:1,low:2,medium:3,high:4,xhigh:5};
+      const gv=x=>{const o=x.reasoning; if(!o||!o.options||!o.options.length||o.default==null) return null; return rk[o.default];};
+      const av=gv(a), bv=gv(b); if(av==null) return 1; if(bv==null) return -1; return (av-bv)*d;}
     if(k==="tau2"){const av=a.tau2, bv=b.tau2; if(av==null)return 1; if(bv==null)return -1; return (av-bv)*d;}
     const av=val(a[k]), bv=val(b[k]);
     if(av===null||av===undefined) return 1; if(bv===null||bv===undefined) return -1;   // n/a sinks
@@ -710,10 +770,19 @@ function render(){
       ? `<span class="price" title="${ttip}">${ts.toFixed(1)}<span class="cur">%</span></span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
       : `<span class="price na">—</span>`;
 
+    const rz = r.reasoning || {options:[],default:null};
+    const rzIs = rz.options && rz.options.length;
+    const rzTip = rzIs
+      ? `Reasoning effort: ${rz.options.join(' · ')} — default: ${rz.default || 'not documented'}`
+      : "Not a reasoning model — no reasoning effort";
+    const rzVal = rzIs ? (rz.default || 'n/d') : '—';
+    const rzCls = rzIs ? (rz.default ? 'rz' : 'rz nd') : 'rz na';
+
     tr.innerHTML = `
-      <td><span class="model">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
+      <td><span class="model" title="${rzTip}">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
       <td class="hide"><span class="fam ${r.family}">${r.family}</span></td>
       <td class="hide"><span class="rel">${r.released}</span></td>
+      <td class="hide"><span class="${rzCls}" title="${rzTip}">${rzVal}</span></td>
       <td>${avail}</td>
       <td>${cognigyChip(r.cognigy)}</td>
       <td class="num tau hide">${telCell}</td>
