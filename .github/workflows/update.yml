@@ -1,0 +1,41 @@
+name: Update prices
+
+# Refreshes index.html from the live Azure Retail Prices API.
+#  • Daily on a schedule (so the site stays current with no action from you)
+#  • On demand via the "Run workflow" button (Actions tab) — this is your one-press refresh
+on:
+  schedule:
+    - cron: '17 5 * * *'      # every day at 05:17 UTC
+  workflow_dispatch: {}        # manual "Run workflow" button
+
+permissions:
+  contents: write              # allow committing the regenerated file
+
+concurrency:                   # never run two refreshes at once
+  group: update-prices
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Regenerate index.html
+        run: python3 generate.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "price-bot"
+          git config user.email "price-bot@users.noreply.github.com"
+          git add index.html
+          if git diff --staged --quiet; then
+            echo "No changes."
+          else
+            git commit -m "chore: refresh Azure prices ($(date -u +%Y-%m-%dT%H:%MZ))"
+            git push
+          fi

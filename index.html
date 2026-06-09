@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Azure OpenAI · EU Data Zone Standard — Model & DKK Price Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f1ede3; --paper:#faf7f0; --ink:#16212c; --muted:#62707a;
+  --line:#ddd6c7; --line-strong:#c6bda9;
+  --blue:#27509e;   /* West Europe / input */
+  --gold:#c0892a;   /* Sweden Central */
+  --rust:#b3502f;   /* output */
+  --ok:#2f7d5b; --no:#b6ad9c;
+  --shadow:0 1px 0 rgba(22,33,44,.04), 0 18px 40px -28px rgba(22,33,44,.5);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif; font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 12% -8%, rgba(192,137,42,.10), transparent 42%),
+    radial-gradient(circle at 96% 0%, rgba(39,80,158,.10), transparent 38%);
+  background-attachment:fixed;
+}
+/* subtle paper grain */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+}
+.wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:46px 28px 90px}
+
+/* ---------- header ---------- */
+header{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:9px; font-size:11.5px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--muted); font-weight:600;
+}
+.eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(47,125,91,.5);animation:pulse 2.4s infinite}
+h1{
+  font-family:"Fraunces",serif; font-weight:900; font-optical-sizing:auto;
+  font-size:clamp(38px,6.5vw,68px); line-height:.98; letter-spacing:-.02em;
+  margin:.32em 0 .18em; max-width:14ch;
+}
+h1 em{font-style:italic; font-weight:500; color:var(--blue)}
+.lede{max-width:60ch; color:#33414c; font-size:16.5px}
+.meta-row{
+  display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center; margin-top:22px;
+  padding-top:18px; border-top:1px solid var(--line); font-size:13px; color:var(--muted);
+}
+.meta-row b{color:var(--ink); font-weight:600}
+.stamp{font-family:"JetBrains Mono",monospace; font-size:12.5px}
+.srcs a{color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(39,80,158,.3)}
+.srcs a:hover{border-color:var(--blue)}
+
+/* ---------- controls ---------- */
+.controls{
+  margin:34px 0 14px; display:flex; flex-wrap:wrap; gap:16px 26px; align-items:flex-end;
+  animation:rise .7s .08s cubic-bezier(.2,.7,.2,1) both;
+}
+.ctl-label{display:block; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-weight:600; margin-bottom:8px}
+.seg{display:inline-flex; background:var(--paper); border:1px solid var(--line-strong); border-radius:11px; padding:4px; box-shadow:var(--shadow)}
+.seg button{
+  border:0; background:transparent; font-family:inherit; font-size:13.5px; font-weight:600; color:var(--muted);
+  padding:8px 15px; border-radius:8px; cursor:pointer; transition:.18s; display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+}
+.seg button .dot{width:8px;height:8px;border-radius:50%}
+.seg button[data-region=swedencentral] .dot{background:var(--gold)}
+.seg button[data-region=westeurope] .dot{background:var(--blue)}
+.seg button.on{background:var(--ink); color:#fff; box-shadow:0 6px 16px -8px rgba(22,33,44,.7)}
+.seg.fam button.on{background:var(--ink); color:#fff}
+.search{position:relative}
+.search input{
+  font-family:inherit; font-size:14px; padding:10px 14px 10px 36px; width:230px; color:var(--ink);
+  background:var(--paper); border:1px solid var(--line-strong); border-radius:11px; box-shadow:var(--shadow);
+}
+.search input:focus{outline:2px solid var(--blue); outline-offset:1px}
+.search svg{position:absolute; left:12px; bottom:13px; color:var(--muted)}
+.spacer{flex:1 1 auto}
+.count{font-size:12.5px; color:var(--muted); font-family:"JetBrains Mono",monospace; padding-bottom:10px}
+
+/* ---------- table ---------- */
+.card{
+  background:var(--paper); border:1px solid var(--line-strong); border-radius:16px; overflow:hidden;
+  box-shadow:var(--shadow); animation:rise .7s .16s cubic-bezier(.2,.7,.2,1) both;
+}
+table{width:100%; border-collapse:collapse}
+thead th{
+  text-align:left; font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted);
+  font-weight:700; padding:16px 18px; border-bottom:1.5px solid var(--line-strong); background:#f5f1e7;
+  position:sticky; top:0; backdrop-filter:blur(6px); user-select:none;
+}
+thead th.sortable{cursor:pointer; white-space:nowrap}
+thead th.num{text-align:right}
+thead th .arr{opacity:.35; font-size:10px}
+thead th.act .arr{opacity:1; color:var(--ink)}
+tbody td{padding:15px 18px; border-bottom:1px solid var(--line); vertical-align:middle}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:#f3eee2}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.dim{opacity:.4}
+tbody tr.dim:hover{opacity:.7}
+
+.model{font-family:"JetBrains Mono",monospace; font-weight:500; font-size:14.5px; letter-spacing:-.01em; color:var(--ink)}
+.note{display:block; font-family:"Archivo"; font-size:11px; color:var(--muted); margin-top:2px; letter-spacing:0}
+.rel{font-family:"JetBrains Mono",monospace; font-size:13px; color:var(--muted); letter-spacing:-.02em}
+.fam{
+  display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  padding:3px 9px; border-radius:999px; border:1px solid;
+}
+.fam.GPT{color:#1f3d77; background:rgba(39,80,158,.09); border-color:rgba(39,80,158,.25)}
+.fam.Reasoning{color:#7a3c12; background:rgba(179,80,47,.10); border-color:rgba(179,80,47,.28)}
+.fam.Embedding{color:#2f5b46; background:rgba(47,125,91,.10); border-color:rgba(47,125,91,.28)}
+
+.avail{display:inline-flex; gap:7px}
+.chip{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--muted)}
+.chip .led{width:9px;height:9px;border-radius:50%; background:var(--no); box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.chip.sc.yes .led{background:var(--gold); box-shadow:0 0 0 3px rgba(192,137,42,.16)}
+.chip.we.yes .led{background:var(--blue); box-shadow:0 0 0 3px rgba(39,80,158,.16)}
+.chip.no{opacity:.5; text-decoration:line-through}
+
+td.num{text-align:right; position:relative}
+.price{font-family:"JetBrains Mono",monospace; font-weight:500; font-size:14.5px}
+.price .cur{font-size:10.5px; color:var(--muted); font-weight:400; margin-left:3px}
+.price.na{color:var(--no); font-weight:400}
+.bar{position:absolute; left:18px; right:18px; bottom:8px; height:3px; border-radius:2px; background:rgba(22,33,44,.06); overflow:hidden}
+.bar i{position:absolute; left:0; top:0; bottom:0; border-radius:2px}
+td.inp .bar i{background:linear-gradient(90deg,var(--blue),#5a82d8)}
+td.out .bar i{background:linear-gradient(90deg,var(--rust),#d98a6e)}
+
+/* ---------- footer ---------- */
+.legend{
+  margin-top:30px; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px;
+  animation:rise .7s .24s cubic-bezier(.2,.7,.2,1) both;
+}
+.legend .box{background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:16px 18px}
+.legend h4{margin:0 0 7px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.legend p{margin:0; font-size:13px; color:#3b4751; line-height:1.55}
+.legend code{font-family:"JetBrains Mono",monospace; font-size:12px; background:rgba(22,33,44,.05); padding:1px 5px; border-radius:5px}
+footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 18px; justify-content:space-between}
+.empty{padding:50px; text-align:center; color:var(--muted); font-size:15px}
+
+@keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,125,91,.5)} 70%{box-shadow:0 0 0 7px rgba(47,125,91,0)} 100%{box-shadow:0 0 0 0 rgba(47,125,91,0)}}
+@media (max-width:720px){
+  .wrap{padding:32px 16px 70px}
+  thead th.hide,tbody td.hide{display:none}
+  .search input{width:160px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow"><span class="pulse"></span>Azure OpenAI · Data Zone Standard · EU</span>
+    <h1>Compliant&nbsp;models, <em>priced in&nbsp;kroner</em>.</h1>
+    <p class="lede">Every text &amp; embedding model you can deploy on <b>Data Zone Standard</b> in
+      <b>Sweden Central</b> and <b>West Europe</b> — with official Azure input &amp; output token prices in Danish kroner or US dollars (per&nbsp;1M&nbsp;tokens).</p>
+    <div class="meta-row">
+      <span>Updated <b class="stamp" id="updated">—</b></span>
+      <span>Prices in <b id="cur">DKK</b> / 1M tokens</span>
+      <span class="srcs">Sources:
+        <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard" target="_blank" rel="noopener">availability</a> ·
+        <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener">retail prices API</a>
+      </span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div>
+      <span class="ctl-label">Region view</span>
+      <div class="seg" id="regionSeg">
+        <button data-region="both" class="on">Compare both</button>
+        <button data-region="swedencentral"><span class="dot"></span>Sweden Central</button>
+        <button data-region="westeurope"><span class="dot"></span>West Europe</button>
+      </div>
+    </div>
+    <div>
+      <span class="ctl-label">Family</span>
+      <div class="seg fam" id="famSeg">
+        <button data-fam="all" class="on">All</button>
+        <button data-fam="GPT">GPT</button>
+        <button data-fam="Embedding">Embedding</button>
+      </div>
+    </div>
+    <div>
+      <span class="ctl-label">Currency</span>
+      <div class="seg" id="curSeg">
+        <button data-cur="DKK" class="on">DKK kr</button>
+        <button data-cur="USD">USD $</button>
+      </div>
+    </div>
+    <div class="search">
+      <span class="ctl-label">Search</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="filter models…" autocomplete="off">
+    </div>
+    <span class="spacer"></span>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th class="sortable" data-sort="id">Model <span class="arr">↕</span></th>
+        <th class="hide">Family</th>
+        <th class="sortable hide" data-sort="released">Released <span class="arr">↕</span></th>
+        <th>Availability</th>
+        <th class="num sortable act" data-sort="inp">Input <span class="arr">↑</span></th>
+        <th class="num sortable" data-sort="out">Output <span class="arr">↕</span></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">No models match those filters.</div>
+  </div>
+
+  <div class="legend">
+    <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
+    <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
+    <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
+    <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by an agent that re-queries the Azure Retail Prices API in DKK and re-checks region availability.</p></div>
+  </div>
+
+  <footer>
+    <span>Azure OpenAI — EU Data Zone Standard overview</span>
+    <span class="stamp" id="footcur">per 1,000,000 tokens</span>
+  </footer>
+</div>
+
+<script>
+const PAYLOAD = {"updated": "2026-06-09 09:36 UTC", "currencies": ["DKK", "USD"], "rows": [{"id": "gpt-4.1", "family": "GPT", "released": "2025-04-14", "inp": {"DKK": 14.1, "USD": 2.2}, "out": {"DKK": 56.6, "USD": 8.8}, "sc": true, "we": true, "note": ""}, {"id": "gpt-4.1-mini", "family": "GPT", "released": "2025-04-14", "inp": {"DKK": 2.8, "USD": 0.44}, "out": {"DKK": 11.3, "USD": 1.76}, "sc": true, "we": true, "note": ""}, {"id": "gpt-4.1-nano", "family": "GPT", "released": "2025-04-14", "inp": {"DKK": 0.7, "USD": 0.11}, "out": {"DKK": 2.8, "USD": 0.44}, "sc": true, "we": true, "note": ""}, {"id": "gpt-4o", "family": "GPT", "released": "2024-11-20", "inp": {"DKK": 17.7, "USD": 2.75}, "out": {"DKK": 70.7, "USD": 11.0}, "sc": true, "we": true, "note": "v2024-11-20"}, {"id": "gpt-4o-mini", "family": "GPT", "released": "2024-07-18", "inp": {"DKK": 1.1, "USD": 0.165}, "out": {"DKK": 4.2, "USD": 0.66}, "sc": true, "we": true, "note": ""}, {"id": "gpt-5", "family": "GPT", "released": "2025-08-07", "inp": {"DKK": 8.8382, "USD": 1.375}, "out": {"DKK": 70.7052, "USD": 11.0}, "sc": true, "we": true, "note": ""}, {"id": "gpt-5-mini", "family": "GPT", "released": "2025-08-07", "inp": {"DKK": 1.7676, "USD": 0.275}, "out": {"DKK": 14.141, "USD": 2.2}, "sc": true, "we": true, "note": ""}, {"id": "gpt-5-nano", "family": "GPT", "released": "2025-08-07", "inp": {"DKK": 0.3535, "USD": 0.055}, "out": {"DKK": 2.8282, "USD": 0.44}, "sc": true, "we": true, "note": ""}, {"id": "gpt-5.1", "family": "GPT", "released": "2025-11-13", "inp": {"DKK": 8.8382, "USD": 1.375}, "out": {"DKK": 70.7052, "USD": 11.0}, "sc": true, "we": false, "note": ""}, {"id": "gpt-5.4", "family": "GPT", "released": "2026-03-05", "inp": {"DKK": 17.6763, "USD": 2.75}, "out": {"DKK": 106.0579, "USD": 16.5}, "sc": true, "we": true, "note": "short-context tier"}, {"id": "gpt-5.5", "family": "GPT", "released": "2026-04-24", "inp": {"DKK": 35.3526, "USD": 5.5}, "out": {"DKK": 212.1157, "USD": 33.0}, "sc": true, "we": true, "note": "short-context tier"}, {"id": "o1", "family": "GPT", "released": "2024-12-17", "inp": {"DKK": 106.1, "USD": 16.5}, "out": {"DKK": 424.2, "USD": 66.0}, "sc": true, "we": true, "note": ""}, {"id": "o3", "family": "GPT", "released": "2025-04-16", "inp": {"DKK": 14.1, "USD": 2.2}, "out": {"DKK": 56.6, "USD": 8.8}, "sc": true, "we": true, "note": ""}, {"id": "o3-mini", "family": "GPT", "released": "2025-01-31", "inp": {"DKK": 7.8, "USD": 1.21}, "out": {"DKK": 31.1, "USD": 4.84}, "sc": true, "we": true, "note": ""}, {"id": "o4-mini", "family": "GPT", "released": "2025-04-16", "inp": {"DKK": 7.8, "USD": 1.21}, "out": {"DKK": 31.1, "USD": 4.84}, "sc": true, "we": true, "note": ""}, {"id": "text-embedding-3-large", "family": "Embedding", "released": "2024-01-25", "inp": {"DKK": 0.9, "USD": 0.143}, "out": null, "sc": true, "we": true, "note": ""}, {"id": "text-embedding-3-small", "family": "Embedding", "released": "2024-01-25", "inp": {"DKK": 0.1, "USD": 0.022}, "out": null, "sc": true, "we": true, "note": ""}, {"id": "text-embedding-ada-002", "family": "Embedding", "released": "2022-12-15", "inp": null, "out": null, "sc": true, "we": true, "note": "no Data Zone meter"}]};
+
+const $ = s => document.querySelector(s);
+const state = { region:"both", fam:"all", q:"", sort:"inp", dir:1, cur:"DKK" };
+let ROWS = [];
+
+const SYM = { DKK:{sym:"kr", pre:false, loc:"da-DK"}, USD:{sym:"$", pre:true, loc:"en-US"} };
+
+function val(cell){ return cell ? cell[state.cur] : null; }   // price for current currency
+
+function fmt(v){
+  const loc = SYM[state.cur].loc;
+  if(v===null||v===undefined) return null;
+  if(v >= 100) return v.toLocaleString(loc,{maximumFractionDigits:0});
+  if(v >= 10)  return v.toLocaleString(loc,{minimumFractionDigits:1,maximumFractionDigits:1});
+  return v.toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function priceHTML(v){
+  const s = SYM[state.cur];
+  const n = fmt(v);
+  return s.pre ? `<span class="cur">${s.sym}</span>${n}` : `${n}<span class="cur">${s.sym}</span>`;
+}
+
+function init(){
+  if(!PAYLOAD){ document.body.innerHTML="<p style='padding:40px;font-family:monospace'>No data baked in. Run: python3 generate.py</p>"; return; }
+  $("#updated").textContent = PAYLOAD.updated;
+  ROWS = PAYLOAD.rows;
+  wire();
+  render();
+}
+
+function wire(){
+  $("#regionSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
+    state.region=b.dataset.region; setOn("#regionSeg",b); render();});
+  $("#famSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
+    state.fam=b.dataset.fam; setOn("#famSeg",b); render();});
+  $("#curSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
+    state.cur=b.dataset.cur; setOn("#curSeg",b); render();});
+  $("#q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase(); render();});
+  document.querySelectorAll("th.sortable").forEach(th=>th.addEventListener("click",()=>{
+    const k=th.dataset.sort;
+    if(state.sort===k) state.dir*=-1; else {state.sort=k; state.dir = k==="id"?1:1;}
+    document.querySelectorAll("th .arr").forEach(a=>{a.textContent="↕"; a.parentElement.classList.remove("act");});
+    th.classList.add("act"); th.querySelector(".arr").textContent = state.dir>0?"↑":"↓";
+    render();
+  }));
+}
+function setOn(sel,btn){document.querySelectorAll(sel+" button").forEach(b=>b.classList.remove("on")); btn.classList.add("on");}
+
+function visibleRows(){
+  let rows = ROWS.filter(r=>{
+    if(state.fam!=="all" && r.family!==state.fam) return false;
+    if(state.q && !r.id.toLowerCase().includes(state.q)) return false;
+    return true;
+  });
+  const k=state.sort, d=state.dir;
+  rows.sort((a,b)=>{
+    if(k==="id") return a.id.localeCompare(b.id)*d;
+    if(k==="released") return a.released.localeCompare(b.released)*d;
+    const av=val(a[k]), bv=val(b[k]);
+    if(av===null||av===undefined) return 1; if(bv===null||bv===undefined) return -1;   // n/a sinks
+    return (av-bv)*d;
+  });
+  return rows;
+}
+
+function availChip(on, region, label){
+  return `<span class="chip ${region} ${on?'yes':'no'}"><span class="led"></span>${label}</span>`;
+}
+
+function render(){
+  $("#cur").textContent = state.cur;
+  $("#footcur").textContent = `${state.cur} · per 1,000,000 tokens`;
+  const rows = visibleRows();
+  const tb = $("#tbody"); tb.innerHTML="";
+  const showSC = state.region!=="westeurope";
+  const showWE = state.region!=="swedencentral";
+  // magnitude bars (log-scaled) relative to the priciest model in the active currency
+  const maxIn = Math.max(...ROWS.map(r=>val(r.inp)||0), 1e-9);
+  const maxOut = Math.max(...ROWS.map(r=>val(r.out)||0), 1e-9);
+  const bar = (v,max)=> v ? Math.max(.04, Math.log10(1+v)/Math.log10(1+max)) : 0;
+  let shown=0;
+
+  rows.forEach(r=>{
+    const vin = val(r.inp), vout = val(r.out);
+    // in single-region view, dim models unavailable there
+    const inRegion = state.region==="both" || (state.region==="swedencentral"&&r.sc) || (state.region==="westeurope"&&r.we);
+    const tr=document.createElement("tr");
+    if(!inRegion) tr.className="dim";
+
+    let avail="<span class='avail'>";
+    if(showSC) avail+=availChip(r.sc,"sc","SC");
+    if(showWE) avail+=availChip(r.we,"we","WE");
+    avail+="</span>";
+
+    const inCell = vin!==null && vin!==undefined
+      ? `<span class="price">${priceHTML(vin)}</span><span class="bar"><i style="width:${(bar(vin,maxIn)*100).toFixed(1)}%"></i></span>`
+      : `<span class="price na">n/a</span>`;
+    const outCell = vout!==null && vout!==undefined
+      ? `<span class="price">${priceHTML(vout)}</span><span class="bar"><i style="width:${(bar(vout,maxOut)*100).toFixed(1)}%"></i></span>`
+      : `<span class="price na">${r.family==='Embedding'?'—':'n/a'}</span>`;
+
+    tr.innerHTML = `
+      <td><span class="model">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
+      <td class="hide"><span class="fam ${r.family}">${r.family}</span></td>
+      <td class="hide"><span class="rel">${r.released}</span></td>
+      <td>${avail}</td>
+      <td class="num inp">${inCell}</td>
+      <td class="num out">${outCell}</td>`;
+    tb.appendChild(tr); shown++;
+  });
+
+  $("#empty").style.display = shown?"none":"block";
+  $("#count").textContent = `${shown} model${shown===1?"":"s"}`;
+}
+
+init();
+</script>
+</body>
+</html>
