@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: write              # allow committing the regenerated file
+  issues: write                # allow opening a failure-notification issue
 
 concurrency:                   # never run two refreshes at once
   group: update-prices
@@ -49,4 +50,20 @@ jobs:
           else
             git commit -m "chore: refresh Azure prices ($(date -u +%Y-%m-%dT%H:%MZ))"
             git push
+          fi
+
+      - name: Notify on failure (assign an issue -> email)
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="⚠️ Automated data update failed"
+          existing=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Failed again — run: $RUN_URL"
+          else
+            printf 'The scheduled update (Azure prices / Cognigy / τ²-bench) failed.\n\nRun: %s\n\ncc @hoaj' "$RUN_URL" \
+              | gh issue create --title "$title" --assignee hoaj --body-file -
           fi

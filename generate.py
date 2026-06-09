@@ -143,6 +143,39 @@ def fetch_cognigy_azure_support():
         return None
 
 
+# Artificial Analysis publishes the τ²-Bench *Telecom* leaderboard with no public API on this page;
+# the data is embedded in Next.js RSC chunks where each model object carries a `tau2` fraction.
+# AA's slug is our model id with dots -> dashes (gpt-4.1 -> gpt-4-1, gpt-5.5 -> gpt-5-5).
+ARTIFICIAL_ANALYSIS_URL = "https://artificialanalysis.ai/evaluations/tau2-bench"
+
+
+def tau2_slug(model_id):
+    return model_id.replace(".", "-")
+
+
+def fetch_tau2_telecom():
+    """Scrape the τ²-Bench Telecom leaderboard. Returns {slug: score_pct (float)} or None."""
+    try:
+        req = urllib.request.Request(ARTIFICIAL_ANALYSIS_URL, headers={"User-Agent": "Mozilla/5.0 (price-bot)"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            doc = r.read().decode("utf-8", "replace")
+        chunks = re.findall(r'self\.__next_f\.push\(\[1,(".*?")\]\)', doc, re.S)
+        rsc = "".join(json.loads(c) for c in chunks)
+        scores = {}
+        for m in re.finditer(r'"tau2":\s*([0-9.]+|null)', rsc):
+            val = m.group(1)
+            if val == "null":
+                continue
+            back = rsc[max(0, m.start() - 6000):m.start()]   # nearest preceding slug = this object's
+            sl = re.findall(r'"slug":"([^"]+)"', back)
+            if sl:
+                scores.setdefault(sl[-1], round(float(val) * 100, 1))
+        return scores or None
+    except Exception as e:
+        print(f"WARNING: Artificial Analysis scrape failed: {e}", file=sys.stderr)
+        return None
+
+
 def fetch_prices(region, currency):
     """Return {meterName: price_per_million} for all OpenAI products in `region`."""
     out = {}
@@ -162,9 +195,11 @@ def fetch_prices(region, currency):
     return out
 
 
-def build_rows(prices_by_cur, cognigy, old_cog):
-    """prices_by_cur: {currency: {meterName: price_per_million}}.
-    cognigy: scraped Azure support map (or None). old_cog: {id: cognigy dict} from last run."""
+def build_rows(prices_by_cur, cognigy, tau2, old_rows):
+    """prices_by_cur: {currency: {meterName: price_per_million}}. cognigy: scraped Azure support
+    map (or None). tau2: {slug: score_pct} (or None). old_rows: previous run's rows for fallback."""
+    old_by_id = {r["id"]: r for r in old_rows}
+
     def lookup(meter):
         if not meter:
             return None
@@ -175,7 +210,7 @@ def build_rows(prices_by_cur, cognigy, old_cog):
         feat = "knowledge_search" if m["family"] == "Embedding" else "llm_prompt"
         label = "Knowledge Search" if feat == "knowledge_search" else "Prompt Node"
         if cognigy is None:                                  # scrape failed -> keep last-known
-            prev = old_cog.get(m["id"])
+            prev = old_by_id.get(m["id"], {}).get("cognigy")
             return prev if isinstance(prev, dict) else {"status": "unknown", "feature": None}
         entry = cognigy.get(cognigy_code(m["id"]))
         if not entry:                                        # not listed for Azure (the o-series)
@@ -184,6 +219,11 @@ def build_rows(prices_by_cur, cognigy, old_cog):
         status = "yes" if v else ("no" if v is False else "unknown")
         return {"status": status, "feature": label if status != "unknown" else None}
 
+    def tau2_score(m):
+        if tau2 is None:                                     # scrape failed -> keep last-known
+            return old_by_id.get(m["id"], {}).get("tau2")
+        return tau2.get(tau2_slug(m["id"]))                  # None if not on the leaderboard
+
     rows = []
     for m in MODELS:
         rows.append({
@@ -191,6 +231,7 @@ def build_rows(prices_by_cur, cognigy, old_cog):
             "family": m["family"],
             "released": m["released"],
             "cognigy": cog_status(m),
+            "tau2": tau2_score(m),
             "inp": lookup(m["meterIn"]),
             "out": lookup(m["meterOut"]),
             "sc": SC in m["regions"],
@@ -211,9 +252,16 @@ def main():
     else:
         print("  Cognigy unavailable — keeping last-known values.", file=sys.stderr)
 
+    print("Fetching Artificial Analysis τ²-Bench Telecom leaderboard ...", file=sys.stderr)
+    tau2 = fetch_tau2_telecom()
+    if tau2:
+        print(f"  parsed {len(tau2)} model scores from Artificial Analysis.", file=sys.stderr)
+    else:
+        print("  Artificial Analysis unavailable — keeping last-known values.", file=sys.stderr)
+
     old = read_old_payload()
-    old_cog = {r["id"]: r.get("cognigy") for r in old["rows"]} if old and old.get("rows") else {}
-    rows = build_rows(prices_by_cur, cognigy, old_cog)
+    old_rows = old["rows"] if old and old.get("rows") else []
+    rows = build_rows(prices_by_cur, cognigy, tau2, old_rows)
 
     # --- detect real problems; these fail the build so GitHub emails on the failure ---
     def gha(level, msg):
@@ -247,6 +295,8 @@ def main():
         gha("warning", "Cognigy unreachable — kept last-known support values.")
     elif resolved < len(expected_ids):
         gha("warning", f"Cognigy resolved {resolved}/{len(expected_ids)} expected Azure models — some may have been renamed.")
+    if tau2 is None:
+        gha("warning", "Artificial Analysis unreachable — kept last-known τ²-bench Telecom scores.")
 
     # Only move the timestamp when the data actually changed, so an unchanged daily
     # run produces a byte-identical file -> no git diff -> no noise commit.
@@ -419,6 +469,7 @@ td.num{text-align:right; position:relative}
 .bar i{position:absolute; left:0; top:0; bottom:0; border-radius:2px}
 td.inp .bar i{background:linear-gradient(90deg,var(--blue),#5a82d8)}
 td.out .bar i{background:linear-gradient(90deg,var(--rust),#d98a6e)}
+td.tau .bar i{background:linear-gradient(90deg,#2f7d5b,#73c39c)}
 
 /* ---------- footer ---------- */
 .legend{
@@ -456,7 +507,8 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
       <span class="srcs">Sources:
         <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard" target="_blank" rel="noopener">availability</a> ·
         <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener">retail prices API</a> ·
-        <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">Cognigy support</a>
+        <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">Cognigy support</a> ·
+        <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-bench telecom</a>
       </span>
     </div>
   </header>
@@ -502,6 +554,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <th class="sortable hide act" data-sort="released">Released <span class="arr">↓</span></th>
         <th>Availability</th>
         <th class="sortable" data-sort="cognigy">Cognigy <span class="arr">↕</span></th>
+        <th class="num sortable hide" data-sort="tau2" title="τ²-Bench Telecom score (Artificial Analysis)">Telco&nbsp;τ² <span class="arr">↕</span></th>
         <th class="num sortable" data-sort="inp">Input <span class="arr">↕</span></th>
         <th class="num sortable" data-sort="out">Output <span class="arr">↕</span></th>
       </tr></thead>
@@ -514,6 +567,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
+    <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini).</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
@@ -585,6 +639,7 @@ function visibleRows(){
     if(k==="id") return a.id.localeCompare(b.id)*d;
     if(k==="released") return a.released.localeCompare(b.released)*d;
     if(k==="cognigy"){const rk={yes:0,no:1,unknown:2}; return (rk[a.cognigy.status]-rk[b.cognigy.status])*d;}
+    if(k==="tau2"){const av=a.tau2, bv=b.tau2; if(av==null)return 1; if(bv==null)return -1; return (av-bv)*d;}
     const av=val(a[k]), bv=val(b[k]);
     if(av===null||av===undefined) return 1; if(bv===null||bv===undefined) return -1;   // n/a sinks
     return (av-bv)*d;
@@ -637,6 +692,10 @@ function render(){
     const outCell = vout!==null && vout!==undefined
       ? `<span class="price">${priceHTML(vout)}</span><span class="bar"><i style="width:${(bar(vout,maxOut)*100).toFixed(1)}%"></i></span>`
       : `<span class="price na">${r.family==='Embedding'?'—':'n/a'}</span>`;
+    const ts = r.tau2;
+    const telCell = (ts!==null && ts!==undefined)
+      ? `<span class="price">${ts.toFixed(1)}<span class="cur">%</span></span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
+      : `<span class="price na">—</span>`;
 
     tr.innerHTML = `
       <td><span class="model">${r.id}</span>${r.note?`<span class="note">${r.note}</span>`:""}</td>
@@ -644,6 +703,7 @@ function render(){
       <td class="hide"><span class="rel">${r.released}</span></td>
       <td>${avail}</td>
       <td>${cognigyChip(r.cognigy)}</td>
+      <td class="num tau hide">${telCell}</td>
       <td class="num inp">${inCell}</td>
       <td class="num out">${outCell}</td>`;
     tb.appendChild(tr); shown++;

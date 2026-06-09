@@ -14,6 +14,9 @@ Live demo: _set after enabling GitHub Pages (see below)_
 - It also scrapes the [Cognigy model-support page](https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature)
   (no API exists — it's a static HTML table) for the **Microsoft Azure OpenAI** section: chat models are judged on
   *LLM Prompt Node* support, embeddings on *Knowledge Search*. If the scrape fails, the last-known values are kept.
+- It also scrapes the [Artificial Analysis τ²-Bench Telecom leaderboard](https://artificialanalysis.ai/evaluations/tau2-bench)
+  (no API — the scores live in the page's Next.js RSC payload, keyed by a `tau2` field) for each model's
+  agentic telecom score. Fallback to last-known on failure.
 - **`index.html`** — the artifact. Self-contained; open it directly in a browser, or serve it via GitHub Pages.
 - **`.github/workflows/update.yml`** — runs `generate.py` daily and on demand, commits the refreshed `index.html`.
 

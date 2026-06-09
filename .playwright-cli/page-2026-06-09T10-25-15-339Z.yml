@@ -1,0 +1,1199 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - navigation "Main" [ref=e5]:
+      - link "Artificial Analysis" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e9]: Artificial Analysis
+      - list [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - listitem [ref=e14]:
+              - button "Models" [ref=e15] [cursor=pointer]
+            - listitem [ref=e16]:
+              - button "Coding Agents" [ref=e17] [cursor=pointer]
+            - listitem [ref=e18]:
+              - button "Speech, Image, Video, Music" [ref=e19] [cursor=pointer]
+            - listitem [ref=e20]:
+              - link "Hardware" [ref=e21] [cursor=pointer]:
+                - /url: /benchmarks/hardware
+            - listitem [ref=e22]:
+              - button "Leaderboards" [ref=e23] [cursor=pointer]
+            - listitem [ref=e24]:
+              - button "About" [ref=e25] [cursor=pointer]
+          - listitem [ref=e27]:
+            - link "AI Trends" [ref=e28] [cursor=pointer]:
+              - /url: /trends
+          - listitem [ref=e30]:
+            - button "Arenas" [ref=e31] [cursor=pointer]:
+              - img [ref=e32]
+              - text: Arenas
+      - generic [ref=e34]:
+        - link "Loading":
+          - /url: /login
+        - button "K" [ref=e35] [cursor=pointer]:
+          - img
+          - generic [ref=e36]:
+            - img
+            - text: K
+        - link "X" [ref=e37] [cursor=pointer]:
+          - /url: https://x.com/ArtificialAnlys
+          - img
+        - link "LinkedIn" [ref=e38] [cursor=pointer]:
+          - /url: https://www.linkedin.com/company/artificial-analysis/
+          - img
+    - generic [ref=e40]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - link "All evaluations" [ref=e45] [cursor=pointer]:
+              - /url: /evaluations
+              - img [ref=e46]
+              - text: All evaluations
+            - heading "𝜏²-Bench Telecom Benchmark Leaderboard" [level=1] [ref=e48]
+            - generic [ref=e49]: A dual-control conversational AI benchmark simulating technical support scenarios where both agent and user must coordinate actions to resolve telecom service issues.
+            - link "See example tasks" [ref=e50] [cursor=pointer]:
+              - /url: "#example-tasks"
+              - text: See example tasks
+              - img [ref=e51]
+            - generic [ref=e54]:
+              - heading "Background" [level=3] [ref=e55]:
+                - button "Background" [expanded] [ref=e56] [cursor=pointer]:
+                  - text: Background
+                  - img [ref=e57]
+              - region "Background" [ref=e59]:
+                - generic [ref=e60]:
+                  - generic [ref=e61]: 𝜏²-Bench (Tau-2 Bench) introduces a new paradigm for evaluating conversational AI by simulating both the agent and user to actively modify a shared world state.
+                  - generic [ref=e62]: The telecom domain tests agents' abilities to guide users through technical troubleshooting to test problem-solving and effective communication skills.
+                  - generic [ref=e63]:
+                    - text: Developed by
+                    - link "Sierra Research" [ref=e64] [cursor=pointer]:
+                      - /url: https://sierra.ai/
+                      - text: Sierra Research
+                      - img [ref=e65]
+                    - text: ", this benchmark addresses gaps between other benchmarks and real-world customer service scenarios where users are active participants in problem resolution."
+            - generic [ref=e69]:
+              - heading "Methodology" [level=3] [ref=e70]:
+                - button "Methodology" [expanded] [ref=e71] [cursor=pointer]:
+                  - text: Methodology
+                  - img [ref=e72]
+              - region "Methodology" [ref=e74]:
+                - generic [ref=e75]:
+                  - text: All evaluations are conducted independently by Artificial Analysis. More information can be found on our
+                  - link "Intelligence Benchmarking Methodology" [ref=e76] [cursor=pointer]:
+                    - /url: /methodology/intelligence-benchmarking
+                    - text: Intelligence Benchmarking Methodology
+                    - img [ref=e77]
+                  - text: page.
+          - generic [ref=e80]:
+            - region "Publication" [ref=e81]:
+              - generic [ref=e82]:
+                - heading "Publication" [level=4] [ref=e83]
+                - link "View on arXiv" [ref=e84] [cursor=pointer]:
+                  - /url: https://arxiv.org/abs/2506.07982
+                  - text: View on arXiv
+                  - img
+              - generic [ref=e85]:
+                - paragraph [ref=e86]: "𝜏²-Bench: Evaluating Conversational Agents in a Dual-Control Environment"
+                - generic [ref=e87]: Victor Barres, Honghua Dong, Soham Ray, Xujie Si, Karthik Narasimhan.
+                - generic [ref=e89]:
+                  - heading "Abstract" [level=3] [ref=e90]:
+                    - button "Abstract" [ref=e91] [cursor=pointer]:
+                      - text: Abstract
+                      - img [ref=e92]
+                  - paragraph [ref=e95]: "Existing benchmarks for conversational AI agents simulate single-control environments, where only the AI agent can use tools to interact with the world, while the user remains a passive information provider. This differs from real-world scenarios like technical support, where users need to actively participate in modifying the state of the (shared) world. In order to address this gap, we introduce 𝜏²-bench, with four key contributions: 1) A novel Telecom dual-control domain modeled as a Dec-POMDP, where both agent and user make use of tools to act in a shared, dynamic environment that tests both agent coordination and communication, 2) A compositional task generator that programmatically creates diverse, verifiable tasks from atomic components, ensuring domain coverage and controlled complexity, 3) A reliable user simulator tightly coupled with the environment, whose behavior is constrained by tools and observable states, improving simulation fidelity, 4) Fine-grained analysis of agent performance through multiple ablations including separating errors arising from reasoning vs communication/coordination. In particular, our experiments show significant performance drops when agents shift from no-user to dual-control, highlighting the challenges of guiding users. Overall, 𝜏²-bench provides a controlled testbed for agents that must both reason effectively and guide user actions."
+                  - region "Abstract":
+                    - generic [ref=e96]: "Existing benchmarks for conversational AI agents simulate single-control environments, where only the AI agent can use tools to interact with the world, while the user remains a passive information provider. This differs from real-world scenarios like technical support, where users need to actively participate in modifying the state of the (shared) world. In order to address this gap, we introduce 𝜏²-bench, with four key contributions: 1) A novel Telecom dual-control domain modeled as a Dec-POMDP, where both agent and user make use of tools to act in a shared, dynamic environment that tests both agent coordination and communication, 2) A compositional task generator that programmatically creates diverse, verifiable tasks from atomic components, ensuring domain coverage and controlled complexity, 3) A reliable user simulator tightly coupled with the environment, whose behavior is constrained by tools and observable states, improving simulation fidelity, 4) Fine-grained analysis of agent performance through multiple ablations including separating errors arising from reasoning vs communication/coordination. In particular, our experiments show significant performance drops when agents shift from no-user to dual-control, highlighting the challenges of guiding users. Overall, 𝜏²-bench provides a controlled testbed for agents that must both reason effectively and guide user actions."
+            - generic [ref=e98]:
+              - heading "Related Links" [level=3] [ref=e99]:
+                - button "Related Links" [expanded] [ref=e100] [cursor=pointer]:
+                  - text: Related Links
+                  - img [ref=e101]
+              - region "Related Links" [ref=e103]:
+                - generic [ref=e105]:
+                  - link "𝜏²-bench - Sierra AI 𝜏²-bench - Sierra AI" [ref=e106] [cursor=pointer]:
+                    - /url: https://sierra.ai/resources/research/tau-squared-bench
+                    - generic [ref=e107]:
+                      - img "𝜏²-bench - Sierra AI" [ref=e108]
+                      - generic [ref=e109]: 𝜏²-bench - Sierra AI
+                    - img
+                  - link "2506.07982 2506.07982" [ref=e110] [cursor=pointer]:
+                    - /url: https://arxiv.org/abs/2506.07982
+                    - generic [ref=e111]:
+                      - img "2506.07982" [ref=e112]
+                      - generic [ref=e113]: "2506.07982"
+                    - img
+                  - link "sierra-research/tau2-bench sierra-research/tau2-bench" [ref=e114] [cursor=pointer]:
+                    - /url: https://github.com/sierra-research/tau2-bench
+                    - generic [ref=e115]:
+                      - img "sierra-research/tau2-bench" [ref=e116]
+                      - generic [ref=e117]: sierra-research/tau2-bench
+                    - img
+        - generic [ref=e120]:
+          - heading "𝜏²-Bench Telecom" [level=4] [ref=e122]
+          - generic [ref=e123]: JT-35B-Flash scores the highest on 𝜏²-Bench Telecom with a score of 99.1%, followed by GLM-4.7-Flash (Reasoning) with a score of 98.8%, and Step 3.7 Flash with a score of 98.5%
+      - generic [ref=e124]:
+        - generic [ref=e126]:
+          - complementary [ref=e127]:
+            - navigation [ref=e129]:
+              - link "Results" [ref=e130] [cursor=pointer]:
+                - /url: "#results"
+                - generic [ref=e132]: Results
+              - link "Token Usage" [ref=e133] [cursor=pointer]:
+                - /url: "#token-usage"
+                - generic [ref=e135]: Token Usage
+              - link "Score vs. Release Date" [ref=e136] [cursor=pointer]:
+                - /url: "#score-vs-release-date"
+                - generic [ref=e138]: Score vs. Release Date
+              - link "Example Tasks" [ref=e139] [cursor=pointer]:
+                - /url: "#example-tasks"
+                - generic [ref=e141]: Example Tasks
+          - generic [ref=e142]:
+            - generic [ref=e143]:
+              - heading "Results" [level=2] [ref=e146]:
+                - generic [ref=e148]: Results
+              - generic [ref=e151]:
+                - generic [ref=e152]:
+                  - generic [ref=e153]:
+                    - 'heading "𝜏²-Bench Telecom Benchmark Leaderboard: Results" [level=3] [ref=e154]'
+                    - generic [ref=e156]: Independently benchmarked by Artificial Analysis
+                  - generic [ref=e158]:
+                    - generic [ref=e160]:
+                      - generic [ref=e161]:
+                        - combobox [ref=e162] [cursor=pointer]:
+                          - generic [ref=e163]: 32 of 422 models
+                          - img
+                        - button "Open filters" [ref=e165] [cursor=pointer]:
+                          - img
+                      - button "Add model from specific provider" [ref=e166] [cursor=pointer]:
+                        - generic [ref=e167]:
+                          - img
+                        - text: Add model from specific provider
+                    - generic [ref=e168]:
+                      - button "Copy link to this section" [ref=e169] [cursor=pointer]:
+                        - img
+                      - button "Download chart as image" [ref=e170] [cursor=pointer]:
+                        - img
+                - generic [ref=e172]:
+                  - generic [ref=e173]:
+                    - img
+                    - application [ref=e177]:
+                      - generic [ref=e281]:
+                        - generic [ref=e282]:
+                          - generic [ref=e284]:
+                            - img "JT-35B-Flash" [ref=e286]
+                            - link "JT-35B-Flash" [ref=e289] [cursor=pointer]:
+                              - /url: /models/jt-35b-flash
+                          - generic [ref=e291]:
+                            - img "GLM-4.7-Flash" [ref=e293]
+                            - img [ref=e296]:
+                              - img [ref=e297]
+                              - generic "Reasoning model" [ref=e299]
+                            - link "GLM-4.7-Flash" [ref=e301] [cursor=pointer]:
+                              - /url: /models/glm-4-7-flash
+                          - generic [ref=e303]:
+                            - img "Step 3.7 Flash" [ref=e305]
+                            - img [ref=e308]:
+                              - img [ref=e309]
+                              - generic "Reasoning model" [ref=e311]
+                            - link "Step 3.7 Flash" [ref=e313] [cursor=pointer]:
+                              - /url: /models/step-3-7-flash
+                          - generic [ref=e315]:
+                            - img "GLM-5-Turbo" [ref=e317]
+                            - img [ref=e320]:
+                              - img [ref=e321]
+                              - generic "Reasoning model" [ref=e323]
+                            - link "GLM-5-Turbo" [ref=e325] [cursor=pointer]:
+                              - /url: /models/glm-5-turbo
+                          - generic [ref=e327]:
+                            - img "GLM 5V Turbo" [ref=e329]
+                            - img [ref=e332]:
+                              - img [ref=e333]
+                              - generic "Reasoning model" [ref=e335]
+                            - link "GLM 5V Turbo" [ref=e337] [cursor=pointer]:
+                              - /url: /models/glm-5v-turbo
+                          - generic [ref=e339]:
+                            - img "Grok 4.3 (high)" [ref=e341]
+                            - img [ref=e344]:
+                              - img [ref=e345]
+                              - generic "Reasoning model" [ref=e347]
+                            - link "Grok 4.3 (high)" [ref=e349] [cursor=pointer]:
+                              - /url: /models/grok-4-3
+                          - generic [ref=e351]:
+                            - img "GLM-5.1" [ref=e353]
+                            - img [ref=e356]:
+                              - img [ref=e357]
+                              - generic "Reasoning model" [ref=e359]
+                            - link "GLM-5.1" [ref=e361] [cursor=pointer]:
+                              - /url: /models/glm-5-1
+                          - generic [ref=e363]:
+                            - img "DeepSeek V4 Pro (Max)" [ref=e365]
+                            - img [ref=e368]:
+                              - img [ref=e369]
+                              - generic "Reasoning model" [ref=e371]
+                            - link "DeepSeek V4 Pro (Max)" [ref=e373] [cursor=pointer]:
+                              - /url: /models/deepseek-v4-pro
+                          - generic [ref=e375]:
+                            - img "Kimi K2.6" [ref=e377]
+                            - img [ref=e380]:
+                              - img [ref=e381]
+                              - generic "Reasoning model" [ref=e383]
+                            - link "Kimi K2.6" [ref=e385] [cursor=pointer]:
+                              - /url: /models/kimi-k2-6
+                          - generic [ref=e387]:
+                            - img "Gemini 3.1 Pro Preview" [ref=e389]
+                            - img [ref=e392]:
+                              - img [ref=e393]
+                              - generic "Reasoning model" [ref=e395]
+                            - link "Gemini 3.1 Pro Preview" [ref=e397] [cursor=pointer]:
+                              - /url: /models/gemini-3-1-pro-preview
+                          - generic [ref=e399]:
+                            - img "Qwen3.5 397B A17B" [ref=e401]
+                            - img [ref=e404]:
+                              - img [ref=e405]
+                              - generic "Reasoning model" [ref=e407]
+                            - link "Qwen3.5 397B A17B" [ref=e409] [cursor=pointer]:
+                              - /url: /models/qwen3-5-397b-a17b
+                          - generic [ref=e411]:
+                            - img "Gemini 3.5 Flash" [ref=e413]
+                            - img [ref=e416]:
+                              - img [ref=e417]
+                              - generic "Reasoning model" [ref=e419]
+                            - link "Gemini 3.5 Flash" [ref=e421] [cursor=pointer]:
+                              - /url: /models/gemini-3-5-flash
+                          - generic [ref=e423]:
+                            - img "DeepSeek V4 Flash (Max)" [ref=e425]
+                            - img [ref=e428]:
+                              - img [ref=e429]
+                              - generic "Reasoning model" [ref=e431]
+                            - link "DeepSeek V4 Flash (Max)" [ref=e433] [cursor=pointer]:
+                              - /url: /models/deepseek-v4-flash
+                          - generic [ref=e435]:
+                            - img "Qwen3.7 Max" [ref=e437]
+                            - img [ref=e440]:
+                              - img [ref=e441]
+                              - generic "Reasoning model" [ref=e443]
+                            - link "Qwen3.7 Max" [ref=e445] [cursor=pointer]:
+                              - /url: /models/qwen3-7-max
+                          - generic [ref=e447]:
+                            - img "Claude Opus 4.8 (max)" [ref=e449]
+                            - img [ref=e452]:
+                              - img [ref=e453]
+                              - generic "Reasoning model" [ref=e455]
+                            - link "Claude Opus 4.8 (max)" [ref=e457] [cursor=pointer]:
+                              - /url: /models/claude-opus-4-8
+                          - generic [ref=e459]:
+                            - img "Mistral Medium 3.5" [ref=e461]
+                            - img [ref=e464]:
+                              - img [ref=e465]
+                              - generic "Reasoning model" [ref=e467]
+                            - link "Mistral Medium 3.5" [ref=e469] [cursor=pointer]:
+                              - /url: /models/mistral-medium-3-5
+                          - generic [ref=e471]:
+                            - img "MiMo-V2.5-Pro" [ref=e473]
+                            - img [ref=e476]:
+                              - img [ref=e477]
+                              - generic "Reasoning model" [ref=e479]
+                            - link "MiMo-V2.5-Pro" [ref=e481] [cursor=pointer]:
+                              - /url: /models/mimo-v2-5-pro
+                          - generic [ref=e483]:
+                            - img "GPT-5.5 (xhigh)" [ref=e485]
+                            - img [ref=e488]:
+                              - img [ref=e489]
+                              - generic "Reasoning model" [ref=e491]
+                            - link "GPT-5.5 (xhigh)" [ref=e493] [cursor=pointer]:
+                              - /url: /models/gpt-5-5
+                          - generic [ref=e495]:
+                            - img "Nova 2.0 Pro Preview (medium)" [ref=e497]
+                            - img [ref=e500]:
+                              - img [ref=e501]
+                              - generic "Reasoning model" [ref=e503]
+                            - link "Nova 2.0 Pro Preview (medium)" [ref=e505] [cursor=pointer]:
+                              - /url: /models/nova-2-0-pro-reasoning-medium
+                          - generic [ref=e507]:
+                            - img "Muse Spark" [ref=e509]
+                            - img [ref=e512]:
+                              - img [ref=e513]
+                              - generic "Reasoning model" [ref=e515]
+                            - link "Muse Spark" [ref=e517] [cursor=pointer]:
+                              - /url: /models/muse-spark
+                          - generic [ref=e519]:
+                            - img "MiniMax-M3" [ref=e521]
+                            - img [ref=e524]:
+                              - img [ref=e525]
+                              - generic "Reasoning model" [ref=e527]
+                            - link "MiniMax-M3" [ref=e529] [cursor=pointer]:
+                              - /url: /models/minimax-m3
+                          - generic [ref=e531]:
+                            - img "Claude Opus 4.7 (max)" [ref=e533]
+                            - img [ref=e536]:
+                              - img [ref=e537]
+                              - generic "Reasoning model" [ref=e539]
+                            - link "Claude Opus 4.7 (max)" [ref=e541] [cursor=pointer]:
+                              - /url: /models/claude-opus-4-7
+                          - generic [ref=e543]:
+                            - img "Solar Pro 3" [ref=e545]
+                            - img [ref=e548]:
+                              - img [ref=e549]
+                              - generic "Reasoning model" [ref=e551]
+                            - link "Solar Pro 3" [ref=e553] [cursor=pointer]:
+                              - /url: /models/solar-pro-3
+                          - generic [ref=e555]:
+                            - img "MiniMax-M2.7" [ref=e557]
+                            - img [ref=e560]:
+                              - img [ref=e561]
+                              - generic "Reasoning model" [ref=e563]
+                            - link "MiniMax-M2.7" [ref=e565] [cursor=pointer]:
+                              - /url: /models/minimax-m2-7
+                          - generic [ref=e567]:
+                            - img "GPT-5.4 mini (xhigh)" [ref=e569]
+                            - img [ref=e572]:
+                              - img [ref=e573]
+                              - generic "Reasoning model" [ref=e575]
+                            - link "GPT-5.4 mini (xhigh)" [ref=e577] [cursor=pointer]:
+                              - /url: /models/gpt-5-4-mini
+                          - generic [ref=e579]:
+                            - img "Nemotron 3 Ultra" [ref=e581]
+                            - img [ref=e584]:
+                              - img [ref=e585]
+                              - generic "Reasoning model" [ref=e587]
+                            - link "Nemotron 3 Ultra" [ref=e589] [cursor=pointer]:
+                              - /url: /models/nvidia-nemotron-3-ultra-550b-a55b
+                          - generic [ref=e591]:
+                            - img "Claude Sonnet 4.6 (max)" [ref=e593]
+                            - img [ref=e596]:
+                              - img [ref=e597]
+                              - generic "Reasoning model" [ref=e599]
+                            - link "Claude Sonnet 4.6 (max)" [ref=e601] [cursor=pointer]:
+                              - /url: /models/claude-sonnet-4-6-adaptive
+                          - generic [ref=e603]:
+                            - img "gpt-oss-120b (high)" [ref=e605]
+                            - img [ref=e608]:
+                              - img [ref=e609]
+                              - generic "Reasoning model" [ref=e611]
+                            - link "gpt-oss-120b (high)" [ref=e613] [cursor=pointer]:
+                              - /url: /models/gpt-oss-120b
+                          - generic [ref=e615]:
+                            - img "gpt-oss-20B (high)" [ref=e617]
+                            - img [ref=e620]:
+                              - img [ref=e621]
+                              - generic "Reasoning model" [ref=e623]
+                            - link "gpt-oss-20B (high)" [ref=e625] [cursor=pointer]:
+                              - /url: /models/gpt-oss-20b
+                          - generic [ref=e627]:
+                            - img "Gemma 4 31B" [ref=e629]
+                            - img [ref=e632]:
+                              - img [ref=e633]
+                              - generic "Reasoning model" [ref=e635]
+                            - link "Gemma 4 31B" [ref=e637] [cursor=pointer]:
+                              - /url: /models/gemma-4-31b
+                          - generic [ref=e639]:
+                            - img "Claude 4.5 Haiku" [ref=e641]
+                            - img [ref=e644]:
+                              - img [ref=e645]
+                              - generic "Reasoning model" [ref=e647]
+                            - link "Claude 4.5 Haiku" [ref=e649] [cursor=pointer]:
+                              - /url: /models/claude-4-5-haiku-reasoning
+                          - generic [ref=e651]:
+                            - img "K2 Think V2" [ref=e653]
+                            - img [ref=e656]:
+                              - img [ref=e657]
+                              - generic "Reasoning model" [ref=e659]
+                            - link "K2 Think V2" [ref=e661] [cursor=pointer]:
+                              - /url: /models/k2-think-v2
+                        - generic [ref=e662]:
+                          - generic [ref=e663]: 99.1%
+                          - generic [ref=e664]: 98.8%
+                          - generic [ref=e665]: 98.5%
+                          - generic [ref=e666]: 98.5%
+                          - generic [ref=e667]: 98.5%
+                          - generic [ref=e668]: 97.7%
+                          - generic [ref=e669]: 97.7%
+                          - generic [ref=e670]: 96.2%
+                          - generic [ref=e671]: 95.9%
+                          - generic [ref=e672]: 95.6%
+                          - generic [ref=e673]: 95.6%
+                          - generic [ref=e674]: 95.3%
+                          - generic [ref=e675]: 95.0%
+                          - generic [ref=e676]: 94.7%
+                          - generic [ref=e677]: 94.4%
+                          - generic [ref=e678]: 94.2%
+                          - generic [ref=e679]: 94.2%
+                          - generic [ref=e680]: 93.9%
+                          - generic [ref=e681]: 92.7%
+                          - generic [ref=e682]: 91.5%
+                          - generic [ref=e683]: 88.9%
+                          - generic [ref=e684]: 88.6%
+                          - generic [ref=e685]: 86.3%
+                          - generic [ref=e686]: 84.8%
+                          - generic [ref=e687]: 83.3%
+                          - generic [ref=e688]: 83.3%
+                          - generic [ref=e689]: 75.7%
+                          - generic [ref=e690]: 65.8%
+                          - generic [ref=e691]: 60.2%
+                          - generic [ref=e692]: 59.9%
+                          - generic [ref=e693]: 54.7%
+                          - generic [ref=e694]: 25.4%
+                  - generic [ref=e696]:
+                    - img [ref=e697]
+                    - text: Reasoning models are indicated by a lightbulb icon
+            - generic [ref=e699]:
+              - heading "Token Usage" [level=2] [ref=e702]:
+                - generic [ref=e704]: Token Usage
+              - generic [ref=e706]:
+                - tablist [ref=e708]:
+                  - tab "Output Token Usage" [selected] [ref=e709] [cursor=pointer]
+                  - tab "Score vs. Token Usage" [ref=e710] [cursor=pointer]
+                - tabpanel "Output Token Usage" [ref=e711]:
+                  - generic [ref=e712]:
+                    - generic [ref=e713]:
+                      - generic [ref=e714]:
+                        - generic [ref=e715]:
+                          - 'heading "𝜏²-Bench Telecom Benchmark Leaderboard: Output Token Usage" [level=3] [ref=e716]'
+                          - generic [ref=e718]: Output tokens used to run the evaluation
+                        - generic [ref=e720]:
+                          - generic [ref=e722]:
+                            - generic [ref=e723]:
+                              - combobox [ref=e724] [cursor=pointer]:
+                                - generic [ref=e725]: 32 of 422 models
+                                - img
+                              - button "Open filters" [ref=e727] [cursor=pointer]:
+                                - img
+                            - button "Add model from specific provider" [ref=e728] [cursor=pointer]:
+                              - generic [ref=e729]:
+                                - img
+                              - text: Add model from specific provider
+                          - generic [ref=e730]:
+                            - button "Copy link to this section" [ref=e731] [cursor=pointer]:
+                              - img
+                            - button "Download chart as image" [ref=e732] [cursor=pointer]:
+                              - img
+                      - generic [ref=e734]:
+                        - generic [ref=e736]:
+                          - button "Answer tokens" [ref=e737] [cursor=pointer]:
+                            - generic [ref=e739]: Answer tokens
+                          - button "Reasoning tokens" [ref=e740] [cursor=pointer]:
+                            - generic [ref=e742]: Reasoning tokens
+                        - generic [ref=e743]:
+                          - img
+                          - application [ref=e747]:
+                            - generic [ref=e947]:
+                              - generic [ref=e948]:
+                                - generic [ref=e950]:
+                                  - img "GPT-5.4 mini (xhigh)" [ref=e952]
+                                  - img [ref=e955]:
+                                    - img [ref=e956]
+                                    - generic "Reasoning model" [ref=e958]
+                                  - link "GPT-5.4 mini (xhigh)" [ref=e960] [cursor=pointer]:
+                                    - /url: /models/gpt-5-4-mini
+                                - generic [ref=e962]:
+                                  - img "Solar Pro 3" [ref=e964]
+                                  - img [ref=e967]:
+                                    - img [ref=e968]
+                                    - generic "Reasoning model" [ref=e970]
+                                  - link "Solar Pro 3" [ref=e972] [cursor=pointer]:
+                                    - /url: /models/solar-pro-3
+                                - generic [ref=e974]:
+                                  - img "Claude Opus 4.8 (max)" [ref=e976]
+                                  - img [ref=e979]:
+                                    - img [ref=e980]
+                                    - generic "Reasoning model" [ref=e982]
+                                  - link "Claude Opus 4.8 (max)" [ref=e984] [cursor=pointer]:
+                                    - /url: /models/claude-opus-4-8
+                                - generic [ref=e986]:
+                                  - img "Gemma 4 31B" [ref=e988]
+                                  - img [ref=e991]:
+                                    - img [ref=e992]
+                                    - generic "Reasoning model" [ref=e994]
+                                  - link "Gemma 4 31B" [ref=e996] [cursor=pointer]:
+                                    - /url: /models/gemma-4-31b
+                                - generic [ref=e998]:
+                                  - img "gpt-oss-120b (high)" [ref=e1000]
+                                  - img [ref=e1003]:
+                                    - img [ref=e1004]
+                                    - generic "Reasoning model" [ref=e1006]
+                                  - link "gpt-oss-120b (high)" [ref=e1008] [cursor=pointer]:
+                                    - /url: /models/gpt-oss-120b
+                                - generic [ref=e1010]:
+                                  - img "Claude 4.5 Haiku" [ref=e1012]
+                                  - img [ref=e1015]:
+                                    - img [ref=e1016]
+                                    - generic "Reasoning model" [ref=e1018]
+                                  - link "Claude 4.5 Haiku" [ref=e1020] [cursor=pointer]:
+                                    - /url: /models/claude-4-5-haiku-reasoning
+                                - generic [ref=e1022]:
+                                  - img "K2 Think V2" [ref=e1024]
+                                  - img [ref=e1027]:
+                                    - img [ref=e1028]
+                                    - generic "Reasoning model" [ref=e1030]
+                                  - link "K2 Think V2" [ref=e1032] [cursor=pointer]:
+                                    - /url: /models/k2-think-v2
+                                - generic [ref=e1034]:
+                                  - img "Gemini 3.5 Flash" [ref=e1036]
+                                  - img [ref=e1039]:
+                                    - img [ref=e1040]
+                                    - generic "Reasoning model" [ref=e1042]
+                                  - link "Gemini 3.5 Flash" [ref=e1044] [cursor=pointer]:
+                                    - /url: /models/gemini-3-5-flash
+                                - generic [ref=e1046]:
+                                  - img "gpt-oss-20B (high)" [ref=e1048]
+                                  - img [ref=e1051]:
+                                    - img [ref=e1052]
+                                    - generic "Reasoning model" [ref=e1054]
+                                  - link "gpt-oss-20B (high)" [ref=e1056] [cursor=pointer]:
+                                    - /url: /models/gpt-oss-20b
+                                - generic [ref=e1058]:
+                                  - img "Muse Spark" [ref=e1060]
+                                  - img [ref=e1063]:
+                                    - img [ref=e1064]
+                                    - generic "Reasoning model" [ref=e1066]
+                                  - link "Muse Spark" [ref=e1068] [cursor=pointer]:
+                                    - /url: /models/muse-spark
+                                - generic [ref=e1070]:
+                                  - img "MiniMax-M3" [ref=e1072]
+                                  - img [ref=e1075]:
+                                    - img [ref=e1076]
+                                    - generic "Reasoning model" [ref=e1078]
+                                  - link "MiniMax-M3" [ref=e1080] [cursor=pointer]:
+                                    - /url: /models/minimax-m3
+                                - generic [ref=e1082]:
+                                  - img "Gemini 3.1 Pro Preview" [ref=e1084]
+                                  - img [ref=e1087]:
+                                    - img [ref=e1088]
+                                    - generic "Reasoning model" [ref=e1090]
+                                  - link "Gemini 3.1 Pro Preview" [ref=e1092] [cursor=pointer]:
+                                    - /url: /models/gemini-3-1-pro-preview
+                                - generic [ref=e1094]:
+                                  - img "MiMo-V2.5-Pro" [ref=e1096]
+                                  - img [ref=e1099]:
+                                    - img [ref=e1100]
+                                    - generic "Reasoning model" [ref=e1102]
+                                  - link "MiMo-V2.5-Pro" [ref=e1104] [cursor=pointer]:
+                                    - /url: /models/mimo-v2-5-pro
+                                - generic [ref=e1106]:
+                                  - img "Claude Sonnet 4.6 (max)" [ref=e1108]
+                                  - img [ref=e1111]:
+                                    - img [ref=e1112]
+                                    - generic "Reasoning model" [ref=e1114]
+                                  - link "Claude Sonnet 4.6 (max)" [ref=e1116] [cursor=pointer]:
+                                    - /url: /models/claude-sonnet-4-6-adaptive
+                                - generic [ref=e1118]:
+                                  - img "Nemotron 3 Ultra" [ref=e1120]
+                                  - img [ref=e1123]:
+                                    - img [ref=e1124]
+                                    - generic "Reasoning model" [ref=e1126]
+                                  - link "Nemotron 3 Ultra" [ref=e1128] [cursor=pointer]:
+                                    - /url: /models/nvidia-nemotron-3-ultra-550b-a55b
+                                - generic [ref=e1130]:
+                                  - img "Kimi K2.6" [ref=e1132]
+                                  - img [ref=e1135]:
+                                    - img [ref=e1136]
+                                    - generic "Reasoning model" [ref=e1138]
+                                  - link "Kimi K2.6" [ref=e1140] [cursor=pointer]:
+                                    - /url: /models/kimi-k2-6
+                                - generic [ref=e1142]:
+                                  - img "Nova 2.0 Pro Preview (medium)" [ref=e1144]
+                                  - img [ref=e1147]:
+                                    - img [ref=e1148]
+                                    - generic "Reasoning model" [ref=e1150]
+                                  - link "Nova 2.0 Pro Preview (medium)" [ref=e1152] [cursor=pointer]:
+                                    - /url: /models/nova-2-0-pro-reasoning-medium
+                                - generic [ref=e1154]:
+                                  - img "Qwen3.5 397B A17B" [ref=e1156]
+                                  - img [ref=e1159]:
+                                    - img [ref=e1160]
+                                    - generic "Reasoning model" [ref=e1162]
+                                  - link "Qwen3.5 397B A17B" [ref=e1164] [cursor=pointer]:
+                                    - /url: /models/qwen3-5-397b-a17b
+                                - generic [ref=e1166]:
+                                  - img "DeepSeek V4 Pro (Max)" [ref=e1168]
+                                  - img [ref=e1171]:
+                                    - img [ref=e1172]
+                                    - generic "Reasoning model" [ref=e1174]
+                                  - link "DeepSeek V4 Pro (Max)" [ref=e1176] [cursor=pointer]:
+                                    - /url: /models/deepseek-v4-pro
+                                - generic [ref=e1178]:
+                                  - img "Mistral Medium 3.5" [ref=e1180]
+                                  - img [ref=e1183]:
+                                    - img [ref=e1184]
+                                    - generic "Reasoning model" [ref=e1186]
+                                  - link "Mistral Medium 3.5" [ref=e1188] [cursor=pointer]:
+                                    - /url: /models/mistral-medium-3-5
+                                - generic [ref=e1190]:
+                                  - img "Claude Opus 4.7 (max)" [ref=e1192]
+                                  - img [ref=e1195]:
+                                    - img [ref=e1196]
+                                    - generic "Reasoning model" [ref=e1198]
+                                  - link "Claude Opus 4.7 (max)" [ref=e1200] [cursor=pointer]:
+                                    - /url: /models/claude-opus-4-7
+                                - generic [ref=e1202]:
+                                  - img "GPT-5.5 (xhigh)" [ref=e1204]
+                                  - img [ref=e1207]:
+                                    - img [ref=e1208]
+                                    - generic "Reasoning model" [ref=e1210]
+                                  - link "GPT-5.5 (xhigh)" [ref=e1212] [cursor=pointer]:
+                                    - /url: /models/gpt-5-5
+                                - generic [ref=e1214]:
+                                  - img "Step 3.7 Flash" [ref=e1216]
+                                  - img [ref=e1219]:
+                                    - img [ref=e1220]
+                                    - generic "Reasoning model" [ref=e1222]
+                                  - link "Step 3.7 Flash" [ref=e1224] [cursor=pointer]:
+                                    - /url: /models/step-3-7-flash
+                                - generic [ref=e1226]:
+                                  - img "DeepSeek V4 Flash (Max)" [ref=e1228]
+                                  - img [ref=e1231]:
+                                    - img [ref=e1232]
+                                    - generic "Reasoning model" [ref=e1234]
+                                  - link "DeepSeek V4 Flash (Max)" [ref=e1236] [cursor=pointer]:
+                                    - /url: /models/deepseek-v4-flash
+                                - generic [ref=e1238]:
+                                  - img "MiniMax-M2.7" [ref=e1240]
+                                  - img [ref=e1243]:
+                                    - img [ref=e1244]
+                                    - generic "Reasoning model" [ref=e1246]
+                                  - link "MiniMax-M2.7" [ref=e1248] [cursor=pointer]:
+                                    - /url: /models/minimax-m2-7
+                                - generic [ref=e1250]:
+                                  - img "GLM-5.1" [ref=e1252]
+                                  - img [ref=e1255]:
+                                    - img [ref=e1256]
+                                    - generic "Reasoning model" [ref=e1258]
+                                  - link "GLM-5.1" [ref=e1260] [cursor=pointer]:
+                                    - /url: /models/glm-5-1
+                                - generic [ref=e1262]:
+                                  - img "GLM 5V Turbo" [ref=e1264]
+                                  - img [ref=e1267]:
+                                    - img [ref=e1268]
+                                    - generic "Reasoning model" [ref=e1270]
+                                  - link "GLM 5V Turbo" [ref=e1272] [cursor=pointer]:
+                                    - /url: /models/glm-5v-turbo
+                                - generic [ref=e1274]:
+                                  - img "Grok 4.3 (high)" [ref=e1276]
+                                  - img [ref=e1279]:
+                                    - img [ref=e1280]
+                                    - generic "Reasoning model" [ref=e1282]
+                                  - link "Grok 4.3 (high)" [ref=e1284] [cursor=pointer]:
+                                    - /url: /models/grok-4-3
+                                - generic [ref=e1286]:
+                                  - img "GLM-5-Turbo" [ref=e1288]
+                                  - img [ref=e1291]:
+                                    - img [ref=e1292]
+                                    - generic "Reasoning model" [ref=e1294]
+                                  - link "GLM-5-Turbo" [ref=e1296] [cursor=pointer]:
+                                    - /url: /models/glm-5-turbo
+                                - generic [ref=e1298]:
+                                  - img "GLM-4.7-Flash" [ref=e1300]
+                                  - img [ref=e1303]:
+                                    - img [ref=e1304]
+                                    - generic "Reasoning model" [ref=e1306]
+                                  - link "GLM-4.7-Flash" [ref=e1308] [cursor=pointer]:
+                                    - /url: /models/glm-4-7-flash
+                                - generic [ref=e1310]:
+                                  - img "Qwen3.7 Max" [ref=e1312]
+                                  - img [ref=e1315]:
+                                    - img [ref=e1316]
+                                    - generic "Reasoning model" [ref=e1318]
+                                  - link "Qwen3.7 Max" [ref=e1320] [cursor=pointer]:
+                                    - /url: /models/qwen3-7-max
+                                - generic [ref=e1322]:
+                                  - img "JT-35B-Flash" [ref=e1324]
+                                  - link "JT-35B-Flash" [ref=e1327] [cursor=pointer]:
+                                    - /url: /models/jt-35b-flash
+                              - generic [ref=e1328]:
+                                - generic [ref=e1329]: 3M
+                                - generic [ref=e1330]: 1M
+                                - generic [ref=e1331]: 941k
+                                - generic [ref=e1332]: 723k
+                                - generic [ref=e1333]: 637k
+                                - generic [ref=e1334]: 344k
+                                - generic [ref=e1335]: 628k
+                                - generic [ref=e1336]: 622k
+                                - generic [ref=e1337]: 422k
+                                - generic [ref=e1338]: 428k
+                                - generic [ref=e1339]: 192k
+                                - generic [ref=e1340]: 458k
+                                - generic [ref=e1341]: 287k
+                                - generic [ref=e1342]: 176k
+                                - generic [ref=e1343]: 276k
+                                - generic [ref=e1344]: 317k
+                                - generic [ref=e1345]: 307k
+                                - generic [ref=e1346]: 210k
+                                - generic [ref=e1347]: 251k
+                                - generic [ref=e1348]: 313k
+                                - generic [ref=e1349]: 317k
+                                - generic [ref=e1350]: 302k
+                                - generic [ref=e1351]: 231k
+                                - generic [ref=e1352]: 201k
+                                - generic [ref=e1353]: 185k
+                                - generic [ref=e1354]: 173k
+                                - generic [ref=e1355]: 160k
+                                - generic [ref=e1356]: 248k
+                                - generic [ref=e1357]: 157k
+                                - generic [ref=e1358]: 157k
+                              - generic [ref=e1359]:
+                                - generic [ref=e1360]: 3M
+                                - generic [ref=e1361]: 2M
+                                - generic [ref=e1362]: 1M
+                                - generic [ref=e1363]: 991k
+                                - generic [ref=e1364]: 930k
+                                - generic [ref=e1365]: 889k
+                                - generic [ref=e1366]: 888k
+                                - generic [ref=e1367]: 826k
+                                - generic [ref=e1368]: 771k
+                                - generic [ref=e1369]: 710k
+                                - generic [ref=e1370]: 682k
+                                - generic [ref=e1371]: 636k
+                                - generic [ref=e1372]: 561k
+                                - generic [ref=e1373]: 556k
+                                - generic [ref=e1374]: 546k
+                                - generic [ref=e1375]: 540k
+                                - generic [ref=e1376]: 535k
+                                - generic [ref=e1377]: 506k
+                                - generic [ref=e1378]: 494k
+                                - generic [ref=e1379]: 486k
+                                - generic [ref=e1380]: 472k
+                                - generic [ref=e1381]: 467k
+                                - generic [ref=e1382]: 450k
+                                - generic [ref=e1383]: 447k
+                                - generic [ref=e1384]: 443k
+                                - generic [ref=e1385]: 432k
+                                - generic [ref=e1386]: 428k
+                                - generic [ref=e1387]: 424k
+                                - generic [ref=e1388]: 404k
+                                - generic [ref=e1389]: 395k
+                                - generic [ref=e1390]: 384k
+                                - generic [ref=e1391]: 297k
+                              - generic [ref=e1392]:
+                                - generic [ref=e1393]: 451k
+                                - generic [ref=e1394]: 331k
+                                - generic [ref=e1395]: 268k
+                                - generic [ref=e1396]: 293k
+                                - generic [ref=e1397]: 545k
+                                - generic [ref=e1398]: 349k
+                                - generic [ref=e1399]: 281k
+                                - generic [ref=e1400]: 491k
+                                - generic [ref=e1401]: 179k
+                                - generic [ref=e1402]: 274k
+                                - generic [ref=e1403]: 270k
+                                - generic [ref=e1404]: 222k
+                                - generic [ref=e1405]: 228k
+                                - generic [ref=e1406]: 295k
+                                - generic [ref=e1407]: 243k
+                                - generic [ref=e1408]: 174k
+                                - generic [ref=e1409]: 155k
+                                - generic [ref=e1410]: 165k
+                                - generic [ref=e1411]: 220k
+                                - generic [ref=e1412]: 246k
+                                - generic [ref=e1413]: 258k
+                                - generic [ref=e1414]: 259k
+                                - generic [ref=e1415]: 268k
+                                - generic [ref=e1416]: 176k
+                                - generic [ref=e1417]: 247k
+                                - generic [ref=e1418]: 237k
+                                - generic [ref=e1419]: 250k
+                                - generic [ref=e1420]: 297k
+                        - generic [ref=e1422]:
+                          - img [ref=e1423]
+                          - text: Reasoning models are indicated by a lightbulb icon
+                    - generic [ref=e1428]:
+                      - heading "Evaluation Output Tokens" [level=3] [ref=e1429]:
+                        - button "Evaluation Output Tokens" [ref=e1430] [cursor=pointer]:
+                          - generic [ref=e1431]:
+                            - img [ref=e1432]
+                            - text: Evaluation Output Tokens
+                          - img [ref=e1434]
+                      - region "Evaluation Output Tokens":
+                        - paragraph [ref=e1437]: The number of output tokens used to run the evaluation, including visible answer tokens and reasoning tokens where reported by reasoning models.
+            - generic [ref=e1438]:
+              - heading "Score vs. Release Date" [level=2] [ref=e1441]:
+                - generic [ref=e1443]: Score vs. Release Date
+              - generic [ref=e1446]:
+                - generic [ref=e1447]:
+                  - 'heading "𝜏²-Bench Telecom Benchmark Leaderboard: Score vs. Release Date" [level=3] [ref=e1449]'
+                  - generic [ref=e1451]:
+                    - generic [ref=e1453]:
+                      - generic [ref=e1454]:
+                        - combobox [ref=e1455] [cursor=pointer]:
+                          - generic [ref=e1456]: 32 of 422 models
+                          - img
+                        - button "Open filters" [ref=e1458] [cursor=pointer]:
+                          - img
+                      - button "Add model from specific provider" [ref=e1459] [cursor=pointer]:
+                        - generic [ref=e1460]:
+                          - img
+                        - text: Add model from specific provider
+                    - generic [ref=e1461]:
+                      - button "Copy link to this section" [ref=e1462] [cursor=pointer]:
+                        - img
+                      - button "Download chart as image" [ref=e1463] [cursor=pointer]:
+                        - img
+                - generic [ref=e1465]:
+                  - generic [ref=e1468]: Most attractive region
+                  - generic [ref=e1470]:
+                    - button "OpenAI" [ref=e1471] [cursor=pointer]:
+                      - generic [ref=e1473]: OpenAI
+                    - button "Meta" [ref=e1474] [cursor=pointer]:
+                      - generic [ref=e1476]: Meta
+                    - button "Google" [ref=e1477] [cursor=pointer]:
+                      - generic [ref=e1479]: Google
+                    - button "Anthropic" [ref=e1480] [cursor=pointer]:
+                      - generic [ref=e1482]: Anthropic
+                    - button "Mistral" [ref=e1483] [cursor=pointer]:
+                      - generic [ref=e1485]: Mistral
+                    - button "DeepSeek" [ref=e1486] [cursor=pointer]:
+                      - generic [ref=e1488]: DeepSeek
+                    - button "xAI" [ref=e1489] [cursor=pointer]:
+                      - generic [ref=e1491]: xAI
+                    - button "Amazon" [ref=e1492] [cursor=pointer]:
+                      - generic [ref=e1494]: Amazon
+                    - button "Upstage" [ref=e1495] [cursor=pointer]:
+                      - generic [ref=e1497]: Upstage
+                    - button "MiniMax" [ref=e1498] [cursor=pointer]:
+                      - generic [ref=e1500]: MiniMax
+                    - button "NVIDIA" [ref=e1501] [cursor=pointer]:
+                      - generic [ref=e1503]: NVIDIA
+                    - button "Kimi" [ref=e1504] [cursor=pointer]:
+                      - generic [ref=e1506]: Kimi
+                    - button "StepFun" [ref=e1507] [cursor=pointer]:
+                      - generic [ref=e1509]: StepFun
+                    - button "Xiaomi" [ref=e1510] [cursor=pointer]:
+                      - generic [ref=e1512]: Xiaomi
+                    - button "MBZUAI Institute of Foundation Models" [ref=e1513] [cursor=pointer]:
+                      - generic [ref=e1515]: MBZUAI Institute of Foundation Models
+                    - button "China Mobile" [ref=e1516] [cursor=pointer]:
+                      - generic [ref=e1518]: China Mobile
+                    - button "Z AI" [ref=e1519] [cursor=pointer]:
+                      - generic [ref=e1521]: Z AI
+                    - button "Alibaba" [ref=e1522] [cursor=pointer]:
+                      - generic [ref=e1524]: Alibaba
+                  - generic [ref=e1525]:
+                    - img
+                    - application [ref=e1528]:
+                      - generic [ref=e1605]:
+                        - generic [ref=e1606]:
+                          - generic [ref=e1608]: Jul 2025
+                          - generic [ref=e1610]: Oct 2025
+                          - generic [ref=e1612]: Jan 2026
+                          - generic [ref=e1614]: Apr 2026
+                          - generic [ref=e1616]: Jul 2026
+                        - generic [ref=e1617]: Release Date
+                        - generic [ref=e1618]:
+                          - generic [ref=e1620]: 0%
+                          - generic [ref=e1622]: 20%
+                          - generic [ref=e1624]: 40%
+                          - generic [ref=e1626]: 60%
+                          - generic [ref=e1628]: 80%
+                          - generic [ref=e1630]: 100%
+                        - generic [ref=e1631]: Score
+            - generic [ref=e1632]:
+              - heading "Example Tasks" [level=2] [ref=e1635]:
+                - generic [ref=e1637]: Example Tasks
+              - generic [ref=e1639]:
+                - 'button "Mobile Data Not Working Scenario: Mobile data is not working properly. Either stops working or is very slow. User Context: • Name: John Smith • Phone: 555-123-2002 • Location: At home in the United States • Constraints: Not willing to change mobile data plan but will refuel 2.0 GB if necessary. No wifi access. Initial State: Mobile data is turned off and data limit exceeded (15.1 GB used) Required Actions: • User turns mobile data on • Agent refuels 2.0 GB of data to customer account Success Criteria (all must be met): ✓ Mobile data is turned on ✓ Internet speed test shows excellent (200+ Mbps) ✓ Exactly 2.0 GB of data refueled to account Click to expand" [ref=e1641] [cursor=pointer]':
+                  - generic [ref=e1642]:
+                    - generic [ref=e1643]: Mobile Data Not Working
+                    - img [ref=e1644]
+                  - generic [ref=e1647]:
+                    - paragraph [ref=e1648]:
+                      - strong [ref=e1649]: "Scenario:"
+                      - text: Mobile data is not working properly. Either stops working or is very slow.
+                    - paragraph [ref=e1650]:
+                      - strong [ref=e1651]: "User Context:"
+                      - text: "• Name: John Smith"
+                      - text: "• Phone: 555-123-2002"
+                      - text: "• Location: At home in the United States"
+                      - text: "• Constraints: Not willing to change mobile data plan but will refuel 2.0 GB if necessary. No wifi access."
+                    - paragraph [ref=e1652]:
+                      - strong [ref=e1653]: "Initial State:"
+                      - text: Mobile data is turned off and data limit exceeded (15.1 GB used)
+                    - paragraph [ref=e1654]:
+                      - strong [ref=e1655]: "Required Actions:"
+                      - text: • User turns mobile data on
+                      - text: • Agent refuels 2.0 GB of data to customer account
+                    - paragraph [ref=e1656]:
+                      - strong [ref=e1657]: "Success Criteria (all must be met):"
+                      - text: ✓ Mobile data is turned on
+                      - text: ✓ Internet speed test shows excellent (200+ Mbps)
+                      - text: ✓ Exactly 2.0 GB of data refueled to account
+                  - generic: Click to expand
+                - 'button "No Service Connection Issue Scenario: Phone showing \"No Service\" for the past few hours User Context: • Name: John Smith • Phone: 555-123-2002 • Location: At home • Constraints: Retired librarian, 64 years old, limited tech knowledge, anxious about technology Initial State: Airplane mode is on, SIM card is locked with PIN, and SIM card is physically unseated Required Actions: • Agent attempts troubleshooting • Agent transfers to human agents when unable to resolve Success Criteria (all must be met): ✓ Service status remains \"No Service\" ✓ Agent transfers to human support with summary \"I cannot fix the issue.\" Click to expand" [ref=e1659] [cursor=pointer]':
+                  - generic [ref=e1660]:
+                    - generic [ref=e1661]: No Service Connection Issue
+                    - img [ref=e1662]
+                  - generic [ref=e1665]:
+                    - paragraph [ref=e1666]:
+                      - strong [ref=e1667]: "Scenario:"
+                      - text: Phone showing "No Service" for the past few hours
+                    - paragraph [ref=e1668]:
+                      - strong [ref=e1669]: "User Context:"
+                      - text: "• Name: John Smith"
+                      - text: "• Phone: 555-123-2002"
+                      - text: "• Location: At home"
+                      - text: "• Constraints: Retired librarian, 64 years old, limited tech knowledge, anxious about technology"
+                    - paragraph [ref=e1670]:
+                      - strong [ref=e1671]: "Initial State:"
+                      - text: Airplane mode is on, SIM card is locked with PIN, and SIM card is physically unseated
+                    - paragraph [ref=e1672]:
+                      - strong [ref=e1673]: "Required Actions:"
+                      - text: • Agent attempts troubleshooting
+                      - text: • Agent transfers to human agents when unable to resolve
+                    - paragraph [ref=e1674]:
+                      - strong [ref=e1675]: "Success Criteria (all must be met):"
+                      - text: ✓ Service status remains "No Service"
+                      - text: ✓ Agent transfers to human support with summary "I cannot fix the issue."
+                  - generic: Click to expand
+                - 'button "MMS Issues While Abroad Scenario: Unable to send MMS messages for the past few hours User Context: • Name: John Smith • Phone: 555-123-2002 • Location: Abroad in France • Constraints: Willing to refuel 2.0 GB data but not change plan Initial State: Airplane mode is on, messaging app lacks SMS and storage permissions, data limit exceeded (15.1 GB used), and roaming is disabled on both device and account Required Actions: • User turns airplane mode off • User grants SMS permission to messaging app • User grants storage permission to messaging app • Agent refuels 2.0 GB of data • Agent enables roaming on customer account • User turns roaming on in device settings Success Criteria (all must be met): ✓ MMS messages can be sent successfully ✓ Exactly 2.0 GB of data refueled to account Click to expand" [ref=e1677] [cursor=pointer]':
+                  - generic [ref=e1678]:
+                    - generic [ref=e1679]: MMS Issues While Abroad
+                    - img [ref=e1680]
+                  - generic [ref=e1683]:
+                    - paragraph [ref=e1684]:
+                      - strong [ref=e1685]: "Scenario:"
+                      - text: Unable to send MMS messages for the past few hours
+                    - paragraph [ref=e1686]:
+                      - strong [ref=e1687]: "User Context:"
+                      - text: "• Name: John Smith"
+                      - text: "• Phone: 555-123-2002"
+                      - text: "• Location: Abroad in France"
+                      - text: "• Constraints: Willing to refuel 2.0 GB data but not change plan"
+                    - paragraph [ref=e1688]:
+                      - strong [ref=e1689]: "Initial State:"
+                      - text: Airplane mode is on, messaging app lacks SMS and storage permissions, data limit exceeded (15.1 GB used), and roaming is disabled on both device and account
+                    - paragraph [ref=e1690]:
+                      - strong [ref=e1691]: "Required Actions:"
+                      - text: • User turns airplane mode off
+                      - text: • User grants SMS permission to messaging app
+                      - text: • User grants storage permission to messaging app
+                      - text: • Agent refuels 2.0 GB of data
+                      - text: • Agent enables roaming on customer account
+                      - text: • User turns roaming on in device settings
+                    - paragraph [ref=e1692]:
+                      - strong [ref=e1693]: "Success Criteria (all must be met):"
+                      - text: ✓ MMS messages can be sent successfully
+                      - text: ✓ Exactly 2.0 GB of data refueled to account
+                  - generic: Click to expand
+        - generic [ref=e1694]:
+          - heading "Explore Evaluations" [level=2] [ref=e1696]
+          - generic [ref=e1697]:
+            - link "Artificial Analysis Intelligence Index Artificial Analysis Intelligence Index A composite benchmark aggregating ten challenging evaluations to provide a holistic measure of AI capabilities across mathematics, science, coding, and reasoning." [ref=e1698] [cursor=pointer]:
+              - /url: /evaluations/artificial-analysis-intelligence-index
+              - generic [ref=e1699]:
+                - img "Artificial Analysis Intelligence Index" [ref=e1700]
+                - generic [ref=e1701]: Artificial Analysis Intelligence Index
+                - img [ref=e1702]
+              - paragraph [ref=e1705]: A composite benchmark aggregating ten challenging evaluations to provide a holistic measure of AI capabilities across mathematics, science, coding, and reasoning.
+            - link "GDPval-AA Leaderboard GDPval-AA Leaderboard GDPval-AA is Artificial Analysis' evaluation framework for OpenAI's GDPval dataset. It tests AI models on real-world tasks across 44 occupations and 9 major industries. Models are given shell access and web browsing capabilities in an agentic loop via Stirrup to solve tasks, with Elo ratings derived from blind pairwise comparisons." [ref=e1706] [cursor=pointer]:
+              - /url: /evaluations/gdpval-aa
+              - generic [ref=e1707]:
+                - img "GDPval-AA Leaderboard" [ref=e1708]
+                - generic [ref=e1709]: GDPval-AA Leaderboard
+                - img [ref=e1710]
+              - paragraph [ref=e1713]: GDPval-AA is Artificial Analysis' evaluation framework for OpenAI's GDPval dataset. It tests AI models on real-world tasks across 44 occupations and 9 major industries. Models are given shell access and web browsing capabilities in an agentic loop via Stirrup to solve tasks, with Elo ratings derived from blind pairwise comparisons.
+            - link "APEX-Agents-AA Benchmark Leaderboard APEX-Agents-AA Benchmark Leaderboard Artificial Analysis' implementation of the APEX-Agents benchmark, testing AI agents on long-horizon, cross-application tasks in professional-services environments with realistic application tooling." [ref=e1714] [cursor=pointer]:
+              - /url: /evaluations/apex-agents-aa
+              - generic [ref=e1715]:
+                - img "APEX-Agents-AA Benchmark Leaderboard" [ref=e1716]
+                - generic [ref=e1717]: APEX-Agents-AA Benchmark Leaderboard
+                - img [ref=e1718]
+              - paragraph [ref=e1721]: Artificial Analysis' implementation of the APEX-Agents benchmark, testing AI agents on long-horizon, cross-application tasks in professional-services environments with realistic application tooling.
+            - link "𝜏²-Bench Telecom Benchmark Leaderboard 𝜏²-Bench Telecom Benchmark Leaderboard A dual-control conversational AI benchmark simulating technical support scenarios where both agent and user must coordinate actions to resolve telecom service issues." [ref=e1722] [cursor=pointer]:
+              - /url: /evaluations/tau2-bench
+              - generic [ref=e1723]:
+                - img "𝜏²-Bench Telecom Benchmark Leaderboard" [ref=e1724]
+                - generic [ref=e1725]: 𝜏²-Bench Telecom Benchmark Leaderboard
+                - img [ref=e1726]
+              - paragraph [ref=e1729]: A dual-control conversational AI benchmark simulating technical support scenarios where both agent and user must coordinate actions to resolve telecom service issues.
+            - link "Terminal-Bench Hard Benchmark Leaderboard Terminal-Bench Hard Benchmark Leaderboard An agentic benchmark evaluating AI capabilities in terminal environments through software engineering, system administration, and data processing tasks." [ref=e1730] [cursor=pointer]:
+              - /url: /evaluations/terminalbench-hard
+              - generic [ref=e1731]:
+                - img "Terminal-Bench Hard Benchmark Leaderboard" [ref=e1732]
+                - generic [ref=e1733]: Terminal-Bench Hard Benchmark Leaderboard
+                - img [ref=e1734]
+              - paragraph [ref=e1737]: An agentic benchmark evaluating AI capabilities in terminal environments through software engineering, system administration, and data processing tasks.
+            - link "SciCode Benchmark Leaderboard SciCode Benchmark Leaderboard A scientist-curated coding benchmark featuring 288 test set subproblems from 80 laboratory problems across 16 scientific disciplines." [ref=e1738] [cursor=pointer]:
+              - /url: /evaluations/scicode
+              - generic [ref=e1739]:
+                - img "SciCode Benchmark Leaderboard" [ref=e1740]
+                - generic [ref=e1741]: SciCode Benchmark Leaderboard
+                - img [ref=e1742]
+              - paragraph [ref=e1745]: A scientist-curated coding benchmark featuring 288 test set subproblems from 80 laboratory problems across 16 scientific disciplines.
+            - link "Artificial Analysis Long Context Reasoning Benchmark Leaderboard Artificial Analysis Long Context Reasoning Benchmark Leaderboard A challenging benchmark measuring language models' ability to extract, reason about, and synthesize information from long-form documents ranging from 10k to 100k tokens (measured using the cl100k_base tokenizer)." [ref=e1746] [cursor=pointer]:
+              - /url: /evaluations/artificial-analysis-long-context-reasoning
+              - generic [ref=e1747]:
+                - img "Artificial Analysis Long Context Reasoning Benchmark Leaderboard" [ref=e1748]
+                - generic [ref=e1749]: Artificial Analysis Long Context Reasoning Benchmark Leaderboard
+                - img [ref=e1750]
+              - paragraph [ref=e1753]: A challenging benchmark measuring language models' ability to extract, reason about, and synthesize information from long-form documents ranging from 10k to 100k tokens (measured using the cl100k_base tokenizer).
+            - 'link "AA-Omniscience: Knowledge and Hallucination Benchmark AA-Omniscience: Knowledge and Hallucination Benchmark A benchmark measuring factual recall and hallucination across various economically relevant domains." [ref=e1754] [cursor=pointer]':
+              - /url: /evaluations/omniscience
+              - generic [ref=e1755]:
+                - 'img "AA-Omniscience: Knowledge and Hallucination Benchmark" [ref=e1756]'
+                - generic [ref=e1757]: "AA-Omniscience: Knowledge and Hallucination Benchmark"
+                - img [ref=e1758]
+              - paragraph [ref=e1761]: A benchmark measuring factual recall and hallucination across various economically relevant domains.
+            - link "IFBench Benchmark Leaderboard IFBench Benchmark Leaderboard A benchmark evaluating precise instruction-following generalization on 58 diverse, verifiable out-of-domain constraints that test models' ability to follow specific output requirements." [ref=e1762] [cursor=pointer]:
+              - /url: /evaluations/ifbench
+              - generic [ref=e1763]:
+                - img "IFBench Benchmark Leaderboard" [ref=e1764]
+                - generic [ref=e1765]: IFBench Benchmark Leaderboard
+                - img [ref=e1766]
+              - paragraph [ref=e1769]: A benchmark evaluating precise instruction-following generalization on 58 diverse, verifiable out-of-domain constraints that test models' ability to follow specific output requirements.
+            - link "Humanity's Last Exam Benchmark Leaderboard Humanity's Last Exam Benchmark Leaderboard A frontier-level benchmark with 2,500 expert-vetted questions across mathematics, sciences, and humanities, designed to be the final closed-ended academic evaluation." [ref=e1770] [cursor=pointer]:
+              - /url: /evaluations/humanitys-last-exam
+              - generic [ref=e1771]:
+                - img "Humanity's Last Exam Benchmark Leaderboard" [ref=e1772]
+                - generic [ref=e1773]: Humanity's Last Exam Benchmark Leaderboard
+                - img [ref=e1774]
+              - paragraph [ref=e1777]: A frontier-level benchmark with 2,500 expert-vetted questions across mathematics, sciences, and humanities, designed to be the final closed-ended academic evaluation.
+            - link "GPQA Diamond Benchmark Leaderboard The most challenging 198 questions from GPQA, where PhD experts achieve 65% accuracy but skilled non-experts only reach 34% despite web access." [ref=e1778] [cursor=pointer]:
+              - /url: /evaluations/gpqa-diamond
+              - generic [ref=e1779]:
+                - generic [ref=e1780]: GPQA Diamond Benchmark Leaderboard
+                - img [ref=e1781]
+              - paragraph [ref=e1784]: The most challenging 198 questions from GPQA, where PhD experts achieve 65% accuracy but skilled non-experts only reach 34% despite web access.
+            - link "CritPt Benchmark Leaderboard CritPt Benchmark Leaderboard A benchmark designed to test LLMs on research-level physics reasoning tasks, featuring 71 composite research challenges." [ref=e1785] [cursor=pointer]:
+              - /url: /evaluations/critpt
+              - generic [ref=e1786]:
+                - img "CritPt Benchmark Leaderboard" [ref=e1787]
+                - generic [ref=e1788]: CritPt Benchmark Leaderboard
+                - img [ref=e1789]
+              - paragraph [ref=e1792]: A benchmark designed to test LLMs on research-level physics reasoning tasks, featuring 71 composite research challenges.
+            - link "ITBench-AA Benchmark Leaderboard ITBench-AA Benchmark Leaderboard Artificial Analysis' implementation of IBM's ITBench benchmark, testing AI agents on Kubernetes incident root-cause analysis from offline incident snapshots. The agent inspects alerts, events, traces, and topology and identifies the contributing-factor entities (deployments, pods, namespaces, network policies, etc.) responsible for the failure." [ref=e1793] [cursor=pointer]:
+              - /url: /evaluations/itbench-aa
+              - generic [ref=e1794]:
+                - img "ITBench-AA Benchmark Leaderboard" [ref=e1795]
+                - generic [ref=e1796]: ITBench-AA Benchmark Leaderboard
+                - img [ref=e1797]
+              - paragraph [ref=e1800]: Artificial Analysis' implementation of IBM's ITBench benchmark, testing AI agents on Kubernetes incident root-cause analysis from offline incident snapshots. The agent inspects alerts, events, traces, and topology and identifies the contributing-factor entities (deployments, pods, namespaces, network policies, etc.) responsible for the failure.
+            - link "Artificial Analysis Openness Index Artificial Analysis Openness Index A composite measure providing an industry standard to communicate model openness for users and developers." [ref=e1801] [cursor=pointer]:
+              - /url: /evaluations/artificial-analysis-openness-index
+              - generic [ref=e1802]:
+                - img "Artificial Analysis Openness Index" [ref=e1803]
+                - generic [ref=e1804]: Artificial Analysis Openness Index
+                - img [ref=e1805]
+              - paragraph [ref=e1808]: A composite measure providing an industry standard to communicate model openness for users and developers.
+            - link "MMLU-Pro Benchmark Leaderboard MMLU-Pro Benchmark Leaderboard An enhanced version of MMLU with 12,000 graduate-level questions across 14 subject areas, featuring ten answer options and deeper reasoning requirements." [ref=e1809] [cursor=pointer]:
+              - /url: /evaluations/mmlu-pro
+              - generic [ref=e1810]:
+                - img "MMLU-Pro Benchmark Leaderboard" [ref=e1811]
+                - generic [ref=e1812]: MMLU-Pro Benchmark Leaderboard
+                - img [ref=e1813]
+              - paragraph [ref=e1816]: An enhanced version of MMLU with 12,000 graduate-level questions across 14 subject areas, featuring ten answer options and deeper reasoning requirements.
+            - link "Global-MMLU-Lite Benchmark Leaderboard Global-MMLU-Lite Benchmark Leaderboard A lightweight, multilingual version of MMLU, designed to evaluate knowledge and reasoning skills across a diverse range of languages and cultural contexts." [ref=e1817] [cursor=pointer]:
+              - /url: /evaluations/global-mmlu-lite
+              - generic [ref=e1818]:
+                - img "Global-MMLU-Lite Benchmark Leaderboard" [ref=e1819]
+                - generic [ref=e1820]: Global-MMLU-Lite Benchmark Leaderboard
+                - img [ref=e1821]
+              - paragraph [ref=e1824]: A lightweight, multilingual version of MMLU, designed to evaluate knowledge and reasoning skills across a diverse range of languages and cultural contexts.
+            - link "LiveCodeBench Benchmark Leaderboard LiveCodeBench Benchmark Leaderboard A contamination-free coding benchmark that continuously harvests fresh competitive programming problems from LeetCode, AtCoder, and CodeForces, evaluating code generation, self-repair, and execution." [ref=e1825] [cursor=pointer]:
+              - /url: /evaluations/livecodebench
+              - generic [ref=e1826]:
+                - img "LiveCodeBench Benchmark Leaderboard" [ref=e1827]
+                - generic [ref=e1828]: LiveCodeBench Benchmark Leaderboard
+                - img [ref=e1829]
+              - paragraph [ref=e1832]: A contamination-free coding benchmark that continuously harvests fresh competitive programming problems from LeetCode, AtCoder, and CodeForces, evaluating code generation, self-repair, and execution.
+            - link "MATH-500 Benchmark Leaderboard MATH-500 Benchmark Leaderboard A 500-problem subset from the MATH dataset, featuring competition-level mathematics across six domains including algebra, geometry, and number theory." [ref=e1833] [cursor=pointer]:
+              - /url: /evaluations/math-500
+              - generic [ref=e1834]:
+                - img "MATH-500 Benchmark Leaderboard" [ref=e1835]
+                - generic [ref=e1836]: MATH-500 Benchmark Leaderboard
+                - img [ref=e1837]
+              - paragraph [ref=e1840]: A 500-problem subset from the MATH dataset, featuring competition-level mathematics across six domains including algebra, geometry, and number theory.
+            - link "AIME 2025 Benchmark Leaderboard AIME 2025 Benchmark Leaderboard All 30 problems from the 2025 American Invitational Mathematics Examination, testing olympiad-level mathematical reasoning with integer answers from 000-999." [ref=e1841] [cursor=pointer]:
+              - /url: /evaluations/aime-2025
+              - generic [ref=e1842]:
+                - img "AIME 2025 Benchmark Leaderboard" [ref=e1843]
+                - generic [ref=e1844]: AIME 2025 Benchmark Leaderboard
+                - img [ref=e1845]
+              - paragraph [ref=e1848]: All 30 problems from the 2025 American Invitational Mathematics Examination, testing olympiad-level mathematical reasoning with integer answers from 000-999.
+            - link "MMMU-Pro Benchmark Leaderboard MMMU-Pro Benchmark Leaderboard An enhanced MMMU benchmark that eliminates shortcuts and guessing strategies to more rigorously test multimodal models across 30 academic disciplines." [ref=e1849] [cursor=pointer]:
+              - /url: /evaluations/mmmu-pro
+              - generic [ref=e1850]:
+                - img "MMMU-Pro Benchmark Leaderboard" [ref=e1851]
+                - generic [ref=e1852]: MMMU-Pro Benchmark Leaderboard
+                - img [ref=e1853]
+              - paragraph [ref=e1856]: An enhanced MMMU benchmark that eliminates shortcuts and guessing strategies to more rigorously test multimodal models across 30 academic disciplines.
+    - button "Back to top":
+      - img
+    - region "Notifications alt+T"
+    - generic [ref=e1858]:
+      - generic [ref=e1859]:
+        - link "Artificial Analysis" [ref=e1861] [cursor=pointer]:
+          - /url: /
+          - img [ref=e1862]
+        - generic [ref=e1864]:
+          - paragraph [ref=e1865]: Get notified about new articles
+          - generic [ref=e1869]:
+            - generic [ref=e1870]: Email address
+            - textbox "Email address" [ref=e1871]:
+              - /placeholder: What's your email?
+            - button "Subscribe" [ref=e1872] [cursor=pointer]
+        - paragraph [ref=e1876]: Artificial Analysis
+        - generic [ref=e1877]:
+          - generic [ref=e1878]:
+            - paragraph [ref=e1879]: Explore
+            - list [ref=e1880]:
+              - listitem [ref=e1881]:
+                - link "LLM Leaderboard" [ref=e1882] [cursor=pointer]:
+                  - /url: /leaderboards/models
+              - listitem [ref=e1883]:
+                - link "Image Arena" [ref=e1884] [cursor=pointer]:
+                  - /url: /image/arena
+              - listitem [ref=e1885]:
+                - link "Video Arena" [ref=e1886] [cursor=pointer]:
+                  - /url: /video/arena
+              - listitem [ref=e1887]:
+                - link "AI Agents" [ref=e1888] [cursor=pointer]:
+                  - /url: /agents
+              - listitem [ref=e1889]:
+                - link "Evaluations" [ref=e1890] [cursor=pointer]:
+                  - /url: /evaluations
+          - generic [ref=e1891]:
+            - paragraph [ref=e1892]: Company
+            - list [ref=e1893]:
+              - listitem [ref=e1894]:
+                - link "Methodology" [ref=e1895] [cursor=pointer]:
+                  - /url: /methodology
+              - listitem [ref=e1896]:
+                - link "Services" [ref=e1897] [cursor=pointer]:
+                  - /url: /services
+              - listitem [ref=e1898]:
+                - link "Contact" [ref=e1899] [cursor=pointer]:
+                  - /url: /contact
+              - listitem [ref=e1900]:
+                - link "Articles" [ref=e1901] [cursor=pointer]:
+                  - /url: /articles
+              - listitem [ref=e1902]:
+                - link "FAQ" [ref=e1903] [cursor=pointer]:
+                  - /url: /faq
+        - generic [ref=e1904]:
+          - link "X" [ref=e1905] [cursor=pointer]:
+            - /url: https://x.com/ArtificialAnlys
+            - img [ref=e1906]
+            - generic [ref=e1908]: X
+          - link "LinkedIn" [ref=e1909] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/artificial-analysis/
+            - img [ref=e1910]
+            - generic [ref=e1912]: LinkedIn
+          - link "YouTube" [ref=e1913] [cursor=pointer]:
+            - /url: https://www.youtube.com/@ArtificialAnalysisAI
+            - img [ref=e1914]
+            - generic [ref=e1916]: YouTube
+          - link "Rednote" [ref=e1917] [cursor=pointer]:
+            - /url: https://www.xiaohongshu.com/user/profile/69ea6345000000000d034c02
+            - img [ref=e1918]
+            - generic [ref=e1920]: Rednote
+          - link "Discord" [ref=e1921] [cursor=pointer]:
+            - /url: https://discord.gg/Mk298GPZ7V
+            - img [ref=e1922]
+            - generic [ref=e1924]: Discord
+      - generic [ref=e1925]:
+        - paragraph [ref=e1926]: © 2026 Artificial Analysis
+        - link "Terms of Use" [ref=e1927] [cursor=pointer]:
+          - /url: /docs/legal/Terms-of-Use.pdf
+        - link "Privacy Policy" [ref=e1928] [cursor=pointer]:
+          - /url: /docs/legal/Privacy-Policy.pdf
+  - alert [ref=e1929]
+  - generic [ref=e1930]: Jul 2025
