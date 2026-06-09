@@ -6,7 +6,12 @@ name: Update prices
 on:
   schedule:
     - cron: '17 5 * * *'      # every day at 05:17 UTC
-  workflow_dispatch: {}        # manual "Run workflow" button
+  workflow_dispatch:           # manual "Run workflow" button
+    inputs:
+      fail_test:
+        description: 'Force a failing run to test failure email notifications'
+        type: boolean
+        default: false
 
 permissions:
   contents: write              # allow committing the regenerated file
@@ -19,6 +24,12 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      - name: Notification test (manual only)
+        if: ${{ inputs.fail_test }}
+        run: |
+          echo "::error::Deliberate test failure — verifying that failure emails reach hoaj@outlook.dk."
+          exit 1
+
       - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v6
