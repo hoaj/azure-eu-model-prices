@@ -23,6 +23,7 @@ Scope: text/chat LLMs + text embeddings. Audio/realtime/image/router excluded.
 """
 
 import json
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -69,6 +70,21 @@ MODELS = [
 ]
 
 
+# Cognigy "LLM Prompt Node" support, curated from:
+# https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature
+#   "yes"     = listed by Cognigy and supports the LLM Prompt Node
+#   "no"      = listed by Cognigy but not supported (the embeddings)
+#   "unknown" = not listed on Cognigy's Azure table (the reasoning o-series)
+COGNIGY_LLM_PROMPT = {
+    "gpt-4.1": "yes", "gpt-4.1-mini": "yes", "gpt-4.1-nano": "yes",
+    "gpt-4o": "yes", "gpt-4o-mini": "yes",
+    "gpt-5": "yes", "gpt-5-mini": "yes", "gpt-5-nano": "yes",
+    "gpt-5.1": "yes", "gpt-5.4": "yes", "gpt-5.5": "yes",
+    "o1": "unknown", "o3": "unknown", "o3-mini": "unknown", "o4-mini": "unknown",
+    "text-embedding-3-large": "no", "text-embedding-3-small": "no", "text-embedding-ada-002": "no",
+}
+
+
 def fetch_prices(region, currency):
     """Return {meterName: price_per_million} for all OpenAI products in `region`."""
     out = {}
@@ -100,6 +116,7 @@ def build_rows(prices_by_cur):
             "id": m["id"],
             "family": m["family"],
             "released": m["released"],
+            "cognigy": COGNIGY_LLM_PROMPT.get(m["id"], "unknown"),
             "inp": lookup(m["meterIn"]),
             "out": lookup(m["meterOut"]),
             "sc": SC in m["regions"],
@@ -118,13 +135,37 @@ def main():
     if missing:
         print(f"WARNING: no price meter matched for: {missing}", file=sys.stderr)
 
-    updated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    payload = {"updated": updated, "currencies": CURRENCIES, "rows": rows}
+    # Only move the timestamp when the data actually changed, so an unchanged daily
+    # run produces a byte-identical file -> no git diff -> no noise commit.
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    old = read_old_payload()
+    if old and old.get("rows") == rows and old.get("currencies") == CURRENCIES:
+        updated = old.get("updated", now)
+        print("No data change since last run; preserving timestamp.", file=sys.stderr)
+    else:
+        updated = now
 
+    payload = {"updated": updated, "currencies": CURRENCIES, "rows": rows}
     html = TEMPLATE.replace("/*DATA*/null", json.dumps(payload, ensure_ascii=False))
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
     print(f"Wrote index.html — {len(rows)} models, updated {updated}", file=sys.stderr)
+
+
+def read_old_payload():
+    """Parse the PAYLOAD object out of an existing index.html, if any."""
+    try:
+        with open("index.html", encoding="utf-8") as f:
+            html = f.read()
+    except FileNotFoundError:
+        return None
+    m = re.search(r"const PAYLOAD = (\{.*?\});", html, re.S)
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(1))
+    except json.JSONDecodeError:
+        return None
 
 
 # --- HTML template (single self-contained file) -------------------------------
@@ -253,6 +294,10 @@ tbody tr.dim:hover{opacity:.7}
 .chip.sc.yes .led{background:var(--gold); box-shadow:0 0 0 3px rgba(192,137,42,.16)}
 .chip.we.yes .led{background:var(--blue); box-shadow:0 0 0 3px rgba(39,80,158,.16)}
 .chip.no{opacity:.5; text-decoration:line-through}
+.cog{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; white-space:nowrap; padding:3px 10px; border-radius:999px; border:1px solid}
+.cog.yes{color:#2f5b46; background:rgba(47,125,91,.10); border-color:rgba(47,125,91,.30)}
+.cog.no{color:#7a3c12; background:rgba(179,80,47,.08); border-color:rgba(179,80,47,.24); opacity:.85}
+.cog.unk{color:var(--muted); background:rgba(22,33,44,.04); border-color:var(--line-strong)}
 
 td.num{text-align:right; position:relative}
 .price{font-family:"JetBrains Mono",monospace; font-weight:500; font-size:14.5px}
@@ -272,6 +317,8 @@ td.out .bar i{background:linear-gradient(90deg,var(--rust),#d98a6e)}
 .legend h4{margin:0 0 7px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
 .legend p{margin:0; font-size:13px; color:#3b4751; line-height:1.55}
 .legend code{font-family:"JetBrains Mono",monospace; font-size:12px; background:rgba(22,33,44,.05); padding:1px 5px; border-radius:5px}
+.legend a{color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(39,80,158,.3)}
+.legend a:hover{border-color:var(--blue)}
 footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 18px; justify-content:space-between}
 .empty{padding:50px; text-align:center; color:var(--muted); font-size:15px}
 
@@ -288,7 +335,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
 <div class="wrap">
   <header>
     <span class="eyebrow"><span class="pulse"></span>Azure OpenAI · Data Zone Standard · EU</span>
-    <h1>Compliant&nbsp;models, <em>priced in&nbsp;kroner</em>.</h1>
+    <h1>Compliant&nbsp;models, <em>priced for the EU&nbsp;zone</em>.</h1>
     <p class="lede">Every text &amp; embedding model you can deploy on <b>Data Zone Standard</b> in
       <b>Sweden Central</b> and <b>West Europe</b> — with official Azure input &amp; output token prices in Danish kroner or US dollars (per&nbsp;1M&nbsp;tokens).</p>
     <div class="meta-row">
@@ -341,6 +388,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <th class="hide">Family</th>
         <th class="sortable hide" data-sort="released">Released <span class="arr">↕</span></th>
         <th>Availability</th>
+        <th class="sortable" data-sort="cognigy">Cognigy <span class="arr">↕</span></th>
         <th class="num sortable act" data-sort="inp">Input <span class="arr">↑</span></th>
         <th class="num sortable" data-sort="out">Output <span class="arr">↕</span></th>
       </tr></thead>
@@ -353,7 +401,8 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by an agent that re-queries the Azure Retail Prices API in DKK and re-checks region availability.</p></div>
+    <div class="box"><h4>Cognigy LLM Prompt Node</h4><p>Whether the model is usable in Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">LLM&nbsp;Prompt&nbsp;Node</a>. <code>—</code> = not listed by Cognigy (the reasoning o-series); embeddings are listed as unsupported.</p></div>
+    <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD) and re-checks region availability.</p></div>
   </div>
 
   <footer>
@@ -422,6 +471,7 @@ function visibleRows(){
   rows.sort((a,b)=>{
     if(k==="id") return a.id.localeCompare(b.id)*d;
     if(k==="released") return a.released.localeCompare(b.released)*d;
+    if(k==="cognigy"){const rk={yes:0,no:1,unknown:2}; return (rk[a.cognigy]-rk[b.cognigy])*d;}
     const av=val(a[k]), bv=val(b[k]);
     if(av===null||av===undefined) return 1; if(bv===null||bv===undefined) return -1;   // n/a sinks
     return (av-bv)*d;
@@ -431,6 +481,15 @@ function visibleRows(){
 
 function availChip(on, region, label){
   return `<span class="chip ${region} ${on?'yes':'no'}"><span class="led"></span>${label}</span>`;
+}
+const COG = {
+  yes:{cls:"yes", txt:"✓ Prompt Node", tip:"Supported in Cognigy's LLM Prompt Node"},
+  no:{cls:"no", txt:"✗ No", tip:"Listed by Cognigy but the LLM Prompt Node is not supported"},
+  unknown:{cls:"unk", txt:"—", tip:"Not listed on Cognigy's Azure model-support page"},
+};
+function cognigyChip(s){
+  const c = COG[s] || COG.unknown;
+  return `<span class="cog ${c.cls}" title="${c.tip}">${c.txt}</span>`;
 }
 
 function render(){
@@ -470,6 +529,7 @@ function render(){
       <td class="hide"><span class="fam ${r.family}">${r.family}</span></td>
       <td class="hide"><span class="rel">${r.released}</span></td>
       <td>${avail}</td>
+      <td>${cognigyChip(r.cognigy)}</td>
       <td class="num inp">${inCell}</td>
       <td class="num out">${outCell}</td>`;
     tb.appendChild(tr); shown++;
