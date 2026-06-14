@@ -364,20 +364,13 @@ def main():
 
     # `checked` is stamped every run (so the file always changes -> a commit & redeploy every day,
     # visible proof the job ran). `updated` only moves when the data itself actually changed.
-    _dt = datetime.now(timezone.utc)
-    now = _dt.strftime("%Y-%m-%d %H:%M UTC")
-    checked = _dt.strftime("%Y-%m-%d %H:%M:%S UTC")    # second-resolution -> unique every run
-    if old and old.get("rows") == rows and old.get("currencies") == CURRENCIES:
-        updated = old.get("updated", now)
-        print("No data change since last run; keeping 'data updated' timestamp.", file=sys.stderr)
-    else:
-        updated = now
-
-    payload = {"updated": updated, "checked": checked, "currencies": CURRENCIES, "rows": rows}
+    # Stamp every run so the file always changes -> the daily workflow commits & redeploys.
+    updated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    payload = {"updated": updated, "currencies": CURRENCIES, "rows": rows}
     html = TEMPLATE.replace("/*DATA*/null", json.dumps(payload, ensure_ascii=False))
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"Wrote index.html — {len(rows)} models, data updated {updated}, checked {checked}", file=sys.stderr)
+    print(f"Wrote index.html — {len(rows)} models, updated {updated}", file=sys.stderr)
 
 
 def read_old_payload():
@@ -588,8 +581,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <p class="lede">Every text &amp; embedding model you can deploy on <b>Data Zone Standard</b> in
       <b>Sweden Central</b> and <b>West Europe</b> — with official Azure input &amp; output token prices in Danish kroner or US dollars (per&nbsp;1M&nbsp;tokens).</p>
     <div class="meta-row">
-      <span>Data updated <b class="stamp" id="updated">—</b></span>
-      <span>Last checked <b class="stamp" id="checked">—</b></span>
+      <span>Updated <b class="stamp" id="updated">—</b></span>
       <span>Prices in <b id="cur">DKK</b> / 1M tokens</span>
       <span class="srcs">Sources:
         <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard" target="_blank" rel="noopener">availability</a> ·
@@ -696,7 +688,6 @@ function priceHTML(v){
 function init(){
   if(!PAYLOAD){ document.body.innerHTML="<p style='padding:40px;font-family:monospace'>No data baked in. Run: python3 generate.py</p>"; return; }
   $("#updated").textContent = PAYLOAD.updated;
-  $("#checked").textContent = PAYLOAD.checked || PAYLOAD.updated;
   ROWS = PAYLOAD.rows;
   wire();
   render();
