@@ -56,24 +56,18 @@ The site appears at `https://<user>.github.io/<repo>/`.
 
 ## Update the model list / availability
 
-Prices auto-refresh for the models in the registry. When a **new** model appears or a region
-changes, the daily run detects it and does two things:
+Prices auto-refresh for the models in the registry. When a **new** model becomes deployable in
+Sweden Central / West Europe, or a region changes, the daily run opens a GitHub issue assigned to
+`@hoaj` naming the model. Add it to the `MODELS` list (meter names + `regions`) and, if it's a
+reasoning model, to `REASONING` — using the
+[availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard)
+and the [prices API](https://prices.azure.com/api/retail/prices) as sources. Two things to watch
+when picking a meter: it must be a **Data Zone** meter (`DZ`/`Dz`/`Data Zone` — the Global `Gl`
+meters sit right beside them and otherwise look identical), and for the 5.x family the
+**short-context standard** tier (`ShortCo` + `Std`, not `LongCo`/`Batch`/`PP`/cached).
 
-1. **Opens an issue** assigned to `@hoaj` naming the model — the durable notification.
-2. **Drafts the registry entry as a pull request**, using
-   [`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action).
-   It runs only on drift (roughly once a quarter), never on the daily no-op.
-
-The PR is gated on the generator agreeing: the agent must leave `python3 generate.py` exiting 0
-with no `drift.txt` remaining. That catches a wrong meter name (the build aborts with *price meter
-missing or renamed*) and an incomplete entry (drift persists) — the two failure modes that would
-otherwise render as plausible-but-wrong numbers. It does **not** catch a wrong `reasoning` default,
-which is why this opens a PR for review instead of committing to `main`. **Review before merging.**
-
-Requires the `COMPLIANTMODELS` repo secret (an Anthropic API key). Without it that step fails and is skipped
-(`continue-on-error`) — the issue still gets opened and prices still refresh, so you can also just
-edit the `MODELS` / `REASONING` registry by hand from the
-[availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard).
+Re-run `python3 generate.py` afterwards: it must exit 0 and leave no `drift.txt` behind. A wrong
+meter name aborts the build; an incomplete entry keeps the drift warning alive.
 
 `generate.py` fails the build outright if Azure renames a meter it already expects.
 
