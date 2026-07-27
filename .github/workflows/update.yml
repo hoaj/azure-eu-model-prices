@@ -17,6 +17,7 @@ permissions:
   contents: write              # allow committing the regenerated file
   issues: write                # allow opening a failure-notification issue
   pull-requests: write         # allow the drift agent to open a registry PR
+  id-token: write              # claude-code-action mints an OIDC token for its GitHub App
 
 concurrency:                   # never run two refreshes at once
   group: update-prices
@@ -77,6 +78,7 @@ jobs:
       # the daily price refresh green if the agent fails: the issue is the durable notification,
       # this is the convenience layer on top of it.
       - name: Draft the registry entry as a PR
+        id: draft
         if: ${{ hashFiles('drift.txt') != '' }}
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
@@ -121,6 +123,21 @@ jobs:
             index.html — the daily job regenerates it. In the PR description, list anything
             you were uncertain about (especially the reasoning default) so it gets reviewed
             rather than rubber-stamped.
+
+      # `continue-on-error` rewrites the step's *conclusion* to success, so a failed agent is
+      # invisible in the run summary — the exact silence this whole guard exists to remove.
+      # `outcome` is the pre-override result, so check that and say so on the issue.
+      - name: Say so if the drift agent failed
+        if: ${{ steps.draft.outcome == 'failure' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="📋 Model registry is out of date"
+          n=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
+          [ -n "$n" ] && gh issue comment "$n" --body \
+            "⚠️ The agent that drafts the registry entry failed, so there is no PR to review — update \`MODELS\` / \`REASONING\` by hand. Prices for existing models refreshed normally. Log: $RUN_URL"
 
       - name: Notify on failure (assign an issue -> email)
         if: ${{ failure() }}
