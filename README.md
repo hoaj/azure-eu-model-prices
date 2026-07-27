@@ -17,6 +17,11 @@ Live demo: _set after enabling GitHub Pages (see below)_
 - It also scrapes the [Artificial Analysis τ²-Bench Telecom leaderboard](https://artificialanalysis.ai/evaluations/tau2-bench)
   (no API — the scores live in the page's Next.js RSC payload, keyed by a `tau2` field) for each model's
   agentic telecom score. Fallback to last-known on failure.
+- It also scrapes the [Azure region-availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard)
+  and **diffs it against the `MODELS` registry**. It doesn't drive the table — `regions` stays hand-curated —
+  but the build now warns when a model becomes deployable in Sweden Central / West Europe and isn't listed,
+  or when a region changes. Without this, a new release (GPT-5.6 did exactly this) is invisible until
+  someone spots it by eye.
 - **`index.html`** — the artifact. Self-contained; open it directly in a browser, or serve it via GitHub Pages.
 - **`.github/workflows/update.yml`** — runs `generate.py` daily and on demand, commits the refreshed `index.html`.
 
@@ -46,9 +51,11 @@ The site appears at `https://<user>.github.io/<repo>/`.
 ## Update the model list / availability
 
 Prices auto-refresh for the models in the registry. When a **new** model appears or a region
-changes, edit the `MODELS` list at the top of `generate.py` (meter names + `regions`), using the
+changes, the daily run emits a `WARNING` naming the model — edit the `MODELS` list at the top of
+`generate.py` (meter names + `regions`), using the
 [availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard)
-as the source, then re-run. `generate.py` prints a `WARNING` if Azure ever renames a meter it expects.
+as the source, then re-run. Add a `REASONING` entry too, if it's a reasoning model.
+`generate.py` also fails the build if Azure renames a meter it expects.
 
 ## Run locally
 

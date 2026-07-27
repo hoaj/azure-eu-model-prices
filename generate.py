@@ -16,8 +16,10 @@ Data sources
              Microsoft Learn region-availability page:
              https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard
              It changes rarely and is curated below in MODELS[*]["regions"].
-             >>> When a NEW model appears (auto-discovered via prices), or availability
-                 shifts, update the MODELS registry below from that page. <<<
+             That page IS scraped each run (fetch_availability) — not to drive the table, but
+             to diff against the registry and emit a warning when a new model becomes
+             deployable in Sweden Central / West Europe, or a region changes.
+             >>> When that warning fires, update the MODELS registry below from that page. <<<
 
 Scope: text/chat LLMs + text embeddings. Audio/realtime/image/router excluded.
 """
@@ -58,6 +60,9 @@ MODELS = [
     {"id": "gpt-5.1",      "family": "GPT", "released": "2025-11-13", "meterIn": "GPT 5.1 inp Dz 1M Tokens",           "meterOut": "GPT 5.1 opt Dz 1M Tokens",            "regions": [SC]},
     {"id": "gpt-5.4",      "family": "GPT", "released": "2026-03-05", "meterIn": "5.4 inp Dz 1M Tokens",               "meterOut": "5.4 opt Dz 1M Tokens",                "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.5",      "family": "GPT", "released": "2026-04-24", "meterIn": "5.5 ShortCo inp Dz 1M Tokens",       "meterOut": "5.5 ShortCo opt Dz 1M Tokens",        "regions": [SC, WE], "note": "short-context tier"},
+    {"id": "gpt-5.6-sol",   "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 sol ShortCo Inp Std DZ 1M Tokens",   "meterOut": "5.6 sol ShortCo Opt Std DZ 1M Tokens",   "regions": [SC, WE], "note": "short-context tier"},
+    {"id": "gpt-5.6-terra", "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 terra ShortCo Inp Std DZ 1M Tokens", "meterOut": "5.6 terra ShortCo Opt Std DZ 1M Tokens", "regions": [SC, WE], "note": "short-context tier"},
+    {"id": "gpt-5.6-luna",  "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 luna ShortCo Inp Std DZ 1M Tokens",  "meterOut": "5.6 luna ShortCo Opt Std DZ 1M Tokens",  "regions": [SC, WE], "note": "short-context tier"},
     # o-series (reasoning-capable, shown under GPT)
     {"id": "o1",      "family": "GPT", "released": "2024-12-17", "meterIn": "o1 1217 Inp Data Zone Tokens",      "meterOut": "o1 1217 Outp Data Zone Tokens",       "regions": [SC, WE]},
     {"id": "o3",      "family": "GPT", "released": "2025-04-16", "meterIn": "o3 0416 Inp Data Zone Tokens",      "meterOut": "o3 0416 Outp Data Zone Tokens",       "regions": [SC, WE]},
@@ -89,6 +94,11 @@ REASONING = {
     "gpt-5.1": {"options": ["none", "low", "medium", "high"], "default": "none"},
     "gpt-5.4": {"options": ["none", "low", "medium", "high", "xhigh"], "default": None},
     "gpt-5.5": {"options": ["none", "low", "medium", "high", "xhigh"], "default": "medium"},
+    # gpt-5.6 adds a `max` level (Responses API only). Neither Azure's reasoning doc nor OpenAI's
+    # guide documents a default for 5.6 — the guide states one only for gpt-5.5 — so: None.
+    "gpt-5.6-sol": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
+    "gpt-5.6-terra": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
+    "gpt-5.6-luna": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
     "o1": {"options": ["low", "medium", "high"], "default": "medium"},
     "o3": {"options": ["low", "medium", "high"], "default": "medium"},
     "o3-mini": {"options": ["low", "medium", "high"], "default": "medium"},
@@ -225,6 +235,83 @@ def fetch_reasoning_doc_text():
         return None
 
 
+AVAILABILITY_URL = ("https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/"
+                    "models-sold-directly-by-azure-region-availability?pivots=standard")
+
+# Models on the availability page that are outside this page's scope (text/chat + embeddings).
+OUT_OF_SCOPE = re.compile(r"^(gpt-image|model-router|.*-(audio|realtime)-)", re.I)
+
+
+def fetch_availability():
+    """Scrape the Data Zone Standard → Europe table for the Azure OpenAI models. Returns
+    {model_id: {"version": str, "sc": bool, "we": bool}} or None on failure.
+
+    `regions` in MODELS stays hand-curated (this is the only source, and it's prose-shaped),
+    but scraping it lets the build TELL US when it has drifted — a new model landing in
+    Sweden Central / West Europe is otherwise invisible until someone notices by eye.
+    """
+    try:
+        req = urllib.request.Request(AVAILABILITY_URL, headers={"User-Agent": "Mozilla/5.0 (price-bot)"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            doc = r.read().decode("utf-8", "replace")
+        h = re.search(r'<h2\b[^>]*\bid="data-zone-standard"', doc)
+        if not h:
+            return None
+        sec = doc[h.start():]
+        nxt = re.search(r"<h2\b", sec[10:])          # stop at the next top-level section
+        if nxt:
+            sec = sec[:nxt.start() + 10]
+        # First table in the section carrying both our regions is the Azure OpenAI one
+        # (the "other Foundry Models sold by Azure" table comes after it).
+        for t in re.findall(r"<table.*?</table>", sec, re.S):
+            hdr = [re.sub("<[^>]+>", "", x).strip() for x in re.findall(r"<th[^>]*>(.*?)</th>", t, re.S)]
+            if SC not in hdr or WE not in hdr:
+                continue
+            si, wi = hdr.index(SC), hdr.index(WE)
+            out = {}
+            for row in re.findall(r"<tr>(.*?)</tr>", t, re.S):
+                tds = [re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", x)).strip()
+                       for x in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
+                if len(tds) <= max(si, wi):
+                    continue
+                mid = tds[0]
+                # gpt-4o is listed once per version; keep the newest (that's what we price).
+                prev = out.get(mid)
+                if prev and prev["version"] >= tds[1]:
+                    continue
+                out[mid] = {"version": tds[1], "sc": "✅" in tds[si], "we": "✅" in tds[wi]}
+            return out or None
+        return None
+    except Exception as e:
+        print(f"WARNING: availability scrape failed: {e}", file=sys.stderr)
+        return None
+
+
+def availability_drift(avail):
+    """Compare the scraped availability table against the curated MODELS registry.
+    Returns a list of human-readable drift messages (empty = registry is current)."""
+    msgs = []
+    known = {m["id"]: m for m in MODELS}
+    for mid, a in sorted(avail.items()):
+        if not (a["sc"] or a["we"]) or OUT_OF_SCOPE.match(mid):
+            continue
+        m = known.get(mid)
+        if m is None:
+            where = " + ".join(r for r, on in ((SC, a["sc"]), (WE, a["we"])) if on)
+            msgs.append(f"NEW model deployable but not in the registry: {mid} "
+                        f"(version {a['version']}, {where}) — add it to MODELS.")
+            continue
+        want = {SC: a["sc"], WE: a["we"]}
+        have = {SC: SC in m["regions"], WE: WE in m["regions"]}
+        if want != have:
+            msgs.append(f"Region availability changed for {mid}: page says "
+                        f"{sorted(r for r, on in want.items() if on)}, registry says {sorted(m['regions'])}.")
+    for mid, m in known.items():
+        if mid not in avail:
+            msgs.append(f"{mid} is in the registry but no longer on the Data Zone Standard page.")
+    return msgs
+
+
 def fetch_prices(region, currency):
     """Return {meterName: price_per_million} for all OpenAI products in `region`."""
     out = {}
@@ -315,8 +402,18 @@ def main():
     else:
         print("  Artificial Analysis unavailable — keeping last-known values.", file=sys.stderr)
 
+    print("Fetching Azure Data Zone Standard region availability ...", file=sys.stderr)
+    avail = fetch_availability()
+    if avail:
+        print(f"  parsed {len(avail)} models from the availability page.", file=sys.stderr)
+    else:
+        print("  availability page unavailable — registry not re-verified.", file=sys.stderr)
+
     old = read_old_payload()
     old_rows = old["rows"] if old and old.get("rows") else []
+    # Did the previous run have usable Cognigy values? Decides whether a failed scrape is
+    # survivable (fall back to last-known) or fatal (nothing to fall back on).
+    old_cog = any(r.get("cognigy", {}).get("status", "unknown") != "unknown" for r in old_rows)
     rows = build_rows(prices_by_cur, cognigy, tau2, old_rows)
 
     # --- detect real problems; these fail the build so GitHub emails on the failure ---
@@ -353,6 +450,13 @@ def main():
         gha("warning", f"Cognigy resolved {resolved}/{len(expected_ids)} expected Azure models — some may have been renamed.")
     if tau2 is None:
         gha("warning", "Artificial Analysis unreachable — kept last-known τ²-bench Telecom scores.")
+    # auto-guard: the registry's model list + regions are hand-curated, so diff them against the
+    # Learn availability page — this is what catches a new release (e.g. gpt-5.6) going unnoticed.
+    if avail is None:
+        gha("warning", "Azure availability page unreachable — registry not re-verified this run.")
+    else:
+        for msg in availability_drift(avail):
+            gha("warning", msg)
     # auto-guard: flag if a model we treat as reasoning-capable vanished from the Azure reasoning doc
     rtext = fetch_reasoning_doc_text()
     if rtext is None:
@@ -647,10 +751,10 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
 
   <div class="legend">
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
-    <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
+    <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> / <code>gpt-5.6</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted).</p></div>
-    <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini).</p></div>
+    <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> and <code>gpt-5.6</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. <code>gpt-5.6</code> adds a <code>max</code> level (Responses API only). Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted).</p></div>
+    <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.6 at <em>max</em>, gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini, gpt-5.6-luna).</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
