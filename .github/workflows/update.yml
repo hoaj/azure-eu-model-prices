@@ -81,7 +81,7 @@ jobs:
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.COMPLIANTMODELS }}
           base_branch: main
           branch_prefix: registry/
           claude_args: |

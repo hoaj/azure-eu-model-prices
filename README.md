@@ -64,7 +64,7 @@ missing or renamed*) and an incomplete entry (drift persists) — the two failur
 otherwise render as plausible-but-wrong numbers. It does **not** catch a wrong `reasoning` default,
 which is why this opens a PR for review instead of committing to `main`. **Review before merging.**
 
-Requires an `ANTHROPIC_API_KEY` repo secret. Without it that step fails and is skipped
+Requires the `COMPLIANTMODELS` repo secret (an Anthropic API key). Without it that step fails and is skipped
 (`continue-on-error`) — the issue still gets opened and prices still refresh, so you can also just
 edit the `MODELS` / `REASONING` registry by hand from the
 [availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard).
