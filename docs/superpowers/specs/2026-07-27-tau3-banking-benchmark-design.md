@@ -1,7 +1,10 @@
 # Second agentic benchmark column: τ³-Banking
 
 **Date:** 2026-07-27
-**Status:** approved for implementation
+**Status:** implemented, then partly superseded — τ³-Banking shipped as described, but the τ²-Telecom
+column it was added *alongside* was removed the same day on request, so τ³ is now the page's only
+benchmark. The survey and the reasoning for picking τ³ below still stand; the "second column"
+framing does not.
 
 ## Problem
 
