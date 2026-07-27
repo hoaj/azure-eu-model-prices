@@ -63,7 +63,6 @@ MODELS = [
     {"id": "gpt-5.5",      "family": "GPT", "released": "2026-04-24", "meterIn": "5.5 ShortCo inp Dz 1M Tokens",       "meterOut": "5.5 ShortCo opt Dz 1M Tokens",        "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.6-sol",   "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 sol ShortCo Inp Std DZ 1M Tokens",   "meterOut": "5.6 sol ShortCo Opt Std DZ 1M Tokens",   "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.6-terra", "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 terra ShortCo Inp Std DZ 1M Tokens", "meterOut": "5.6 terra ShortCo Opt Std DZ 1M Tokens", "regions": [SC, WE], "note": "short-context tier"},
-    {"id": "gpt-5.6-luna",  "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 luna ShortCo Inp Std DZ 1M Tokens",  "meterOut": "5.6 luna ShortCo Opt Std DZ 1M Tokens",  "regions": [SC, WE], "note": "short-context tier"},
     # o-series (reasoning-capable, shown under GPT)
     {"id": "o1",      "family": "GPT", "released": "2024-12-17", "meterIn": "o1 1217 Inp Data Zone Tokens",      "meterOut": "o1 1217 Outp Data Zone Tokens",       "regions": [SC, WE]},
     {"id": "o3",      "family": "GPT", "released": "2025-04-16", "meterIn": "o3 0416 Inp Data Zone Tokens",      "meterOut": "o3 0416 Outp Data Zone Tokens",       "regions": [SC, WE]},
@@ -99,7 +98,6 @@ REASONING = {
     # guide documents a default for 5.6 — the guide states one only for gpt-5.5 — so: None.
     "gpt-5.6-sol": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
     "gpt-5.6-terra": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
-    "gpt-5.6-luna": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
     "o1": {"options": ["low", "medium", "high"], "default": "medium"},
     "o3": {"options": ["low", "medium", "high"], "default": "medium"},
     "o3-mini": {"options": ["low", "medium", "high"], "default": "medium"},
