@@ -61,6 +61,7 @@ MODELS = [
     {"id": "gpt-5.1",      "family": "GPT", "released": "2025-11-13", "meterIn": "GPT 5.1 inp Dz 1M Tokens",           "meterOut": "GPT 5.1 opt Dz 1M Tokens",            "regions": [SC]},
     {"id": "gpt-5.4",      "family": "GPT", "released": "2026-03-05", "meterIn": "5.4 inp Dz 1M Tokens",               "meterOut": "5.4 opt Dz 1M Tokens",                "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.5",      "family": "GPT", "released": "2026-04-24", "meterIn": "5.5 ShortCo inp Dz 1M Tokens",       "meterOut": "5.5 ShortCo opt Dz 1M Tokens",        "regions": [SC, WE], "note": "short-context tier"},
+    {"id": "gpt-5.6-luna",  "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 luna ShortCo Inp Std DZ 1M Tokens",  "meterOut": "5.6 luna ShortCo Opt Std DZ 1M Tokens",  "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.6-sol",   "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 sol ShortCo Inp Std DZ 1M Tokens",   "meterOut": "5.6 sol ShortCo Opt Std DZ 1M Tokens",   "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.6-terra", "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 terra ShortCo Inp Std DZ 1M Tokens", "meterOut": "5.6 terra ShortCo Opt Std DZ 1M Tokens", "regions": [SC, WE], "note": "short-context tier"},
     # o-series (reasoning-capable, shown under GPT)
@@ -96,6 +97,7 @@ REASONING = {
     "gpt-5.5": {"options": ["none", "low", "medium", "high", "xhigh"], "default": "medium"},
     # gpt-5.6 adds a `max` level (Responses API only). Neither Azure's reasoning doc nor OpenAI's
     # guide documents a default for 5.6 — the guide states one only for gpt-5.5 — so: None.
+    "gpt-5.6-luna": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
     "gpt-5.6-sol": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
     "gpt-5.6-terra": {"options": ["none", "low", "medium", "high", "xhigh", "max"], "default": None},
     "o1": {"options": ["low", "medium", "high"], "default": "medium"},
