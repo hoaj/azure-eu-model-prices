@@ -52,6 +52,25 @@ jobs:
             git push
           fi
 
+      # A new model on Data Zone Standard needs a hand-written MODELS entry (meter names,
+      # regions, reasoning levels). The build stays green — prices for existing models must
+      # keep refreshing — so drift is surfaced as an assigned issue instead.
+      - name: Raise an issue if the model registry has drifted
+        if: ${{ hashFiles('drift.txt') != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="📋 Model registry is out of date"
+          body=$(printf 'The Azure Data Zone Standard availability page lists models that %s does not match:\n\n%s\n\nUpdate the `MODELS` (and `REASONING`) registry in `generate.py`.\nMeter names: https://prices.azure.com/api/retail/prices\n\nRun: %s\n\ncc @hoaj' "generate.py" "$(cat drift.txt)" "$RUN_URL")
+          existing=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            printf '%s' "$body" | gh issue create --title "$title" --assignee hoaj --body-file -
+          fi
+
       - name: Notify on failure (assign an issue -> email)
         if: ${{ failure() }}
         env:

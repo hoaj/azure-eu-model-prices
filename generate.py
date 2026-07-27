@@ -25,6 +25,7 @@ Scope: text/chat LLMs + text embeddings. Audio/realtime/image/router excluded.
 """
 
 import json
+import os
 import re
 import sys
 import urllib.parse
@@ -241,6 +242,9 @@ AVAILABILITY_URL = ("https://learn.microsoft.com/en-us/azure/foundry/foundry-mod
 # Models on the availability page that are outside this page's scope (text/chat + embeddings).
 OUT_OF_SCOPE = re.compile(r"^(gpt-image|model-router|.*-(audio|realtime)-)", re.I)
 
+# Written when the registry has drifted; the workflow reads it to raise an issue. Never committed.
+DRIFT_FILE = "drift.txt"
+
 
 def fetch_availability():
     """Scrape the Data Zone Standard → Europe table for the Azure OpenAI models. Returns
@@ -452,11 +456,25 @@ def main():
         gha("warning", "Artificial Analysis unreachable — kept last-known τ²-bench Telecom scores.")
     # auto-guard: the registry's model list + regions are hand-curated, so diff them against the
     # Learn availability page — this is what catches a new release (e.g. gpt-5.6) going unnoticed.
+    # Drift does NOT fail the build: a new model appearing must not freeze the daily price
+    # refresh for the models we already track. Instead it's written to DRIFT_FILE, which the
+    # workflow turns into an assigned issue -> email. A ::warning:: alone is invisible unless
+    # someone opens the Actions run, which is how gpt-5.6 sat unnoticed for 18 days.
+    drift = []
     if avail is None:
         gha("warning", "Azure availability page unreachable — registry not re-verified this run.")
     else:
-        for msg in availability_drift(avail):
+        drift = availability_drift(avail)
+        for msg in drift:
             gha("warning", msg)
+    try:
+        if drift:
+            with open(DRIFT_FILE, "w", encoding="utf-8") as f:
+                f.write("\n".join(f"- {m}" for m in drift) + "\n")
+        else:
+            os.remove(DRIFT_FILE)          # stale file from a previous run
+    except FileNotFoundError:
+        pass
     # auto-guard: flag if a model we treat as reasoning-capable vanished from the Azure reasoning doc
     rtext = fetch_reasoning_doc_text()
     if rtext is None:
