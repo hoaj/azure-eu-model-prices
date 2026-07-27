@@ -182,22 +182,34 @@ def fetch_cognigy_azure_support():
         return None
 
 
-# Artificial Analysis publishes the τ²-Bench *Telecom* leaderboard with no public API on this page;
-# the data is embedded in Next.js RSC chunks where each model object carries a `tau2` fraction.
+# Artificial Analysis publishes its leaderboards with no public API on these pages; the data is
+# embedded in Next.js RSC chunks where each model object carries the benchmark as a fraction under
+# a per-leaderboard key (`tau2`, `tau_banking`).
 # AA's slug is our model id with dots -> dashes (gpt-4.1 -> gpt-4-1, gpt-5.5 -> gpt-5-5).
-ARTIFICIAL_ANALYSIS_URL = "https://artificialanalysis.ai/evaluations/tau2-bench"
+#
+# Two leaderboards are scraped, both agentic customer support:
+#   τ²-Bench Telecom — the telco benchmark, but AA has never run it for every model (gpt-5.6-luna
+#                      and gpt-4o-mini are absent), so on its own it leaves new releases uncompared.
+#   τ³-Banking      — the next benchmark in the same Sierra τ-Knowledge series: retrieve the right
+#                      policy from ~700 interconnected policy documents, then execute the correct
+#                      multi-step tool sequence, graded on backend state rather than chat quality.
+#                      Banking rather than telecom domain, but the same job, and it *does* cover
+#                      gpt-5.6-luna — which is why it's here.
+AA_TAU2_URL = "https://artificialanalysis.ai/evaluations/tau2-bench"
+AA_TAU3_URL = "https://artificialanalysis.ai/evaluations/tau3-banking"
 
 
-def tau2_slug(model_id):
+def aa_slug(model_id):
     return model_id.replace(".", "-")
 
 
-def fetch_tau2_telecom():
-    """Scrape the τ²-Bench Telecom leaderboard. Returns {slug: {"score": pct, "name": label}} or
-    None. `name` is AA's display label, which encodes the reasoning-effort variant the score used
+def fetch_aa_scores(url, field):
+    """Scrape an Artificial Analysis leaderboard. Returns {slug: {"score": pct, "name": label}} or
+    None. `field` is the per-model key the leaderboard's score lives under in the RSC payload.
+    `name` is AA's display label, which encodes the reasoning-effort variant the score used
     (e.g. "GPT-5.5 (xhigh)")."""
     try:
-        req = urllib.request.Request(ARTIFICIAL_ANALYSIS_URL, headers={"User-Agent": "Mozilla/5.0 (price-bot)"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (price-bot)"})
         with urllib.request.urlopen(req, timeout=60) as r:
             doc = r.read().decode("utf-8", "replace")
         chunks = re.findall(r'self\.__next_f\.push\(\[1,(".*?")\]\)', doc, re.S)
@@ -206,7 +218,7 @@ def fetch_tau2_telecom():
         for m in re.finditer(r'"slug":"([^"]+)","name":"([^"]+)"', rsc):
             name_by_slug.setdefault(m.group(1), m.group(2))
         scores = {}
-        for m in re.finditer(r'"tau2":\s*([0-9.]+|null)', rsc):
+        for m in re.finditer(rf'"{re.escape(field)}":\s*([0-9.]+|null)', rsc):
             val = m.group(1)
             if val == "null":
                 continue
@@ -216,7 +228,7 @@ def fetch_tau2_telecom():
                 scores.setdefault(sl[-1], {"score": round(float(val) * 100, 1), "name": name_by_slug.get(sl[-1])})
         return scores or None
     except Exception as e:
-        print(f"WARNING: Artificial Analysis scrape failed: {e}", file=sys.stderr)
+        print(f"WARNING: Artificial Analysis scrape failed ({url}): {e}", file=sys.stderr)
         return None
 
 
@@ -335,9 +347,10 @@ def fetch_prices(region, currency):
     return out
 
 
-def build_rows(prices_by_cur, cognigy, tau2, old_rows):
+def build_rows(prices_by_cur, cognigy, tau2, tau3, old_rows):
     """prices_by_cur: {currency: {meterName: price_per_million}}. cognigy: scraped Azure support
-    map (or None). tau2: {slug: score_pct} (or None). old_rows: previous run's rows for fallback."""
+    map (or None). tau2 / tau3: {slug: {"score", "name"}} per leaderboard (or None on a failed
+    scrape). old_rows: previous run's rows for fallback."""
     old_by_id = {r["id"]: r for r in old_rows}
 
     def lookup(meter):
@@ -359,26 +372,30 @@ def build_rows(prices_by_cur, cognigy, tau2, old_rows):
         status = "yes" if v else ("no" if v is False else "unknown")
         return {"status": status, "feature": label if status != "unknown" else None}
 
-    def tau2_data(m):
-        if tau2 is None:                                     # scrape failed -> keep last-known
+    def bench(m, scraped, key):
+        """(score, AA variant label) for one leaderboard. `key` is the row field it lands in."""
+        if scraped is None:                                  # scrape failed -> keep last-known
             prev = old_by_id.get(m["id"], {})
-            return prev.get("tau2"), prev.get("tau2_variant")
-        entry = tau2.get(tau2_slug(m["id"]))                 # None if not on the leaderboard
+            return prev.get(key), prev.get(key + "_variant")
+        entry = scraped.get(aa_slug(m["id"]))                # None if not on the leaderboard
         if not entry:
             return None, None
         return entry["score"], entry.get("name")
 
     rows = []
     for m in MODELS:
-        score, variant = tau2_data(m)
+        t2, t2var = bench(m, tau2, "tau2")
+        t3, t3var = bench(m, tau3, "tau3")
         rows.append({
             "id": m["id"],
             "family": m["family"],
             "released": m["released"],
             "cognigy": cog_status(m),
             "reasoning": REASONING.get(m["id"], {"options": [], "default": None}),
-            "tau2": score,
-            "tau2_variant": variant,
+            "tau2": t2,
+            "tau2_variant": t2var,
+            "tau3": t3,
+            "tau3_variant": t3var,
             "inp": lookup(m["meterIn"]),
             "out": lookup(m["meterOut"]),
             "sc": SC in m["regions"],
@@ -400,9 +417,16 @@ def main():
         print("  Cognigy unavailable — keeping last-known values.", file=sys.stderr)
 
     print("Fetching Artificial Analysis τ²-Bench Telecom leaderboard ...", file=sys.stderr)
-    tau2 = fetch_tau2_telecom()
+    tau2 = fetch_aa_scores(AA_TAU2_URL, "tau2")
     if tau2:
         print(f"  parsed {len(tau2)} model scores from Artificial Analysis.", file=sys.stderr)
+    else:
+        print("  Artificial Analysis unavailable — keeping last-known values.", file=sys.stderr)
+
+    print("Fetching Artificial Analysis τ³-Banking leaderboard ...", file=sys.stderr)
+    tau3 = fetch_aa_scores(AA_TAU3_URL, "tau_banking")
+    if tau3:
+        print(f"  parsed {len(tau3)} model scores from Artificial Analysis.", file=sys.stderr)
     else:
         print("  Artificial Analysis unavailable — keeping last-known values.", file=sys.stderr)
 
@@ -418,7 +442,7 @@ def main():
     # Did the previous run have usable Cognigy values? Decides whether a failed scrape is
     # survivable (fall back to last-known) or fatal (nothing to fall back on).
     old_cog = any(r.get("cognigy", {}).get("status", "unknown") != "unknown" for r in old_rows)
-    rows = build_rows(prices_by_cur, cognigy, tau2, old_rows)
+    rows = build_rows(prices_by_cur, cognigy, tau2, tau3, old_rows)
 
     # --- detect real problems; these fail the build so GitHub emails on the failure ---
     def gha(level, msg):
@@ -454,6 +478,8 @@ def main():
         gha("warning", f"Cognigy resolved {resolved}/{len(expected_ids)} expected Azure models — some may have been renamed.")
     if tau2 is None:
         gha("warning", "Artificial Analysis unreachable — kept last-known τ²-bench Telecom scores.")
+    if tau3 is None:
+        gha("warning", "Artificial Analysis unreachable — kept last-known τ³-Banking scores.")
     # auto-guard: the registry's model list + regions are hand-curated, so diff them against the
     # Learn availability page — this is what catches a new release (e.g. gpt-5.6) going unnoticed.
     # Drift does NOT fail the build: a new model appearing must not freeze the daily price
@@ -671,6 +697,7 @@ td.num{text-align:right; position:relative}
 td.inp .bar i{background:linear-gradient(90deg,var(--blue),#5a82d8)}
 td.out .bar i{background:linear-gradient(90deg,var(--rust),#d98a6e)}
 td.tau .bar i{background:linear-gradient(90deg,#2f7d5b,#73c39c)}
+td.tau3 .bar i{background:linear-gradient(90deg,#4b3f8f,#9186cf)}
 
 /* ---------- footer ---------- */
 .legend{
@@ -710,6 +737,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <a href="https://prices.azure.com/api/retail/prices" target="_blank" rel="noopener">retail prices API</a> ·
         <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">Cognigy support</a> ·
         <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-bench telecom</a> ·
+        <a href="https://artificialanalysis.ai/evaluations/tau3-banking" target="_blank" rel="noopener">τ³-banking</a> ·
         <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">reasoning effort</a>
       </span>
     </div>
@@ -758,6 +786,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <th>Availability</th>
         <th class="sortable" data-sort="cognigy">Cognigy <span class="arr">↕</span></th>
         <th class="num sortable hide" data-sort="tau2" title="τ²-Bench Telecom score (Artificial Analysis)">Telco&nbsp;τ² <span class="arr">↕</span></th>
+        <th class="num sortable hide" data-sort="tau3" title="τ³-Banking score (Artificial Analysis) — agentic support: policy retrieval + multi-step tool calls">Agentic&nbsp;τ³ <span class="arr">↕</span></th>
         <th class="num sortable" data-sort="inp">Input <span class="arr">↕</span></th>
         <th class="num sortable" data-sort="out">Output <span class="arr">↕</span></th>
       </tr></thead>
@@ -772,7 +801,8 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> / <code>gpt-5.6</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
     <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> and <code>gpt-5.6</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. <code>gpt-5.6</code> adds a <code>max</code> level (Responses API only). Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted).</p></div>
-    <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.6 at <em>max</em>, gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini, gpt-5.6-luna).</p></div>
+    <div class="box"><h4>Telco τ² benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau2-bench" target="_blank" rel="noopener">τ²-Bench Telecom</a> score (% of tasks solved) from Artificial Analysis — higher is better. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.6 at <em>max</em>, gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. <code>—</code> = not on the leaderboard (embeddings, gpt-4o-mini, gpt-5.6-luna) — for those, read the <b>Agentic&nbsp;τ³</b> column instead.</p></div>
+    <div class="box"><h4>Agentic τ³ benchmark</h4><p><a href="https://artificialanalysis.ai/evaluations/tau3-banking" target="_blank" rel="noopener">τ³-Banking</a> is the next benchmark in the same Sierra τ-series as τ²-Telecom: 97 tasks where the agent must find the right policy among ~700 documents <em>and</em> run the correct multi-step tool sequence, graded on backend state rather than chat quality. Banking domain, same support job — and unlike τ²-Telecom it covers the whole GPT-5.6 line, including <code>gpt-5.6-luna</code>. Much harder, though: it tops out near 33%, so read it against its own column, not against τ².</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
@@ -847,7 +877,7 @@ function visibleRows(){
     if(k==="id") return a.id.localeCompare(b.id)*d;
     if(k==="released") return a.released.localeCompare(b.released)*d;
     if(k==="cognigy"){const rk={yes:0,no:1,unknown:2}; return (rk[a.cognigy.status]-rk[b.cognigy.status])*d;}
-    if(k==="tau2"){const av=a.tau2, bv=b.tau2; if(av==null)return 1; if(bv==null)return -1; return (av-bv)*d;}
+    if(k==="tau2"||k==="tau3"){const av=a[k], bv=b[k]; if(av==null)return 1; if(bv==null)return -1; return (av-bv)*d;}
     const av=val(a[k]), bv=val(b[k]);
     if(av===null||av===undefined) return 1; if(bv===null||bv===undefined) return -1;   // n/a sinks
     return (av-bv)*d;
@@ -912,12 +942,17 @@ function render(){
     const outCell = vout!==null && vout!==undefined
       ? `<span class="price">${priceHTML(vout)}</span><span class="bar"><i style="width:${(bar(vout,maxOut)*100).toFixed(1)}%"></i></span>`
       : `<span class="price na">${r.family==='Embedding'?'—':'n/a'}</span>`;
-    const ts = r.tau2;
-    const tvar = r.tau2_variant ? r.tau2_variant.replace(/"/g,'&quot;') : null;
-    const ttip = tvar ? `${tvar} — τ²-Bench Telecom (Artificial Analysis)` : "τ²-Bench Telecom (Artificial Analysis)";
-    const telCell = (ts!==null && ts!==undefined)
-      ? `<span class="price" title="${ttip}">${ts.toFixed(1)}<span class="cur">%</span></span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
-      : `<span class="price na">—</span>`;
+    // both benchmark cells are % of tasks solved, drawn on the same raw scale on purpose:
+    // τ³ is far harder than τ², and a per-column relative bar would hide that.
+    const benchCell = (score, variant, bench) => {
+      if(score===null || score===undefined) return `<span class="price na">—</span>`;
+      const v = variant ? variant.replace(/"/g,'&quot;') : null;
+      const tip = v ? `${v} — ${bench} (Artificial Analysis)` : `${bench} (Artificial Analysis)`;
+      return `<span class="price" title="${tip}">${score.toFixed(1)}<span class="cur">%</span></span>`
+           + `<span class="bar"><i style="width:${Math.max(2,score).toFixed(1)}%"></i></span>`;
+    };
+    const telCell = benchCell(r.tau2, r.tau2_variant, "τ²-Bench Telecom");
+    const bnkCell = benchCell(r.tau3, r.tau3_variant, "τ³-Banking");
 
     const rz = r.reasoning || {options:[],default:null};
     const rzIs = rz.options && rz.options.length;
@@ -933,13 +968,14 @@ function render(){
       <td>${avail}</td>
       <td>${cognigyChip(r.cognigy)}</td>
       <td class="num tau hide">${telCell}</td>
+      <td class="num tau3 hide">${bnkCell}</td>
       <td class="num inp">${inCell}</td>
       <td class="num out">${outCell}</td>`;
     tb.appendChild(tr); shown++;
     if(open){
       const dtr=document.createElement("tr");
       dtr.className="detail"+(inRegion?"":" dim");
-      dtr.innerHTML=`<td colspan="8"><div class="dt">${reasoningDetail(r)}</div></td>`;
+      dtr.innerHTML=`<td colspan="9"><div class="dt">${reasoningDetail(r)}</div></td>`;
       tb.appendChild(dtr);
     }
   });

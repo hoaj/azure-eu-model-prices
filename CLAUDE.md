@@ -32,7 +32,7 @@ curl -s "https://prices.azure.com/api/retail/prices?currencyCode=USD&\$filter=ar
 Data flow in `main()`:
 
 1. `fetch_prices()` — Azure Retail Prices API, once per currency (Data Zone meters are zone-wide, so one region query covers both).
-2. `fetch_cognigy_azure_support()`, `fetch_tau2_telecom()`, `fetch_availability()`, `fetch_reasoning_doc_text()` — four HTML scrapes.
+2. `fetch_cognigy_azure_support()`, `fetch_aa_scores()` (once per Artificial Analysis leaderboard — τ²-Telecom and τ³-Banking), `fetch_availability()`, `fetch_reasoning_doc_text()` — five HTML scrapes.
 3. `build_rows()` joins all of it against the hand-curated `MODELS` / `REASONING` registries.
 4. Payload → `TEMPLATE` → `index.html`.
 
@@ -62,11 +62,11 @@ Three deliberately distinct tiers:
 - For the 5.x family use the **short-context standard** tier: meters with `ShortCo` and `Std`, never `LongCo`, `Batch`, `PP` (priority processing), or `Cd`/`cchd` (cached). Add `"note": "short-context tier"`.
 - `regions` is per model and comes from the Learn availability page — don't assume both regions.
 - In `REASONING`, `default: None` means **"not documented for this specific model"**. Never infer a default from a sibling model or a summary; that failure mode renders as a plausible-but-wrong number, which is why drift opens a PR for human review instead of committing to main.
-- Model ids map to two external slug conventions: `cognigy_code()` (`gpt-5.` → `gpt-5-`) and `tau2_slug()` (dots → dashes).
+- Model ids map to two external slug conventions: `cognigy_code()` (`gpt-5.` → `gpt-5-`) and `aa_slug()` (dots → dashes, used for every Artificial Analysis leaderboard).
 
 ### Scrapers are regex over HTML, by design
 
-Stdlib-only means no HTML parser. Each scraper anchors on a structural landmark rather than position: Cognigy on the provider header row (`Microsoft Azure OpenAI`) so non-Azure sections are ignored; availability on `<h2 id="data-zone-standard">` plus the first table carrying both region columns; τ²-Bench on the Next.js RSC payload (`self.__next_f.push`), matching each `"tau2"` score to the nearest preceding `"slug"`. Every scraper catches broadly and returns `None` on failure — callers depend on that, so don't let exceptions escape.
+Stdlib-only means no HTML parser. Each scraper anchors on a structural landmark rather than position: Cognigy on the provider header row (`Microsoft Azure OpenAI`) so non-Azure sections are ignored; availability on `<h2 id="data-zone-standard">` plus the first table carrying both region columns; Artificial Analysis on the Next.js RSC payload (`self.__next_f.push`), matching each score to the nearest preceding `"slug"` — `fetch_aa_scores(url, field)` is that one technique parameterised by leaderboard (`tau2` on τ²-Telecom, `tau_banking` on τ³-Banking). Every scraper catches broadly and returns `None` on failure — callers depend on that, so don't let exceptions escape.
 
 ### Frontend
 
