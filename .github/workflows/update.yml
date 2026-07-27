@@ -16,6 +16,7 @@ on:
 permissions:
   contents: write              # allow committing the regenerated file
   issues: write                # allow opening a failure-notification issue
+  pull-requests: write         # allow the drift agent to open a registry PR
 
 concurrency:                   # never run two refreshes at once
   group: update-prices
@@ -70,6 +71,56 @@ jobs:
           else
             printf '%s' "$body" | gh issue create --title "$title" --assignee hoaj --body-file -
           fi
+
+      # Drafts the registry entry the issue above asks for, as a PR. Gated on the same drift
+      # signal, so it runs ~once a quarter — not on the daily no-op. `continue-on-error` keeps
+      # the daily price refresh green if the agent fails: the issue is the durable notification,
+      # this is the convenience layer on top of it.
+      - name: Draft the registry entry as a PR
+        if: ${{ hashFiles('drift.txt') != '' }}
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          base_branch: main
+          branch_prefix: registry/
+          claude_args: |
+            --allowedTools Read,Edit,Bash,Glob,Grep,WebFetch
+            --model claude-opus-5
+          prompt: |
+            `drift.txt` in the repo root names Azure OpenAI models that are deployable on
+            Data Zone Standard in Sweden Central / West Europe but are missing from the
+            `MODELS` registry in `generate.py`. Add them.
+
+            Follow the conventions already in the file rather than inventing new ones — read
+            the existing gpt-5.4 / gpt-5.5 / gpt-5.6 entries first. In particular:
+
+            - `meterIn` / `meterOut` must be the EXACT Azure meter names. Find them with:
+              curl -s "https://prices.azure.com/api/retail/prices?currencyCode=USD&\$filter=armRegionName%20eq%20'swedencentral'%20and%20productName%20eq%20'Azure%20OpenAI%20GPT5'"
+              The meter must be a **Data Zone** meter: `DZ` or `Dz` or `Data Zone` in the name.
+              Watch out — `Gl` (Global Standard) meters sit right next to the Data Zone ones
+              and match every other filter. A `Gl` meter would put Global prices on a page
+              that is entirely about Data Zone; check this explicitly.
+              For the 5.x family also use the **short-context, standard** tier — the meters
+              with `ShortCo` and `Std`, NOT `LongCo`, `Batch`, `PP` (priority processing), or
+              `Cd`/`cchd` (cached). Add `"note": "short-context tier"`, as the others do.
+            - `released` is the version date from the availability page, quoted in drift.txt.
+            - `regions` must match what drift.txt says — do not assume both regions.
+            - Add a `REASONING` entry too. Check
+              https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning
+              for the supported reasoning_effort levels. For `default`, use None unless a
+              primary source states a default for THAT model specifically — the file's
+              convention is that None means "not documented". Do not infer a default from a
+              sibling model or from a summary; guessing here is worse than leaving it None.
+
+            Then run `python3 generate.py`. It must exit 0 AND leave no `drift.txt` behind.
+            If a meter name is wrong it aborts with "price meter missing or renamed"; if the
+            entry is incomplete, drift.txt is rewritten. Fix and re-run until both hold.
+
+            Open a PR against main. Do not push to main directly, and do not commit
+            index.html — the daily job regenerates it. In the PR description, list anything
+            you were uncertain about (especially the reasoning default) so it gets reviewed
+            rather than rubber-stamped.
 
       - name: Notify on failure (assign an issue -> email)
         if: ${{ failure() }}

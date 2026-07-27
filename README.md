@@ -51,11 +51,25 @@ The site appears at `https://<user>.github.io/<repo>/`.
 ## Update the model list / availability
 
 Prices auto-refresh for the models in the registry. When a **new** model appears or a region
-changes, the daily run emits a `WARNING` naming the model — edit the `MODELS` list at the top of
-`generate.py` (meter names + `regions`), using the
-[availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard)
-as the source, then re-run. Add a `REASONING` entry too, if it's a reasoning model.
-`generate.py` also fails the build if Azure renames a meter it expects.
+changes, the daily run detects it and does two things:
+
+1. **Opens an issue** assigned to `@hoaj` naming the model — the durable notification.
+2. **Drafts the registry entry as a pull request**, using
+   [`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action).
+   It runs only on drift (roughly once a quarter), never on the daily no-op.
+
+The PR is gated on the generator agreeing: the agent must leave `python3 generate.py` exiting 0
+with no `drift.txt` remaining. That catches a wrong meter name (the build aborts with *price meter
+missing or renamed*) and an incomplete entry (drift persists) — the two failure modes that would
+otherwise render as plausible-but-wrong numbers. It does **not** catch a wrong `reasoning` default,
+which is why this opens a PR for review instead of committing to `main`. **Review before merging.**
+
+Requires an `ANTHROPIC_API_KEY` repo secret. Without it that step fails and is skipped
+(`continue-on-error`) — the issue still gets opened and prices still refresh, so you can also just
+edit the `MODELS` / `REASONING` registry by hand from the
+[availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard).
+
+`generate.py` fails the build outright if Azure renames a meter it already expects.
 
 ## Run locally
 
