@@ -61,7 +61,7 @@ Three deliberately distinct tiers:
 - The meter must be a **Data Zone** meter (`DZ` / `Dz` / `Data Zone` in the name). `Gl` (Global Standard) meters sit right next to them and match every other filter — a `Gl` meter silently puts Global prices on a page that is entirely about Data Zone.
 - For the 5.x family use the **short-context standard** tier: meters with `ShortCo` and `Std`, never `LongCo`, `Batch`, `PP` (priority processing), or `Cd`/`cchd` (cached). Add `"note": "short-context tier"`.
 - `regions` is per model and comes from the Learn availability page — don't assume both regions.
-- In `REASONING`, `default: None` means **"not documented for this specific model"**. Never infer a default from a sibling model or a summary; that failure mode renders as a plausible-but-wrong number, which is why drift opens a PR for human review instead of committing to main.
+- In `REASONING`, `default: None` means **"not documented for this specific model"**. Never infer a default from a sibling model or a summary; that failure mode renders as a plausible-but-wrong number that nothing downstream can catch.
 - Model ids map to two external slug conventions: `cognigy_code()` (`gpt-5.` → `gpt-5-`) and `aa_slug()` (dots → dashes, used for every Artificial Analysis leaderboard).
 
 ### Scrapers are regex over HTML, by design
@@ -76,7 +76,7 @@ Vanilla JS inside `TEMPLATE`, no build step: a `state` object plus a full `rende
 
 Runs daily at 05:17 UTC and on demand ("Run workflow"). It regenerates, then commits `index.html` if changed — the `updated` timestamp is stamped every run, so there is a commit every day as proof the job ran.
 
-When `drift.txt` exists, two steps fire: an assigned GitHub issue (the durable notification) and `anthropics/claude-code-action` drafting the registry entry as a PR against main. The PR step is `continue-on-error` and needs an `ANTHROPIC_API_KEY` secret; without it the issue and price refresh still work. **Registry PRs must not commit `index.html`** — the daily job regenerates it.
+When `drift.txt` exists, an assigned GitHub issue is opened (or commented on, if one is already open) naming the model. Filling in the registry is a hand edit — an agent-authored PR was tried and dropped: `claude-code-action` doesn't open the PR itself, and the action refuses to run unless the workflow is byte-identical to main, which made iterating on it costly.
 
 The `fail_test` workflow input deliberately fails a run, to verify failure emails still arrive.
 

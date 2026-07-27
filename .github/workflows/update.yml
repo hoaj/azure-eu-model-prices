@@ -91,6 +91,6 @@ jobs:
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "Failed again — run: $RUN_URL"
           else
-            printf 'The scheduled update (Azure prices / Cognigy / τ²-bench) failed.\n\nRun: %s\n\ncc @hoaj' "$RUN_URL" \
+            printf 'The scheduled update failed, so `index.html` was NOT overwritten — the site is still serving the last known-good data.\n\nOne of these went wrong: Azure Retail Prices API, Cognigy model-support table, Artificial Analysis τ³-Banking leaderboard, or the Azure Data Zone Standard availability page. The run log says which.\n\nA renamed price meter is the usual cause and needs a `MODELS` edit; a scrape failure with no prior values to fall back on is the other.\n\nRun: %s\n\ncc @hoaj' "$RUN_URL" \
               | gh issue create --title "$title" --assignee hoaj --body-file -
           fi
