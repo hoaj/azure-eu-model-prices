@@ -14,9 +14,15 @@ Live demo: _set after enabling GitHub Pages (see below)_
 - It also scrapes the [Cognigy model-support page](https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature)
   (no API exists — it's a static HTML table) for the **Microsoft Azure OpenAI** section: chat models are judged on
   *LLM Prompt Node* support, embeddings on *Knowledge Search*. If the scrape fails, the last-known values are kept.
-- It also scrapes the [Artificial Analysis τ²-Bench Telecom leaderboard](https://artificialanalysis.ai/evaluations/tau2-bench)
-  (no API — the scores live in the page's Next.js RSC payload, keyed by a `tau2` field) for each model's
-  agentic telecom score. Fallback to last-known on failure.
+- It also scrapes two [Artificial Analysis](https://artificialanalysis.ai/evaluations) agentic-support
+  leaderboards (no API — the scores live in each page's Next.js RSC payload):
+  [τ²-Bench Telecom](https://artificialanalysis.ai/evaluations/tau2-bench) (`tau2` field) and
+  [τ³-Banking](https://artificialanalysis.ai/evaluations/tau3-banking) (`tau_banking` field).
+  τ²-Telecom is the telco benchmark, but AA never ran it for every model — `gpt-5.6-luna` and
+  `gpt-4o-mini` are absent from it. τ³-Banking is the next benchmark in the same Sierra τ-series and
+  tests the same job (find the right policy in a large knowledge base, then execute the correct
+  multi-step tool sequence, graded on backend state), in the banking domain instead — and it *does*
+  cover the whole GPT-5.6 line. Each falls back to last-known on failure, independently.
 - It also scrapes the [Azure region-availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard)
   and **diffs it against the `MODELS` registry**. It doesn't drive the table — `regions` stays hand-curated —
   but the build now warns when a model becomes deployable in Sweden Central / West Europe and isn't listed,
