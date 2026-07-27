@@ -42,6 +42,14 @@ jobs:
       - name: Regenerate index.html
         run: python3 generate.py
 
+      # Record drift once, here. Later steps must not re-test for drift.txt: a successful
+      # agent deletes it, which would silently skip the very check that verifies the agent.
+      - name: Detect registry drift
+        id: drift
+        run: |
+          if [ -s drift.txt ]; then echo "found=true" >> "$GITHUB_OUTPUT"
+          else echo "found=false" >> "$GITHUB_OUTPUT"; fi
+
       - name: Commit if changed
         run: |
           git config user.name  "price-bot"
@@ -58,7 +66,7 @@ jobs:
       # regions, reasoning levels). The build stays green — prices for existing models must
       # keep refreshing — so drift is surfaced as an assigned issue instead.
       - name: Raise an issue if the model registry has drifted
-        if: ${{ hashFiles('drift.txt') != '' }}
+        if: ${{ steps.drift.outputs.found == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -77,9 +85,19 @@ jobs:
       # signal, so it runs ~once a quarter — not on the daily no-op. `continue-on-error` keeps
       # the daily price refresh green if the agent fails: the issue is the durable notification,
       # this is the convenience layer on top of it.
+      - name: Count existing registry PRs
+        id: prbase
+        if: ${{ steps.drift.outputs.found == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          echo "count=$(gh pr list --state open --json headRefName \
+            --jq '[.[]|select(.headRefName|startswith("registry/"))]|length')" >> "$GITHUB_OUTPUT"
+
       - name: Draft the registry entry as a PR
         id: draft
-        if: ${{ hashFiles('drift.txt') != '' }}
+        if: ${{ steps.drift.outputs.found == 'true' }}
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
@@ -124,20 +142,26 @@ jobs:
             you were uncertain about (especially the reasoning default) so it gets reviewed
             rather than rubber-stamped.
 
-      # `continue-on-error` rewrites the step's *conclusion* to success, so a failed agent is
-      # invisible in the run summary — the exact silence this whole guard exists to remove.
-      # `outcome` is the pre-override result, so check that and say so on the issue.
-      - name: Say so if the drift agent failed
-        if: ${{ steps.draft.outcome == 'failure' }}
+      # Verify the DELIVERABLE, not the step status. The agent step reports success when it
+      # fails under continue-on-error, and again when the action skips itself (e.g. workflow
+      # validation) — both exit 0. Only "did a new registry PR appear" distinguishes them.
+      - name: Say so if no registry PR was produced
+        if: ${{ steps.drift.outputs.found == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          after=$(gh pr list --state open --json headRefName \
+            --jq '[.[]|select(.headRefName|startswith("registry/"))]|length')
+          if [ "$after" -gt "${{ steps.prbase.outputs.count }}" ]; then
+            echo "Registry PR opened."; exit 0
+          fi
+          echo "::warning::drift detected but no registry PR was opened"
           title="📋 Model registry is out of date"
           n=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
           [ -n "$n" ] && gh issue comment "$n" --body \
-            "⚠️ The agent that drafts the registry entry failed, so there is no PR to review — update \`MODELS\` / \`REASONING\` by hand. Prices for existing models refreshed normally. Log: $RUN_URL"
+            "⚠️ No PR was opened, so there is nothing to review — update \`MODELS\` / \`REASONING\` by hand. Prices for existing models refreshed normally. Log: $RUN_URL"
 
       - name: Notify on failure (assign an issue -> email)
         if: ${{ failure() }}
