@@ -1,4 +1,5 @@
 drift.txt
+benchdrift.txt
 .DS_Store
 .playwright-cli/
 .claude/worktrees/

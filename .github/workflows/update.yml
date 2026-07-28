@@ -48,6 +48,14 @@ jobs:
           if [ -s drift.txt ]; then echo "found=true" >> "$GITHUB_OUTPUT"
           else echo "found=false" >> "$GITHUB_OUTPUT"; fi
 
+      # Benchmark trouble is soft by design (the build stays green so prices keep refreshing), but
+      # a soft warning nobody reads is how stale data survives — hence a second signal file.
+      - name: Detect benchmark drift
+        id: benchdrift
+        run: |
+          if [ -s benchdrift.txt ]; then echo "found=true" >> "$GITHUB_OUTPUT"
+          else echo "found=false" >> "$GITHUB_OUTPUT"; fi
+
       - name: Commit if changed
         run: |
           git config user.name  "price-bot"
@@ -72,6 +80,26 @@ jobs:
         run: |
           title="📋 Model registry is out of date"
           body=$(printf 'The Azure Data Zone Standard availability page lists models that %s does not match:\n\n%s\n\nUpdate the `MODELS` (and `REASONING`) registry in `generate.py`.\nMeter names: https://prices.azure.com/api/retail/prices\n\nRun: %s\n\ncc @hoaj' "generate.py" "$(cat drift.txt)" "$RUN_URL")
+          existing=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            printf '%s' "$body" | gh issue create --title "$title" --assignee hoaj --body-file -
+          fi
+
+      # The τ³ effort ladder is assembled from Artificial Analysis' variant-slug convention
+      # (`<slug>-xhigh`), which is not a documented API. If it changes, the ladder empties and the
+      # page keeps serving plausible single scores — no visible symptom. Prices must keep
+      # refreshing, so this warns via an assigned issue rather than failing the run.
+      - name: Raise an issue if the benchmark data has gone stale
+        if: ${{ steps.benchdrift.outputs.found == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="📉 Agentic τ³ benchmark data needs attention"
+          body=$(printf 'The daily run still published prices, but the τ³-Banking data changed in a way worth a look:\n\n%s\n\nThe scores on the page are the last known good ones. Check `fetch_aa_scores` / `aa_ladder` in `generate.py` against %s\n\nRun: %s\n\ncc @hoaj' "$(cat benchdrift.txt)" "https://artificialanalysis.ai/evaluations/tau3-banking" "$RUN_URL")
           existing=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
