@@ -839,6 +839,9 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
 @media (max-width:720px){
   .wrap{padding:32px 16px 70px}
   thead th.hide,tbody td.hide{display:none}
+  /* The τ³ column is hidden here, so the effort selector would be a control with nothing to
+     act on. The expander ladders still show the same scores. */
+  #effCtl{display:none}
   .search input{width:160px}
 }
 </style>
@@ -880,7 +883,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <button data-fam="Embedding">Embedding</button>
       </div>
     </div>
-    <div>
+    <div id="effCtl">
       <span class="ctl-label">τ³ at effort</span>
       <div class="seg effs" id="effSeg">
         <button data-effort="best" class="on">Best</button>
@@ -1125,11 +1128,16 @@ function render(){
     const ttip = state.effort==="best"
       ? (tvar ? `${tvar} — τ³-Banking (Artificial Analysis)` : "τ³-Banking (Artificial Analysis)")
       : `${r.id} at reasoning_effort=${state.effort} — τ³-Banking (Artificial Analysis)`;
-    // "—" here means two different things, so say which: never on the leaderboard at all, vs.
-    // on it but not run at the tier currently selected.
-    const bnkNa = state.effort!=="best" && r.tau3!==null && r.tau3!==undefined
-      ? `<span class="price na" title="${r.id} is on the τ³ leaderboard, but AA did not run it at ${state.effort}">—</span>`
-      : `<span class="price na" title="Not on the τ³ leaderboard">—</span>`;
+    // "—" here means three different things, so the tooltip says which: never on the leaderboard;
+    // on it but not run at the selected tier; or on it with no tiers to run at all.
+    const onBoard = r.tau3!==null && r.tau3!==undefined;
+    const canReason = !!(((r.reasoning||{}).options)||[]).length;
+    const naTip = !onBoard
+      ? "Not on the τ³ leaderboard"
+      : canReason
+        ? `${r.id} is on the τ³ leaderboard, but AA did not run it at ${state.effort}`
+        : `${r.id} is not a reasoning model — it has no effort tiers (it scores ${r.tau3.toFixed(1)}% as-is)`;
+    const bnkNa = `<span class="price na" title="${naTip}">—</span>`;
     const bnkCell = (ts!==null && ts!==undefined)
       ? `<span class="price" title="${ttip}">${ts.toFixed(1)}<span class="cur">%</span></span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
       : bnkNa;
