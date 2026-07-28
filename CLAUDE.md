@@ -51,10 +51,22 @@ Three deliberately distinct tiers:
 | **Fatal** (`exit 1`) | A price meter that used to resolve is missing/renamed; Cognigy unparseable *and* no prior values to fall back on | `index.html` is left untouched, preserving last-known-good data. The failed run emails via an auto-assigned issue. |
 | **Soft** (warning, build green) | Any single scrape failed | Last-known values carried over from the previous run |
 | **Drift** (warning + `drift.txt`, build green) | Availability page lists a model missing from `MODELS`, or a region changed | Never fails the build — a new model must not freeze the daily price refresh for models already tracked |
+| **Benchmark drift** (warning + `benchdrift.txt`, build green) | AA unreachable, a τ³ effort ladder shrank, a score vanished, or a tier label stopped parsing | Same policy as drift. `benchmark_drift()` compares against the previous payload; the first run after the ladder shipped can't false-alarm because the old rows have no ladder field |
 
 `read_old_payload()` re-parses `const PAYLOAD = {...}` back out of the committed `index.html`. **That file is the state store** — there is no database and no cache.
 
-`drift.txt` is gitignored, written only when drift exists, and deleted when it clears. It is the signal the workflow keys on.
+`drift.txt` and `benchdrift.txt` are gitignored, written only when their drift exists, and deleted when it clears. They are the signals the workflow keys on — one issue each.
+
+### The τ³ effort ladder — the trap
+
+AA models every reasoning-effort variant as a **separate leaderboard entry**: the base slug carries the highest effort it ran, lower ones are suffixed (`gpt-5-6-sol-xhigh`, `…-low`, `…-non-reasoning`). `aa_ladder()` assembles these into `tau3_by_effort`.
+
+Two things to know before touching it:
+
+- **The base entry's own tier exists only in its display label** — `"GPT-5.6 Sol (max)"`. There is no field for it. `aa_effort_from_label()` returns `None` rather than guessing when a label doesn't parse; never infer the tier from a sibling model, for the same reason `REASONING[*]["default"]` is `None` when undocumented.
+- **The suffix convention is not a documented API.** If AA changes it the ladder empties silently and the page keeps serving plausible single scores — no visible symptom. That's what `benchmark_drift()` guards, and why it raises an issue rather than only warning.
+
+`tau3` / `tau3_variant` keep their original meaning (AA's *highest-effort* run, not the highest score), so the column's default "Best" mode is unchanged. `o3-mini` is published only as `o3-mini-high` with no base entry — the suffix scan is what makes it resolve at all.
 
 ### Adding a model to `MODELS` — the traps
 
@@ -70,13 +82,15 @@ Stdlib-only means no HTML parser. Each scraper anchors on a structural landmark 
 
 ### Frontend
 
-Vanilla JS inside `TEMPLATE`, no build step: a `state` object plus a full `render()` redraw. Region/family/text filters, DKK↔USD toggle, sortable columns (rows with no price sink to the bottom), and a per-row expander showing reasoning-effort pills.
+Vanilla JS inside `TEMPLATE`, no build step: a `state` object plus a full `render()` redraw. Region/family/text filters, DKK↔USD toggle, sortable columns (rows with no price sink to the bottom), a **τ³ at effort** selector (`state.effort`), and a per-row expander showing reasoning-effort pills carrying each tier's τ³ score.
+
+`tau3At(r)` is the single source of the displayed score — **`render()` and the sort comparator both call it**, so a sorted column can never disagree with the numbers in it. Two rendering rules worth preserving: the expander's pills come from the curated `REASONING` options (Azure remains authoritative for what's *supported*) with AA scores merely attached, so a supported-but-unbenchmarked tier stays visibly distinct; and ladder bars use a **fixed 56px width scaled to the best score on the page**, never the pill width or a per-row max — either of those would make a weaker model's ladder look like a stronger one's.
 
 ## CI (`.github/workflows/update.yml`)
 
 Runs daily at 05:17 UTC and on demand ("Run workflow"). It regenerates, then commits `index.html` if changed — the `updated` timestamp is stamped every run, so there is a commit every day as proof the job ran.
 
-When `drift.txt` exists, an assigned GitHub issue is opened (or commented on, if one is already open) naming the model. Filling in the registry is a hand edit — an agent-authored PR was tried and dropped: `claude-code-action` doesn't open the PR itself, and the action refuses to run unless the workflow is byte-identical to main, which made iterating on it costly.
+When `drift.txt` exists, an assigned GitHub issue is opened (or commented on, if one is already open) naming the model. `benchdrift.txt` does the same on its own title, so registry staleness and benchmark staleness never share a thread. Filling in the registry is a hand edit — an agent-authored PR was tried and dropped: `claude-code-action` doesn't open the PR itself, and the action refuses to run unless the workflow is byte-identical to main, which made iterating on it costly.
 
 The `fail_test` workflow input deliberately fails a run, to verify failure emails still arrive.
 

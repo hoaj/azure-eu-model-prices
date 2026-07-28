@@ -232,6 +232,71 @@ def fetch_aa_scores(url, field):
         return None
 
 
+# Azure's reasoning_effort vocabulary, ordered weakest -> strongest. The τ³ effort ladder is keyed
+# on these names so the scores line up with the curated REASONING options rendered beside them.
+EFFORT_ORDER = ["none", "minimal", "low", "medium", "high", "xhigh", "max"]
+
+# AA publishes each reasoning-effort variant as its OWN leaderboard entry: the base slug carries the
+# highest effort it ran, and lower efforts are suffixed (`gpt-5-6-sol-high`, `gpt-5-6-sol-low`).
+# Its suffix vocabulary matches Azure's except for "non-reasoning", which is Azure's `none`.
+# That mapping is right for the 5.1+ family, whose off switch really is `none`. gpt-5 and the
+# o-series call their floor `minimal` instead, but AA publishes no non-reasoning variant for those,
+# so nothing is mis-keyed today. This suffix convention is NOT a documented API — benchmark_drift()
+# below exists because it can change under us.
+AA_EFFORT_SUFFIX = {
+    "none": "non-reasoning", "low": "low", "medium": "medium",
+    "high": "high", "xhigh": "xhigh", "max": "max",
+}
+
+
+def aa_effort_from_label(name):
+    """The effort a *base* leaderboard entry was run at: "GPT-5.6 Sol (max)" -> "max".
+
+    AA encodes this ONLY in the display label — no field carries it — so an unrecognised label
+    returns None ("best, tier unknown"). Never guess a tier from a sibling model: that renders as
+    a plausible-but-wrong number nothing downstream can catch.
+    """
+    if not name:
+        return None
+    m = re.search(r"\(([^)]*)\)\s*$", name)
+    if not m:
+        return None                      # a non-reasoning model, e.g. "GPT-4.1 mini" — no tier
+    txt = m.group(1).strip().lower()
+    if txt == "non-reasoning":
+        return "none"
+    eff = re.search(r"(\w+)\s+effort$", txt)   # AA also writes "Adaptive Reasoning, Max Effort"
+    if eff:
+        txt = eff.group(1)
+    return txt if txt in EFFORT_ORDER else None
+
+
+def aa_ladder(scraped, model_id):
+    """(by_effort, best_effort, best_score, best_label) for one model across every reasoning-effort
+    variant AA published.
+
+    "Best" stays defined as AA's *highest-effort* run — the base entry — rather than the highest
+    score, preserving what the column has always shown.
+    """
+    base = aa_slug(model_id)
+    by_effort, labels = {}, {}
+    for effort, suffix in AA_EFFORT_SUFFIX.items():
+        e = scraped.get(f"{base}-{suffix}")
+        if e:
+            by_effort[effort], labels[effort] = e["score"], e.get("name")
+    entry = scraped.get(base)
+    if entry:
+        eff = aa_effort_from_label(entry.get("name"))
+        if eff:
+            by_effort[eff], labels[eff] = entry["score"], entry.get("name")
+        return by_effort, eff, entry["score"], entry.get("name")
+    # No base entry at all: o3-mini is published only as `o3-mini-high`, which the previous
+    # exact-slug lookup missed entirely (the cell rendered "—"). Strongest variant is then best.
+    for eff in reversed(EFFORT_ORDER):
+        if eff in by_effort:
+            return by_effort, eff, by_effort[eff], labels[eff]
+    return by_effort, None, None, None
+
+
 AZURE_REASONING_URL = "https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning"
 
 
@@ -256,6 +321,9 @@ OUT_OF_SCOPE = re.compile(r"^(gpt-image|model-router|.*-(audio|realtime)-)", re.
 
 # Written when the registry has drifted; the workflow reads it to raise an issue. Never committed.
 DRIFT_FILE = "drift.txt"
+
+# Same idea, for the benchmark data rather than the registry. Never committed.
+BENCH_FILE = "benchdrift.txt"
 
 
 def fetch_availability():
@@ -328,6 +396,43 @@ def availability_drift(avail):
     return msgs
 
 
+def benchmark_drift(rows, old_rows, scrape_ok):
+    """Reasons the τ³ data needs a human, with the build still green.
+
+    The effort ladder is assembled from AA's variant-slug convention (`<slug>-xhigh`), which is not
+    a documented API. If AA renames or drops it, the ladder silently empties and the page carries on
+    serving plausible-looking single scores — the failure gives no visible symptom. A ::warning::
+    alone is invisible unless someone opens the Actions run, which is exactly how gpt-5.6 sat
+    unnoticed for 18 days, so this is written to BENCH_FILE and raised as an assigned issue.
+
+    Deliberately NOT fatal: a benchmark going quiet must not freeze the daily price refresh.
+    """
+    msgs = []
+    if not scrape_ok:
+        msgs.append("Artificial Analysis τ³-Banking was unreachable or unparseable — the page is "
+                    "serving last-known scores. One bad day is transient; repeats mean the "
+                    "RSC-payload scrape needs looking at.")
+        return msgs
+    old_by_id = {r["id"]: r for r in old_rows}
+    for r in rows:
+        prev = old_by_id.get(r["id"])
+        if not prev:
+            continue
+        # Absent on rows written before the ladder existed -> 0, so the first run can't false-alarm.
+        was, now = len(prev.get("tau3_by_effort") or {}), len(r["tau3_by_effort"])
+        if was >= 2 and now < was:
+            msgs.append(f"τ³ effort ladder shrank for {r['id']}: {was} scored efforts last run, "
+                        f"{now} now — AA's variant-slug convention may have changed.")
+        if prev.get("tau3") is not None and r["tau3"] is None:
+            msgs.append(f"τ³ score disappeared for {r['id']} (was {prev['tau3']}) — it may have "
+                        f"been dropped from the leaderboard, or its slug renamed.")
+        if prev.get("tau3_best_effort") and not r["tau3_best_effort"]:
+            msgs.append(f"τ³ effort tier for {r['id']} no longer parses out of AA's label "
+                        f"(was '{prev['tau3_best_effort']}') — the score still shows, but the page "
+                        f"can no longer say which tier produced it.")
+    return msgs
+
+
 def fetch_prices(region, currency):
     """Return {meterName: price_per_million} for all OpenAI products in `region`."""
     out = {}
@@ -373,18 +478,18 @@ def build_rows(prices_by_cur, cognigy, tau3, old_rows):
         return {"status": status, "feature": label if status != "unknown" else None}
 
     def bench(m, scraped, key):
-        """(score, AA variant label) for one leaderboard. `key` is the row field it lands in."""
+        """(best score, AA variant label, {effort: score}, best effort) for one leaderboard.
+        `key` is the row field it lands in."""
         if scraped is None:                                  # scrape failed -> keep last-known
             prev = old_by_id.get(m["id"], {})
-            return prev.get(key), prev.get(key + "_variant")
-        entry = scraped.get(aa_slug(m["id"]))                # None if not on the leaderboard
-        if not entry:
-            return None, None
-        return entry["score"], entry.get("name")
+            return (prev.get(key), prev.get(key + "_variant"),
+                    prev.get(key + "_by_effort") or {}, prev.get(key + "_best_effort"))
+        by_effort, best_eff, best, label = aa_ladder(scraped, m["id"])
+        return best, label, by_effort, best_eff
 
     rows = []
     for m in MODELS:
-        t3, t3var = bench(m, tau3, "tau3")
+        t3, t3var, t3lad, t3best = bench(m, tau3, "tau3")
         rows.append({
             "id": m["id"],
             "family": m["family"],
@@ -393,6 +498,8 @@ def build_rows(prices_by_cur, cognigy, tau3, old_rows):
             "reasoning": REASONING.get(m["id"], {"options": [], "default": None}),
             "tau3": t3,
             "tau3_variant": t3var,
+            "tau3_by_effort": t3lad,
+            "tau3_best_effort": t3best,
             "inp": lookup(m["meterIn"]),
             "out": lookup(m["meterOut"]),
             "sc": SC in m["regions"],
@@ -487,6 +594,20 @@ def main():
                 f.write("\n".join(f"- {m}" for m in drift) + "\n")
         else:
             os.remove(DRIFT_FILE)          # stale file from a previous run
+    except FileNotFoundError:
+        pass
+    # auto-guard: the τ³ effort ladder rests on AA's undocumented variant-slug convention, so a
+    # silent change there would empty the ladder with no visible symptom. Same tier as registry
+    # drift — warn, raise an issue, keep the build green.
+    bdrift = benchmark_drift(rows, old_rows, tau3 is not None)
+    for msg in bdrift:
+        gha("warning", msg)
+    try:
+        if bdrift:
+            with open(BENCH_FILE, "w", encoding="utf-8") as f:
+                f.write("\n".join(f"- {m}" for m in bdrift) + "\n")
+        else:
+            os.remove(BENCH_FILE)          # stale file from a previous run
     except FileNotFoundError:
         pass
     # auto-guard: flag if a model we treat as reasoning-capable vanished from the Azure reasoning doc
@@ -602,6 +723,8 @@ h1 em{font-style:italic; font-weight:500; color:var(--blue)}
 .seg button[data-region=westeurope] .dot{background:var(--blue)}
 .seg button.on{background:var(--ink); color:#fff; box-shadow:0 6px 16px -8px rgba(22,33,44,.7)}
 .seg.fam button.on{background:var(--ink); color:#fff}
+.seg.effs button{padding:8px 11px; font-size:12.5px; font-family:"JetBrains Mono",monospace}
+.seg.effs button[data-effort=best]{font-family:inherit; font-weight:700}
 .search{position:relative}
 .search input{
   font-family:inherit; font-size:14px; padding:10px 14px 10px 36px; width:230px; color:var(--ink);
@@ -655,8 +778,19 @@ tr.detail.dim{opacity:.5}
 .dt-label{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-right:2px}
 .dt-note{font-size:12px; color:var(--muted)}
 .dt-none{font-size:13px; color:var(--muted)}
-.eff{font-family:"JetBrains Mono",monospace; font-size:11.5px; padding:3px 10px; border-radius:999px; border:1px solid var(--line-strong); color:var(--muted); background:var(--paper)}
+.eff{display:inline-block; font-family:"JetBrains Mono",monospace; font-size:11.5px; padding:4px 10px 5px; border-radius:999px; border:1px solid var(--line-strong); color:var(--muted); background:var(--paper)}
 .eff.def{color:#1f3d77; border-color:rgba(39,80,158,.45); background:rgba(39,80,158,.10); font-weight:700}
+/* τ³ score attached to an effort pill. Ladder bars are scaled to the best score across ALL models
+   and efforts, never per row: a per-row denominator would make luna's ladder (tops out at 27.2)
+   look identical to sol's (33.0), which is the exact comparison the ladder exists to enable. */
+.eff .sc{font-weight:700; color:var(--ink); margin-left:6px}
+.eff .sc:after{content:"%"; font-weight:400; font-size:9px; color:var(--muted); margin-left:1px}
+/* Fixed width, NOT the pill's: pills are text-sized, so a pill-width bar would make "medium"
+   (a long word) look longer than a higher-scoring "xhigh". One width = one scale. */
+.eff .lb{display:block; width:56px; height:3px; margin-top:4px; border-radius:2px; background:rgba(22,33,44,.12); overflow:hidden}
+.eff .lb i{display:block; height:100%; background:linear-gradient(90deg,#2f7d5b,#73c39c)}
+.eff.nb{opacity:.58}                                    /* Azure supports it, AA never scored it */
+.eff.out{border-style:dashed; border-color:rgba(39,80,158,.5)}  /* AA scored it, Azure doesn't list it */
 .fam{
   display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
   padding:3px 9px; border-radius:999px; border:1px solid;
@@ -747,6 +881,18 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
       </div>
     </div>
     <div>
+      <span class="ctl-label">τ³ at effort</span>
+      <div class="seg effs" id="effSeg">
+        <button data-effort="best" class="on">Best</button>
+        <button data-effort="max">max</button>
+        <button data-effort="xhigh">xhigh</button>
+        <button data-effort="high">high</button>
+        <button data-effort="medium">medium</button>
+        <button data-effort="low">low</button>
+        <button data-effort="none">none</button>
+      </div>
+    </div>
+    <div>
       <span class="ctl-label">Currency</span>
       <div class="seg" id="curSeg">
         <button data-cur="DKK" class="on">DKK kr</button>
@@ -771,7 +917,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <th class="sortable hide act" data-sort="released">Released <span class="arr">↓</span></th>
         <th>Availability</th>
         <th class="sortable" data-sort="cognigy">Cognigy <span class="arr">↕</span></th>
-        <th class="num sortable hide" data-sort="tau3" title="τ³-Banking score (Artificial Analysis) — agentic support: policy retrieval + multi-step tool calls">Agentic&nbsp;τ³ <span class="arr">↕</span></th>
+        <th class="num sortable hide" id="tau3Head" data-sort="tau3" title="τ³-Banking score (Artificial Analysis) — agentic support: policy retrieval + multi-step tool calls"><span id="tau3Label">Agentic&nbsp;τ³</span> <span class="arr">↕</span></th>
         <th class="num sortable" data-sort="inp">Input <span class="arr">↕</span></th>
         <th class="num sortable" data-sort="out">Output <span class="arr">↕</span></th>
       </tr></thead>
@@ -785,8 +931,9 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> / <code>gpt-5.6</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> and <code>gpt-5.6</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. <code>gpt-5.6</code> adds a <code>max</code> level (Responses API only). Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted).</p></div>
+    <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> and <code>gpt-5.6</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. <code>gpt-5.6</code> adds a <code>max</code> level (Responses API only). Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted), each carrying its τ³ score where Artificial Analysis measured one — a faded pill means Azure supports that tier but AA never scored it.</p></div>
     <div class="box"><h4>Agentic τ³ benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau3-banking" target="_blank" rel="noopener">τ³-Banking</a> score (% of tasks solved) from Artificial Analysis — higher is better. 97 support tasks where the agent must find the right policy among ~700 documents <em>and</em> run the correct multi-step tool sequence, graded on backend state rather than chat quality. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.6 at <em>max</em>, gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. It is a hard benchmark — the leaderboard tops out near 33%. <code>—</code> = not on the leaderboard (embeddings, gpt-4.1, gpt-4o, gpt-5-nano, the o-series).</p></div>
+    <div class="box"><h4>Comparing at equal effort</h4><p>In <b>Best</b> mode each model shows the highest effort AA ran it at, so the column <em>mixes</em> tiers — <code>gpt-5.6</code> at <em>max</em> against <code>gpt-5</code> at <em>high</em>. Pick a tier in <b>τ³ at effort</b> to re-key the column and rank every model on the same amount of thinking; sorting follows what's displayed. <code>—</code> then means AA didn't run that model at that tier (hover to tell the two kinds of <code>—</code> apart). Only <code>gpt-5.5</code> and the three <code>gpt-5.6</code> models have a full ladder; the rest were run at a single tier. Expand a row (<b>▸</b>) to see a model's whole curve — that's where diminishing returns show up, e.g. <code>gpt-5.6-sol</code> gains just 0.4 points going from <em>xhigh</em> to <em>max</em>, while <code>gpt-5.6-terra</code> gains 7.5.</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
@@ -801,7 +948,9 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
 const PAYLOAD = /*DATA*/null;
 
 const $ = s => document.querySelector(s);
-const state = { region:"both", fam:"all", q:"", sort:"released", dir:-1, cur:"DKK", expanded:new Set() };
+// effort:"best" = each model at whatever tier AA ran hardest (what the page has always shown).
+// Any other value re-keys the τ³ column to that exact tier, so sorting compares like with like.
+const state = { region:"both", fam:"all", q:"", sort:"released", dir:-1, cur:"DKK", effort:"best", expanded:new Set() };
 let ROWS = [];
 
 const SYM = { DKK:{sym:"kr", pre:false, loc:"da-DK"}, USD:{sym:"$", pre:true, loc:"en-US"} };
@@ -836,6 +985,8 @@ function wire(){
     state.fam=b.dataset.fam; setOn("#famSeg",b); render();});
   $("#curSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
     state.cur=b.dataset.cur; setOn("#curSeg",b); render();});
+  $("#effSeg").addEventListener("click",e=>{const b=e.target.closest("button"); if(!b)return;
+    state.effort=b.dataset.effort; setOn("#effSeg",b); render();});
   $("#q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase(); render();});
   $("#tbody").addEventListener("click",e=>{const tr=e.target.closest("tr");
     if(!tr || tr.classList.contains("detail") || !tr.dataset.id) return;
@@ -850,6 +1001,23 @@ function wire(){
 }
 function setOn(sel,btn){document.querySelectorAll(sel+" button").forEach(b=>b.classList.remove("on")); btn.classList.add("on");}
 
+// The τ³ score currently on show: the model's best run, or its score at the selected tier
+// (null when AA never ran that model at that tier). Sorting reads this too, so the order on
+// screen always matches the numbers on screen.
+function tau3At(r){
+  if(state.effort==="best") return r.tau3;
+  const l = r.tau3_by_effort || {};
+  return (state.effort in l) ? l[state.effort] : null;
+}
+// Denominator for every ladder bar: the best score anywhere in the payload, so pills stay
+// comparable across models. Recomputed per render — ROWS never changes, but this is cheap.
+function tau3Ceiling(){
+  let m = 1e-9;
+  ROWS.forEach(r=>{ if(r.tau3>m) m=r.tau3;
+    Object.values(r.tau3_by_effort||{}).forEach(v=>{ if(v>m) m=v; }); });
+  return m;
+}
+
 function visibleRows(){
   let rows = ROWS.filter(r=>{
     if(state.fam!=="all" && r.family!==state.fam) return false;
@@ -861,7 +1029,7 @@ function visibleRows(){
     if(k==="id") return a.id.localeCompare(b.id)*d;
     if(k==="released") return a.released.localeCompare(b.released)*d;
     if(k==="cognigy"){const rk={yes:0,no:1,unknown:2}; return (rk[a.cognigy.status]-rk[b.cognigy.status])*d;}
-    if(k==="tau3"){const av=a[k], bv=b[k]; if(av==null)return 1; if(bv==null)return -1; return (av-bv)*d;}
+    if(k==="tau3"){const av=tau3At(a), bv=tau3At(b); if(av==null)return 1; if(bv==null)return -1; return (av-bv)*d;}
     const av=val(a[k]), bv=val(b[k]);
     if(av===null||av===undefined) return 1; if(bv===null||bv===undefined) return -1;   // n/a sinks
     return (av-bv)*d;
@@ -886,17 +1054,41 @@ function reasoningDetail(r){
   const rz = r.reasoning || {options:[],default:null};
   if(!rz.options || !rz.options.length)
     return `<span class="dt-none">No reasoning effort — not a reasoning model.</span>`;
-  const pills = rz.options.map(o=>{
+  const lad = r.tau3_by_effort || {};
+  const ceil = tau3Ceiling();
+  // Pills come from the curated REASONING map — Azure stays the source of truth for what is
+  // *supported* — with AA's score attached only where one exists. A supported-but-unbenchmarked
+  // tier therefore shows a bare pill, keeping the two sources visibly separate rather than
+  // implying AA measured something it never ran.
+  const pill = (o, extra, tip) => {
     const def = o===rz.default;
-    return `<span class="eff${def?' def':''}">${o}${def?' · default':''}</span>`;
-  }).join('');
+    const s = lad[o];
+    const has = s!==undefined && s!==null;
+    const bar = has ? `<span class="lb"><i style="width:${Math.max(3,(s/ceil)*100).toFixed(1)}%"></i></span>` : '';
+    const cls = `eff${def?' def':''}${has?'':' nb'}${extra?' '+extra:''}`;
+    return `<span class="${cls}"${tip?` title="${tip}"`:''}>${o}${def?' · default':''}`
+         + `${has?`<span class="sc">${s.toFixed(1)}</span>`:''}${bar}</span>`;
+  };
+  const pills = rz.options.map(o=>pill(o,'',`τ³-Banking at reasoning_effort=${o}`)).join('');
+  // A tier AA scored that Azure doesn't document for this model — surfaced, dashed, not merged in.
+  const extras = Object.keys(lad).filter(o=>!rz.options.includes(o))
+    .map(o=>pill(o,'out',`AA scored ${o}, but Azure does not list it for this model`)).join('');
   const dnote = rz.default ? '' : `<span class="dt-note">· default not documented</span>`;
-  return `<span class="dt-label">Supported reasoning effort</span>${pills}<span class="dt-note">— OpenAI API default; Cognigy inherits it</span>${dnote}`;
+  const bnote = Object.keys(lad).length
+    ? `<span class="dt-note">— τ³ per tier, bars scaled to the page's best (${ceil.toFixed(1)}%); default is OpenAI's, Cognigy inherits it</span>`
+    : `<span class="dt-note">— not on the τ³ leaderboard; default is OpenAI's, Cognigy inherits it</span>`;
+  return `<span class="dt-label">Supported reasoning effort</span>${pills}${extras}${bnote}${dnote}`;
 }
 
 function render(){
   $("#cur").textContent = state.cur;
   $("#footcur").textContent = `${state.cur} · per 1,000,000 tokens`;
+  // Name the tier in the header, so a sorted column can't be mistaken for the mixed-tier default.
+  $("#tau3Label").innerHTML = state.effort==="best"
+    ? "Agentic&nbsp;τ³" : `Agentic&nbsp;τ³ · ${state.effort}`;
+  $("#tau3Head").title = state.effort==="best"
+    ? "τ³-Banking score (Artificial Analysis) — each model at the highest effort AA ran it at"
+    : `τ³-Banking score (Artificial Analysis) with every model at reasoning_effort=${state.effort}`;
   const rows = visibleRows();
   const tb = $("#tbody"); tb.innerHTML="";
   const showSC = state.region!=="westeurope";
@@ -928,12 +1120,19 @@ function render(){
       : `<span class="price na">${r.family==='Embedding'?'—':'n/a'}</span>`;
     // % of tasks solved, drawn on the raw scale on purpose: τ³ is a hard benchmark that tops out
     // near 33%, and a bar scaled to the best score would hide that.
-    const ts = r.tau3;
+    const ts = tau3At(r);
     const tvar = r.tau3_variant ? r.tau3_variant.replace(/"/g,'&quot;') : null;
-    const ttip = tvar ? `${tvar} — τ³-Banking (Artificial Analysis)` : "τ³-Banking (Artificial Analysis)";
+    const ttip = state.effort==="best"
+      ? (tvar ? `${tvar} — τ³-Banking (Artificial Analysis)` : "τ³-Banking (Artificial Analysis)")
+      : `${r.id} at reasoning_effort=${state.effort} — τ³-Banking (Artificial Analysis)`;
+    // "—" here means two different things, so say which: never on the leaderboard at all, vs.
+    // on it but not run at the tier currently selected.
+    const bnkNa = state.effort!=="best" && r.tau3!==null && r.tau3!==undefined
+      ? `<span class="price na" title="${r.id} is on the τ³ leaderboard, but AA did not run it at ${state.effort}">—</span>`
+      : `<span class="price na" title="Not on the τ³ leaderboard">—</span>`;
     const bnkCell = (ts!==null && ts!==undefined)
       ? `<span class="price" title="${ttip}">${ts.toFixed(1)}<span class="cur">%</span></span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
-      : `<span class="price na">—</span>`;
+      : bnkNa;
 
     const rz = r.reasoning || {options:[],default:null};
     const rzIs = rz.options && rz.options.length;

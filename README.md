@@ -19,7 +19,12 @@ Live demo: _set after enabling GitHub Pages (see below)_
   each model's agentic customer-support score: find the right policy in a large knowledge base, then
   execute the correct multi-step tool sequence, graded on backend state. Fallback to last-known on
   failure. The scraper takes the leaderboard URL and payload field as arguments, so swapping or
-  adding a leaderboard is a two-argument change.
+  adding a leaderboard is a two-argument change. AA publishes each **reasoning-effort variant as its
+  own entry** (`gpt-5-6-sol-high`, `…-low`, …), so the build assembles a per-effort *ladder* per
+  model. The page's **τ³ at effort** control re-keys the score column to one tier, making the
+  ranking apples-to-apples instead of comparing `gpt-5.6` at *max* against `gpt-5` at *high*; the
+  row expander shows a model's whole curve. When that ladder shrinks or the scrape fails, the build
+  stays green but writes `benchdrift.txt`, which the workflow turns into an assigned issue.
 - It also scrapes the [Azure region-availability page](https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability?pivots=standard#data-zone-standard)
   and **diffs it against the `MODELS` registry**. It doesn't drive the table — `regions` stays hand-curated —
   but the build now warns when a model becomes deployable in Sweden Central / West Europe and isn't listed,
