@@ -727,7 +727,10 @@ h1 em{font-style:italic; font-weight:500; color:var(--blue)}
 .seg button.on{background:var(--ink); color:#fff; box-shadow:0 6px 16px -8px rgba(22,33,44,.7)}
 .seg.fam button.on{background:var(--ink); color:#fff}
 .seg.effs button{padding:8px 11px; font-size:12.5px; font-family:"JetBrains Mono",monospace}
-.seg.effs button[data-effort=best]{font-family:inherit; font-weight:700}
+/* Lowest/Best are per-model resolutions, not tiers — set them off with a rule and the UI font so
+   the mono tier names read as one scale and these two clearly don't belong to it. */
+.seg.effs .sep{width:1px; align-self:stretch; margin:3px 7px; background:var(--line-strong); flex:0 0 auto}
+.seg.effs button[data-effort=best],.seg.effs button[data-effort=lowest]{font-family:inherit; font-weight:700}
 .search{position:relative}
 .search input{
   font-family:inherit; font-size:14px; padding:10px 14px 10px 36px; width:230px; color:var(--ink);
@@ -888,8 +891,10 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     </div>
     <div id="effCtl">
       <span class="ctl-label">τ³ at effort</span>
-      <!-- Weakest -> strongest left to right, so the row reads as a ladder; "Best" is the
-           odd one out (per-model, mixed tiers) and sits at the end rather than heading the scale. -->
+      <!-- Weakest -> strongest left to right, so the row reads as a ladder. "Lowest" and "Best"
+           are NOT tiers: they resolve per model to whatever its weakest/strongest measured run
+           was, mixing tiers across the column. Hence the divider — they must not read as two
+           more steps on the same scale. -->
       <div class="seg effs" id="effSeg">
         <button data-effort="none">none</button>
         <button data-effort="low">low</button>
@@ -897,6 +902,8 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <button data-effort="high">high</button>
         <button data-effort="xhigh">xhigh</button>
         <button data-effort="max">max</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button data-effort="lowest">Lowest</button>
         <button data-effort="best" class="on">Best</button>
       </div>
     </div>
@@ -941,7 +948,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
     <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> and <code>gpt-5.6</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. <code>gpt-5.6</code> adds a <code>max</code> level (Responses API only). Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted), each carrying its τ³ score where Artificial Analysis measured one — a faded pill means Azure supports that tier but AA never scored it.</p></div>
     <div class="box"><h4>Agentic τ³ benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau3-banking" target="_blank" rel="noopener">τ³-Banking</a> score (% of tasks solved) from Artificial Analysis — higher is better. 97 support tasks where the agent must find the right policy among ~700 documents <em>and</em> run the correct multi-step tool sequence, graded on backend state rather than chat quality. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.6 at <em>max</em>, gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. It is a hard benchmark — the leaderboard tops out near 33%. <code>—</code> = not on the leaderboard (embeddings, gpt-4.1, gpt-4o, gpt-5-nano, the o-series).</p></div>
-    <div class="box"><h4>Comparing at equal effort</h4><p>In <b>Best</b> mode each model shows the highest effort AA ran it at, so the column <em>mixes</em> tiers — <code>gpt-5.6</code> at <em>max</em> against <code>gpt-5</code> at <em>high</em>. Pick a tier in <b>τ³ at effort</b> to re-key the column and rank every model on the same amount of thinking; sorting follows what's displayed. <code>—</code> then means AA didn't run that model at that tier (hover to tell the two kinds of <code>—</code> apart). Only <code>gpt-5.5</code> and the three <code>gpt-5.6</code> models have a full ladder; the rest were run at a single tier. Expand a row (<b>▸</b>) to see a model's whole curve — that's where diminishing returns show up, e.g. <code>gpt-5.6-sol</code> gains just 0.4 points going from <em>xhigh</em> to <em>max</em>, while <code>gpt-5.6-terra</code> gains 7.5.</p></div>
+    <div class="box"><h4>Comparing at equal effort</h4><p><b>Lowest</b> and <b>Best</b> sit apart from the tier buttons because they aren't tiers: each resolves <em>per model</em> to its weakest or strongest measured run, so the column <em>mixes</em> tiers — <b>Best</b> pits <code>gpt-5.6</code> at <em>max</em> against <code>gpt-5</code> at <em>high</em>, and together the pair brackets a model's range. Pick a named tier instead to re-key the column and rank every model on the same amount of thinking; sorting follows what's displayed. <code>—</code> then means AA didn't run that model at that tier (hover to tell the two kinds of <code>—</code> apart). Only <code>gpt-5.5</code> and the three <code>gpt-5.6</code> models have a full ladder; the rest were run at a single tier. Expand a row (<b>▸</b>) to see a model's whole curve — that's where diminishing returns show up, e.g. <code>gpt-5.6-sol</code> gains just 0.4 points going from <em>xhigh</em> to <em>max</em>, while <code>gpt-5.6-terra</code> gains 7.5.</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
@@ -1009,11 +1016,22 @@ function wire(){
 }
 function setOn(sel,btn){document.querySelectorAll(sel+" button").forEach(b=>b.classList.remove("on")); btn.classList.add("on");}
 
-// The τ³ score currently on show: the model's best run, or its score at the selected tier
-// (null when AA never ran that model at that tier). Sorting reads this too, so the order on
+const EFFORTS = ["none","minimal","low","medium","high","xhigh","max"];   // weakest -> strongest
+
+// The weakest tier AA actually ran for this model. A model with a score but no ladder (a
+// non-reasoning model like gpt-4.1-mini) has exactly one measurement, which is both its floor
+// and its ceiling — so it reports that, with a null tier.
+function tau3Lowest(r){
+  const l = r.tau3_by_effort || {};
+  for(const e of EFFORTS) if(e in l) return {score:l[e], effort:e};
+  return (r.tau3!==null && r.tau3!==undefined) ? {score:r.tau3, effort:null} : null;
+}
+// The τ³ score currently on show: the model's best or lowest run, or its score at the selected
+// tier (null when AA never ran that model at that tier). Sorting reads this too, so the order on
 // screen always matches the numbers on screen.
 function tau3At(r){
   if(state.effort==="best") return r.tau3;
+  if(state.effort==="lowest"){ const x = tau3Lowest(r); return x ? x.score : null; }
   const l = r.tau3_by_effort || {};
   return (state.effort in l) ? l[state.effort] : null;
 }
@@ -1094,9 +1112,10 @@ function render(){
   // Name the tier in the header, so a sorted column can't be mistaken for the mixed-tier default.
   $("#tau3Label").innerHTML = state.effort==="best"
     ? "Agentic&nbsp;τ³" : `Agentic&nbsp;τ³ · ${state.effort}`;
-  $("#tau3Head").title = state.effort==="best"
-    ? "τ³-Banking score (Artificial Analysis) — each model at the highest effort AA ran it at"
-    : `τ³-Banking score (Artificial Analysis) with every model at reasoning_effort=${state.effort}`;
+  $("#tau3Head").title =
+    state.effort==="best"   ? "τ³-Banking score (Artificial Analysis) — each model at the highest effort AA ran it at"
+  : state.effort==="lowest" ? "τ³-Banking score (Artificial Analysis) — each model at the lowest effort AA ran it at (tiers differ per model)"
+  : `τ³-Banking score (Artificial Analysis) with every model at reasoning_effort=${state.effort}`;
   const rows = visibleRows();
   const tb = $("#tbody"); tb.innerHTML="";
   const showSC = state.region!=="westeurope";
@@ -1130,9 +1149,14 @@ function render(){
     // near 33%, and a bar scaled to the best score would hide that.
     const ts = tau3At(r);
     const tvar = r.tau3_variant ? r.tau3_variant.replace(/"/g,'&quot;') : null;
+    const lowest = tau3Lowest(r);
     const ttip = state.effort==="best"
       ? (tvar ? `${tvar} — τ³-Banking (Artificial Analysis)` : "τ³-Banking (Artificial Analysis)")
-      : `${r.id} at reasoning_effort=${state.effort} — τ³-Banking (Artificial Analysis)`;
+      : state.effort==="lowest"
+        ? (lowest && lowest.effort
+            ? `${r.id} at reasoning_effort=${lowest.effort} — its weakest measured tier — τ³-Banking (Artificial Analysis)`
+            : `${r.id} — its only measured score — τ³-Banking (Artificial Analysis)`)
+        : `${r.id} at reasoning_effort=${state.effort} — τ³-Banking (Artificial Analysis)`;
     // "—" here means three different things, so the tooltip says which: never on the leaderboard;
     // on it but not run at the selected tier; or on it with no tiers to run at all.
     const onBoard = r.tau3!==null && r.tau3!==undefined;
