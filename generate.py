@@ -888,14 +888,16 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     </div>
     <div id="effCtl">
       <span class="ctl-label">τ³ at effort</span>
+      <!-- Weakest -> strongest left to right, so the row reads as a ladder; "Best" is the
+           odd one out (per-model, mixed tiers) and sits at the end rather than heading the scale. -->
       <div class="seg effs" id="effSeg">
-        <button data-effort="best" class="on">Best</button>
-        <button data-effort="max">max</button>
-        <button data-effort="xhigh">xhigh</button>
-        <button data-effort="high">high</button>
-        <button data-effort="medium">medium</button>
-        <button data-effort="low">low</button>
         <button data-effort="none">none</button>
+        <button data-effort="low">low</button>
+        <button data-effort="medium">medium</button>
+        <button data-effort="high">high</button>
+        <button data-effort="xhigh">xhigh</button>
+        <button data-effort="max">max</button>
+        <button data-effort="best" class="on">Best</button>
       </div>
     </div>
     <div>
