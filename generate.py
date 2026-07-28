@@ -243,8 +243,11 @@ EFFORT_ORDER = ["none", "minimal", "low", "medium", "high", "xhigh", "max"]
 # o-series call their floor `minimal` instead, but AA publishes no non-reasoning variant for those,
 # so nothing is mis-keyed today. This suffix convention is NOT a documented API — benchmark_drift()
 # below exists because it can change under us.
+# `minimal` has no variant on the leaderboard today; it is listed so that if AA starts publishing
+# the gpt-5 family's floor tier it is picked up. A ladder GROWING is not something benchmark_drift()
+# flags, so a missing suffix here would stay invisible.
 AA_EFFORT_SUFFIX = {
-    "none": "non-reasoning", "low": "low", "medium": "medium",
+    "none": "non-reasoning", "minimal": "minimal", "low": "low", "medium": "medium",
     "high": "high", "xhigh": "xhigh", "max": "max",
 }
 
