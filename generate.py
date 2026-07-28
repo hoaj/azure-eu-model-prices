@@ -784,19 +784,8 @@ tr.detail.dim{opacity:.5}
 .dt-label{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-right:2px}
 .dt-note{font-size:12px; color:var(--muted)}
 .dt-none{font-size:13px; color:var(--muted)}
-.eff{display:inline-block; font-family:"JetBrains Mono",monospace; font-size:11.5px; padding:4px 10px 5px; border-radius:999px; border:1px solid var(--line-strong); color:var(--muted); background:var(--paper)}
+.eff{font-family:"JetBrains Mono",monospace; font-size:11.5px; padding:3px 10px; border-radius:999px; border:1px solid var(--line-strong); color:var(--muted); background:var(--paper)}
 .eff.def{color:#1f3d77; border-color:rgba(39,80,158,.45); background:rgba(39,80,158,.10); font-weight:700}
-/* τ³ score attached to an effort pill. Ladder bars are scaled to the best score across ALL models
-   and efforts, never per row: a per-row denominator would make luna's ladder (tops out at 27.2)
-   look identical to sol's (33.0), which is the exact comparison the ladder exists to enable. */
-.eff .sc{font-weight:700; color:var(--ink); margin-left:6px}
-.eff .sc:after{content:"%"; font-weight:400; font-size:9px; color:var(--muted); margin-left:1px}
-/* Fixed width, NOT the pill's: pills are text-sized, so a pill-width bar would make "medium"
-   (a long word) look longer than a higher-scoring "xhigh". One width = one scale. */
-.eff .lb{display:block; width:56px; height:3px; margin-top:4px; border-radius:2px; background:rgba(22,33,44,.12); overflow:hidden}
-.eff .lb i{display:block; height:100%; background:linear-gradient(90deg,#2f7d5b,#73c39c)}
-.eff.nb{opacity:.58}                                    /* Azure supports it, AA never scored it */
-.eff.out{border-style:dashed; border-color:rgba(39,80,158,.5)}  /* AA scored it, Azure doesn't list it */
 .fam{
   display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
   padding:3px 9px; border-radius:999px; border:1px solid;
@@ -820,11 +809,13 @@ td.num{text-align:right; position:relative}
 .price{font-family:"JetBrains Mono",monospace; font-weight:500; font-size:14.5px}
 .price .cur{font-size:10.5px; color:var(--muted); font-weight:400; margin-left:3px}
 .price.na{color:var(--no); font-weight:400}
-/* AA ran this model at exactly one effort tier, so its Lowest and Best are the same number — a
-   single data point, not the end of a range. Naming the tier stops a high "Lowest" (gpt-5.4 was
-   only ever run at xhigh) from reading as a weak-effort score. */
-.price .only{font-family:"Archivo"; font-size:9px; font-weight:600; color:var(--muted); margin-left:5px;
+/* The reasoning tier the displayed score was actually measured at, on every scored row. Under
+   Lowest/Best the tier differs per model — that is what made gpt-5.4's "Lowest" of 30.3 (xhigh is
+   its only run) look like a bug rather than a fact. */
+.price .tier{font-family:"Archivo"; font-size:9px; font-weight:600; color:var(--muted); margin-left:5px;
   padding:1px 4px; border:1px solid var(--line-strong); border-radius:4px; vertical-align:2px}
+/* Dashed = AA measured this model at one tier only, so its Lowest and Best are the same number. */
+.price .tier.solo{border-style:dashed}
 .bar{position:absolute; left:14px; right:14px; bottom:8px; height:3px; border-radius:2px; background:rgba(22,33,44,.06); overflow:hidden}
 .bar i{position:absolute; left:0; top:0; bottom:0; border-radius:2px}
 td.inp .bar i{background:linear-gradient(90deg,var(--blue),#5a82d8)}
@@ -951,9 +942,9 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
     <div class="box"><h4>Prices are zone-wide</h4><p>Data Zone Standard token prices are billed at the EU-zone level — identical for Sweden Central and West Europe. The region toggle changes <em>availability</em>, not price.</p></div>
     <div class="box"><h4>Context tiers</h4><p><code>gpt-5.4</code> / <code>gpt-5.5</code> / <code>gpt-5.6</code> show the <em>short-context</em> rate. Long-context and <code>pro</code> tiers are billed higher — see the pricing page.</p></div>
     <div class="box"><h4>What's excluded</h4><p>Cached-input, Batch and Provisioned rates are not shown. <code>ada-002</code> has no Data Zone meter (price n/a). Audio / realtime / image / router models are out of scope.</p></div>
-    <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> and <code>gpt-5.6</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. <code>gpt-5.6</code> adds a <code>max</code> level (Responses API only). Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted), each carrying its τ³ score where Artificial Analysis measured one — a faded pill means Azure supports that tier but AA never scored it.</p></div>
+    <div class="box"><h4>Reasoning effort</h4><p>A model's default <a href="https://platform.openai.com/docs/guides/reasoning" target="_blank" rel="noopener">reasoning_effort</a> is an OpenAI API default; Azure and Cognigy inherit it (Cognigy's node has no reasoning control). Most reasoning models default to <b>medium</b> — <code>gpt-5.1</code> is <b>none</b>; <code>gpt-5.4</code> and <code>gpt-5.6</code> undocumented; gpt-4.x / gpt-4o &amp; embeddings have none. <code>gpt-5.6</code> adds a <code>max</code> level (Responses API only). Supported levels per <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">Azure</a>. Click the <b>▸</b> on a row to see them (default highlighted). This lists what the model <em>accepts</em>, not how it scores — for τ³ per tier, use the <b>τ³ at effort</b> selector.</p></div>
     <div class="box"><h4>Agentic τ³ benchmark</h4><p>Agentic <a href="https://artificialanalysis.ai/evaluations/tau3-banking" target="_blank" rel="noopener">τ³-Banking</a> score (% of tasks solved) from Artificial Analysis — higher is better. 97 support tasks where the agent must find the right policy among ~700 documents <em>and</em> run the correct multi-step tool sequence, graded on backend state rather than chat quality. Uses AA's highest-effort variant, so the reasoning tier varies (gpt-5.6 at <em>max</em>, gpt-5.4/5.5 at <em>xhigh</em>, gpt-5/5.1 at <em>high</em>); hover a score for the exact variant. It is a hard benchmark — the leaderboard tops out near 33%. <code>—</code> = not on the leaderboard (embeddings, gpt-4.1, gpt-4o, gpt-5-nano, the o-series).</p></div>
-    <div class="box"><h4>Comparing at equal effort</h4><p><b>Lowest</b> and <b>Best</b> sit apart from the tier buttons because they aren't tiers: each resolves <em>per model</em> to its weakest or strongest measured run, so the column <em>mixes</em> tiers — <b>Best</b> pits <code>gpt-5.6</code> at <em>max</em> against <code>gpt-5</code> at <em>high</em>, and together the pair brackets a model's range. Pick a named tier instead to re-key the column and rank every model on the same amount of thinking; sorting follows what's displayed. A small tag on a score (<code>xhigh</code>) means AA ran that model at <em>one</em> tier only, so its Lowest and Best are the same figure — <code>gpt-5.4</code> reads 30.3 even at <b>Lowest</b> because <em>xhigh</em> is the only run there is. <code>—</code> then means AA didn't run that model at that tier (hover to tell the two kinds of <code>—</code> apart). Only <code>gpt-5.5</code> and the three <code>gpt-5.6</code> models have a full ladder; the rest were run at a single tier. Expand a row (<b>▸</b>) to see a model's whole curve — that's where diminishing returns show up, e.g. <code>gpt-5.6-sol</code> gains just 0.4 points going from <em>xhigh</em> to <em>max</em>, while <code>gpt-5.6-terra</code> gains 7.5.</p></div>
+    <div class="box"><h4>Comparing at equal effort</h4><p><b>Lowest</b> and <b>Best</b> sit apart from the tier buttons because they aren't tiers: each resolves <em>per model</em> to its weakest or strongest measured run, so the column <em>mixes</em> tiers — <b>Best</b> pits <code>gpt-5.6</code> at <em>max</em> against <code>gpt-5</code> at <em>high</em>, and together the pair brackets a model's range. Pick a named tier instead to re-key the column and rank every model on the same amount of thinking; sorting follows what's displayed. Every score carries a small tag naming the tier it was measured at, so the number is never ambiguous — and a tag reading <code>xhigh only</code> means AA ran that model at <b>one tier only</b>, making its Lowest and Best the same figure. That is why <code>gpt-5.4</code> reads 30.3 even at <b>Lowest</b>: <em>xhigh</em> is the only run there is. Models with no tag (<code>gpt-4.1-mini</code>) aren't reasoning models, so no tier applies. <code>—</code> then means AA didn't run that model at that tier (hover to tell the two kinds of <code>—</code> apart). Only <code>gpt-5.5</code> and the three <code>gpt-5.6</code> models have a full ladder; the rest were run at a single tier. Expand a row (<b>▸</b>) to see a model's whole curve — that's where diminishing returns show up, e.g. <code>gpt-5.6-sol</code> gains just 0.4 points going from <em>xhigh</em> to <em>max</em>, while <code>gpt-5.6-terra</code> gains 7.5.</p></div>
     <div class="box"><h4>Cognigy support</h4><p>Scraped from Cognigy's <a href="https://docs.cognigy.com/ai/agents/develop/gen-ai-and-llms/model-support-by-feature" target="_blank" rel="noopener">model-support</a> page — <b>Microsoft Azure OpenAI</b> section only. Chat models show <b>LLM&nbsp;Prompt&nbsp;Node</b> support; embeddings show <b>Knowledge&nbsp;Search</b> support. <code>—</code> = not listed (the reasoning o-series).</p></div>
     <div class="box"><h4>Kept fresh</h4><p>Regenerated daily by a GitHub Action that re-queries the Azure Retail Prices API (DKK&nbsp;+&nbsp;USD), re-checks region availability, and re-scrapes Cognigy support.</p></div>
   </div>
@@ -1040,14 +1031,6 @@ function tau3At(r){
   const l = r.tau3_by_effort || {};
   return (state.effort in l) ? l[state.effort] : null;
 }
-// Denominator for every ladder bar: the best score anywhere in the payload, so pills stay
-// comparable across models. Recomputed per render — ROWS never changes, but this is cheap.
-function tau3Ceiling(){
-  let m = 1e-9;
-  ROWS.forEach(r=>{ if(r.tau3>m) m=r.tau3;
-    Object.values(r.tau3_by_effort||{}).forEach(v=>{ if(v>m) m=v; }); });
-  return m;
-}
 
 function visibleRows(){
   let rows = ROWS.filter(r=>{
@@ -1085,30 +1068,16 @@ function reasoningDetail(r){
   const rz = r.reasoning || {options:[],default:null};
   if(!rz.options || !rz.options.length)
     return `<span class="dt-none">No reasoning effort — not a reasoning model.</span>`;
-  const lad = r.tau3_by_effort || {};
-  const ceil = tau3Ceiling();
-  // Pills come from the curated REASONING map — Azure stays the source of truth for what is
-  // *supported* — with AA's score attached only where one exists. A supported-but-unbenchmarked
-  // tier therefore shows a bare pill, keeping the two sources visibly separate rather than
-  // implying AA measured something it never ran.
-  const pill = (o, extra, tip) => {
+  // Azure support only — what the model accepts, nothing about how it scores. τ³ per tier lives
+  // in the column via the effort selector, so repeating it here duplicated the same numbers twice
+  // on screen and buried what this row is actually for.
+  const pills = rz.options.map(o=>{
     const def = o===rz.default;
-    const s = lad[o];
-    const has = s!==undefined && s!==null;
-    const bar = has ? `<span class="lb"><i style="width:${Math.max(3,(s/ceil)*100).toFixed(1)}%"></i></span>` : '';
-    const cls = `eff${def?' def':''}${has?'':' nb'}${extra?' '+extra:''}`;
-    return `<span class="${cls}"${tip?` title="${tip}"`:''}>${o}${def?' · default':''}`
-         + `${has?`<span class="sc">${s.toFixed(1)}</span>`:''}${bar}</span>`;
-  };
-  const pills = rz.options.map(o=>pill(o,'',`τ³-Banking at reasoning_effort=${o}`)).join('');
-  // A tier AA scored that Azure doesn't document for this model — surfaced, dashed, not merged in.
-  const extras = Object.keys(lad).filter(o=>!rz.options.includes(o))
-    .map(o=>pill(o,'out',`AA scored ${o}, but Azure does not list it for this model`)).join('');
+    return `<span class="eff${def?' def':''}">${o}${def?' · default':''}</span>`;
+  }).join('');
   const dnote = rz.default ? '' : `<span class="dt-note">· default not documented</span>`;
-  const bnote = Object.keys(lad).length
-    ? `<span class="dt-note">— τ³ per tier, bars scaled to the page's best (${ceil.toFixed(1)}%); default is OpenAI's, Cognigy inherits it</span>`
-    : `<span class="dt-note">— not on the τ³ leaderboard; default is OpenAI's, Cognigy inherits it</span>`;
-  return `<span class="dt-label">Supported reasoning effort</span>${pills}${extras}${bnote}${dnote}`;
+  return `<span class="dt-label">Supported reasoning effort</span>${pills}`
+       + `<span class="dt-note">— OpenAI API default; Cognigy inherits it</span>${dnote}`;
 }
 
 function render(){
@@ -1172,17 +1141,23 @@ function render(){
         ? `${r.id} is on the τ³ leaderboard, but AA did not run it at ${state.effort}`
         : `${r.id} is not a reasoning model — it has no effort tiers (it scores ${r.tau3.toFixed(1)}% as-is)`;
     const bnkNa = `<span class="price na" title="${naTip}">—</span>`;
-    // Lowest and Best resolve per model, so a model AA ran at only ONE tier shows the same number
-    // for both — and that tier may be a strong one (gpt-5.4 exists only at xhigh, so its "Lowest"
-    // is 30.3). Name the tier inline rather than leaving it to a tooltip nobody hovers.
-    const tiers = Object.keys(r.tau3_by_effort || {});
-    const soloTier = (state.effort==="best" || state.effort==="lowest") && canReason && tiers.length===1
-      ? tiers[0] : null;
-    const soloMark = soloTier
-      ? `<span class="only" title="AA ran ${r.id} at one effort tier only (${soloTier}), so its Lowest and Best are the same score">${soloTier}</span>`
+    // The tier that produced the number on screen, named on every scored row. Under Lowest/Best it
+    // differs per model — gpt-5.4 shows 30.3 at "Lowest" because xhigh is the only run AA made —
+    // so leaving it to a tooltip made a correct number look broken.
+    const shownTier =
+        state.effort==="best"   ? r.tau3_best_effort
+      : state.effort==="lowest" ? (lowest ? lowest.effort : null)
+      : state.effort;
+    const solo = canReason && Object.keys(r.tau3_by_effort || {}).length===1;
+    // "only" is spelled out rather than left to the dashed border: at 9px a border style is not a
+    // difference you can read at a glance, and this is the fact that makes a high Lowest make sense.
+    const tierMark = (ts!==null && ts!==undefined && shownTier)
+      ? `<span class="tier${solo?" solo":""}" title="${solo
+          ? `AA ran ${r.id} at one effort tier only (${shownTier}) — its Lowest and Best are the same score`
+          : `Measured at reasoning_effort=${shownTier}`}">${shownTier}${solo?" only":""}</span>`
       : "";
     const bnkCell = (ts!==null && ts!==undefined)
-      ? `<span class="price" title="${ttip}">${ts.toFixed(1)}<span class="cur">%</span>${soloMark}</span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
+      ? `<span class="price" title="${ttip}">${ts.toFixed(1)}<span class="cur">%</span>${tierMark}</span><span class="bar"><i style="width:${Math.max(2,ts).toFixed(1)}%"></i></span>`
       : bnkNa;
 
     const rz = r.reasoning || {options:[],default:null};
