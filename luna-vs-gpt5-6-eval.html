@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GPT-5.1 vs. GPT-5.6 Luna — evaluering til Cognigy-bots</title>
+<style>
+  :root {
+    --ink: #12161D; --surface: #1A202B; --surface-2: #212836;
+    --text: #E8E6DF; --text-dim: #9BA3B4; --text-faint: #6B7385;
+    --accent: #E7A94C; --accent-dim: #B98536;
+    --good: #6FBF8B; --warn: #E0894F; --bad: #DB6B5D;
+    --rule: #2A3140; --rule-soft: #212836;
+    --sans: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --ink: #F7F5F0; --surface: #FFFFFF; --surface-2: #EFEBE2;
+      --text: #1D2129; --text-dim: #5B6472; --text-faint: #848C99;
+      --accent: #B97A2A; --accent-dim: #8F5E1F;
+      --good: #2F8F5B; --warn: #B85E2A; --bad: #B03F32;
+      --rule: #DDD8CC; --rule-soft: #E9E4D8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ink); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+  a { color: var(--accent); }
+  .page { max-width: 860px; margin: 0 auto; padding: clamp(1.5rem,4vw,3rem); }
+  header.top { border-bottom: 1px solid var(--rule); padding-bottom: 1.75rem; margin-bottom: 1.75rem; }
+  .eyebrow { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 0 0 .6rem; }
+  h1 { font-size: clamp(1.6rem,4vw,2.2rem); line-height: 1.2; margin: 0 0 .6rem; font-weight: 600; }
+  .sub { color: var(--text-dim); margin: 0 0 1rem; max-width: 60ch; }
+  .meta { font-family: var(--mono); font-size: .78rem; color: var(--text-faint); display: flex; flex-wrap: wrap; gap: .4rem 1.5rem; }
+  .meta b { color: var(--text-dim); font-weight: 400; }
+
+  .tldr { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; margin-bottom: 1.5rem; }
+  @media (max-width: 680px) { .tldr { grid-template-columns: 1fr; } }
+  .card { border: 1px solid var(--rule); border-top: 3px solid var(--accent); background: var(--surface); border-radius: 4px; padding: 1.1rem 1.25rem; }
+  .card h3 { margin: .2rem 0 .5rem; font-size: 1.05rem; }
+  .card .tag { font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-faint); }
+  .card ul { margin: .5rem 0 0; padding-left: 1.1rem; font-size: .92rem; color: var(--text-dim); }
+  .card li { margin-bottom: .3rem; }
+  .pill { display: inline-block; font-family: var(--mono); font-size: .72rem; padding: .15em .6em; border-radius: 999px; margin-top: .5rem; }
+  .pill.go { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+
+  .why { border: 1px solid var(--rule); border-left: 3px solid var(--accent); background: var(--surface); border-radius: 4px; padding: 1.1rem 1.3rem; margin-bottom: 2rem; font-size: .94rem; color: var(--text-dim); }
+  .why b { color: var(--text); }
+
+  details { border: 1px solid var(--rule); border-radius: 4px; margin-bottom: .8rem; background: var(--surface); }
+  summary { cursor: pointer; padding: .9rem 1.2rem; font-weight: 600; list-style: none; display: flex; align-items: center; gap: .6rem; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸"; color: var(--accent); font-size: .8rem; transition: transform .15s; }
+  details[open] summary::before { transform: rotate(90deg); }
+  summary .n { font-family: var(--mono); color: var(--text-faint); font-size: .8rem; font-weight: 400; }
+  .body { padding: 0 1.2rem 1.2rem; }
+  .body p { max-width: 68ch; color: var(--text-dim); }
+  .body p:first-child { margin-top: 0; }
+  .body code { font-family: var(--mono); font-size: .85em; background: var(--surface-2); padding: .1em .4em; border-radius: 3px; color: var(--accent); }
+  .body pre { background: var(--surface-2); border-radius: 4px; padding: .8rem 1rem; overflow-x: auto; font-family: var(--mono); font-size: .8rem; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; margin: .8rem 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; font-family: var(--mono); font-size: .84rem; }
+  th, td { padding: .55rem .8rem; text-align: left; border-bottom: 1px solid var(--rule-soft); white-space: nowrap; }
+  thead th { font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); background: var(--surface-2); font-weight: 400; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.hi td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+  .checklist li { display: grid; grid-template-columns: 1.6rem 1fr; gap: .5rem; color: var(--text-dim); font-size: .94rem; }
+  .checklist .i { font-family: var(--mono); color: var(--accent); }
+  .checklist b { color: var(--text); }
+  footer { margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: .78rem; color: var(--text-faint); }
+  footer a { text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top">
+    <p class="eyebrow">AAO · Model- &amp; API-evaluering</p>
+    <h1>GPT-5.1 vs. GPT-5.6 "Luna" som svarhjerne i Cognigy</h1>
+    <p class="sub">Er det værd at skifte model og API-type for en Cognigy chatbot? Testet direkte på en produktionslignende flow, med data på kvalitet, hastighed og hvad der stille går i stykker undervejs.</p>
+    <div class="meta">
+      <span>Omfang: <b>52 scenarier × 3 gentagelser pr. konfiguration</b></span>
+      <span>Projekt: <b>Jacobs Agent (yousee-dev)</b></span>
+      <span>Status: <b>evaluering afsluttet</b></span>
+    </div>
+  </header>
+
+  <div class="tldr">
+    <div class="card">
+      <p class="tag">Chatbot</p>
+      <h3>Skift til Luna (reasoning = none)</h3>
+      <span class="pill go">Betinget af prompt-tilpasning</span>
+      <ul>
+        <li>+ Billigere</li>
+        <li>+ ~2× hurtigere</li>
+        <li>− Svarene er mere kortfattede/"kølige" som standard — formentlig løsbart med prompt-arbejde, men ikke testet endnu</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="tag">Voicebot og andre lav-latency scenarier</p>
+      <h3>Skift til Luna (reasoning = none)</h3>
+      <span class="pill go">Klart valg — ingen forbehold</span>
+      <ul>
+        <li>+ Billigere</li>
+        <li>+ ~2× hurtigere</li>
+        <li>+ Den kortfattede stil er en fordel til stemme, ikke en ulempe</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="why">
+    <b>Hvorfor de to anbefalinger er forskellige:</b> Begge bygger på samme test (156 kørsler). GPT-5.1 og Luna ligger kun ca. 2 procentpoint fra hinanden på kvalitet (93,6 % vs. 91,7 %), men Luna svarer på cirka en tredjedel af tiden. Forskellen mellem chat og voice handler om <i>tone</i>, ikke evne — chat belønner i dag den varmere, mere uddybende stil GPT-5.1 har som standard, mens voice belønner præcis den korthed og hurtighed Luna har som standard.
+    <br><br>
+    At komme hertil krævede at finde og rette en reel, tavs fejl i hvordan projektet læser tool-call argumenter under Responses API'et, som Luna kræver (se punkt 2) — uden den rettelse ville Lunas tal ovenfor være markant dårligere, af grunde der intet har med modellen at gøre. Forbeholdet for chat er heller ikke en vag bemærkning: produktionsprompten er skrevet til GPT-5.1 og er aldrig tilpasset en reasoning-model, hvilket OpenAI's egen vejledning tyder på ville kunne indsnævre det resterende gab (se punkt 7).
+  </div>
+
+  <details open>
+    <summary><span class="n">01</span> Beslutning &amp; begrundelse</summary>
+    <div class="body">
+      <p><b>API-strategi:</b> Behold Completions API i produktion i dag. Det er stadig det mest afprøvede og mest konsistente valg. Men Responses API er ikke længere et "nej" — den blokerende bug er fundet, rettet og dokumenteret, og den rigtige model/reasoning-kombination er nu tæt på produktionskvalitet ved cirka dobbelt hastighed. Før vi gør Responses API til standard, vil vi teste med en prompt der faktisk er skrevet til en reasoning-model (punkt 7), i stedet for at arve prompten uændret fra Completions-æraen.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kategori</th><th>Konfiguration</th><th>Resultat</th></tr></thead>
+          <tbody>
+            <tr><td>Produktion i dag</td><td>GPT-5.1 · Completions API</td><td>93,6 % beståelse, ~9,9s i gennemsnit, mest stabile spredning</td></tr>
+            <tr class="hi"><td>Nærmeste udfordrer</td><td>GPT-5.6 Luna · Responses API, reasoning = none</td><td>91,7 % beståelse (156 kørsler), 0 total-fejl, ~4,3s — over 2× hurtigere</td></tr>
+            <tr><td>Forudsætning</td><td>Tool-argument-fix, ved ethvert skift til Responses API</td><td>Bekræftet i stykker, bekræftet løsbart — se punkt 2 før noget flow ændres</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>Voice og andre lav-latency scenarier:</b> Her er svaret klart. Kortfattetheden, der gør chat-anbefalingen forsigtig, er en fordel når en kunde venter i stilhed på et svar. For voice — og alt andet hvor hastighed og korthed er målet, ikke en risiko — anbefaler vi at skifte til Luna (reasoning = none) nu, uden at vente på prompt-arbejdet i punkt 7.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">02</span> Buggen der blokerede alt</summary>
+    <div class="body">
+      <p>At skifte en flows LLM til en Responses API-model (Luna, eller GPT-5.1 på Responses) ødelagde tavst ethvert tool-kald med et påkrævet argument. Ingen fejl, intet crash — argumentet ankom bare tomt, og botten svarede som om værktøjet havde fejlet. På en 52-scenarie-suite lignede det en bred kvalitetsregression i modellen. Det var det ikke.</p>
+      <p>Projektets tool-nodes læser LLM'ens udfyldte argumenter direkte fra provider-svaret:</p>
+      <pre>context.tool_responses.detailedResult.choices[0].message.tool_calls[0].function.arguments</pre>
+      <p>Det er kun korrekt for <code>apiType: chatCompletion</code>. Under <code>apiType: responses</code> ligger samme data et strukturelt andet sted, uden <code>.detailedResult.choices[0].message</code>-wrapperen:</p>
+      <pre>context.tool_responses.toolCalls[0].function.arguments</pre>
+      <p>Rettet i alle 12 berørte nodes med et dual-path-udtryk, der prøver det nye format først og falder tilbage til det gamle:</p>
+      <pre>{{context.tool_responses?.toolCalls?.[0]?.function?.arguments
+  || context.tool_responses?.detailedResult?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments}}</pre>
+      <p><b>Status:</b> Fixet og valideret i alle kørsler i denne rapport, inklusive Luna-resultaterne i punkt 4. Fixet er <i>ikke</i> endnu overført til det parallelle VOICE-kanal-flow, hvor samme mønster er bekræftet til stede, men urørt — det er kun tavst fordi det flow endnu ikke peger på en Responses API-model. Ethvert brand, der laver denne migrering, bør antage samme bug findes overalt, hvor tool-argumenter udtrækkes på denne måde — ikke kun i det flow, der blev testet.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">03</span> Reasoning-standarder er ikke hvad man tror</summary>
+    <div class="body">
+      <p>Ingen af modellerne dokumenterer dette i Cognigy UI'et — der findes ikke et "reasoning effort"-felt. Det ligger kun i Custom Model Options, og de to modeller har hver deres standardtilstand.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>API</th><th>Gyldige niveauer</th><th>Standard uden konfiguration</th></tr></thead>
+          <tbody>
+            <tr><td>GPT-5.1</td><td>Completions</td><td>low, medium, high, xhigh — intet "none"</td><td>felt fraværende (off)</td></tr>
+            <tr><td>GPT-5.1</td><td>Responses</td><td>none, minimal, low, medium, high, xhigh</td><td>off = eksplicit "none"</td></tr>
+            <tr><td>GPT-5.6 Luna</td><td>Responses</td><td>none, low, medium, high, xhigh</td><td>medium — altid reasoning-låst</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Luna afviser <code>temperature</code>, i det øjeblik en anden effort end "none" er aktiv — inklusive dens egen standard. Det viste, at dens standard svarer til "medium": uden konfiguration lander timingen næsten præcis mellem eksplicit low og high.</p>
+      <p>Alle resultater i punkt 4–5 er kørt med dette forstået, og med punkt 2-fixet allerede på plads — hver konfiguration (Completions, Responses, og hvert Luna reasoning-niveau) er kørt som sin egen rene 156-kørsels batch.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">04</span> Svarkvalitet</summary>
+    <div class="body">
+      <p>156 kørsler pr. konfiguration (52 scenarier × 3 runder), mod det live dispatcher-flow med mocking slået til.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Konfiguration</th><th class="num">Beståelse</th><th class="num">Perfekt (3/3)</th><th class="num">Total fejl (0/3)</th></tr></thead>
+          <tbody>
+            <tr class="hi"><td>GPT-5.1, Completions API</td><td class="num">93,6 % (146/156)</td><td class="num">43</td><td class="num">0</td></tr>
+            <tr class="hi"><td>Luna, reasoning = none</td><td class="num">91,7 % (143/156)</td><td class="num">40</td><td class="num">0</td></tr>
+            <tr><td>GPT-5.1, Responses API</td><td class="num">91,0 % (142/156)</td><td class="num">39</td><td class="num">0</td></tr>
+            <tr><td>Luna, medium (standard)</td><td class="num">89,1 % (139/156)</td><td class="num">40</td><td class="num">1</td></tr>
+            <tr><td>Luna, high</td><td class="num">86,5 % (135/156)</td><td class="num">36</td><td class="num">1</td></tr>
+            <tr><td>Luna, low</td><td class="num">78,8 % (123/156)</td><td class="num">26</td><td class="num">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Luna på "none" er dens bedste resultat på tværs af alle testede indstillinger — ikke en afvejning, men en gevinst på både kvalitet og hastighed samtidig. Den slår GPT-5.1 på Responses API direkte, lukker det meste af gabet til Completions-produktionsbaseline, og gør det på cirka en tredjedel af GPT-5.1's svartid (punkt 5).</p>
+      <p>To ting fra reasoning-sweepet er værd at huske, før man skruer reasoning op på nogen model: <b>mere reasoning gav ikke bedre kvalitet</b> her — high scorede lavere end medium trods cirka tre gange så høj latency — og <b>low kostede mest kvalitet for mindst grund</b>, et reelt fald på ~10 point fra medium. Reasoning effort er ikke en skala hvor "mere" eller "mindre" forudsigeligt hjælper; det skal måles pr. use case.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">05</span> Latency</summary>
+    <div class="body">
+      <p>Isoleret måling — et minimalt flow med et non-streaming LLM-kald og en substantiel (~300 ords) prompt, målt uafhængigt af routing eller tool-call overhead, så det afspejler selve modelkaldet.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Konfiguration</th><th class="num">n</th><th class="num">Gns.</th><th class="num">Median</th><th class="num">Min</th><th class="num">Max</th></tr></thead>
+          <tbody>
+            <tr class="hi"><td>Luna, none</td><td class="num">8</td><td class="num">4,3s</td><td class="num">4,1s</td><td class="num">3,9s</td><td class="num">5,6s</td></tr>
+            <tr><td>Luna, low</td><td class="num">11</td><td class="num">7,9s</td><td class="num">6,4s</td><td class="num">5,0s</td><td class="num">20,8s</td></tr>
+            <tr><td>GPT-5.1, Completions API</td><td class="num">8</td><td class="num">9,9s</td><td class="num">10,3s</td><td class="num">7,5s</td><td class="num">11,6s</td></tr>
+            <tr><td>GPT-5.1, Responses API</td><td class="num">8</td><td class="num">11,3s</td><td class="num">9,8s</td><td class="num">7,0s</td><td class="num">23,0s</td></tr>
+            <tr><td>Luna, medium (standard)</td><td class="num">3</td><td class="num">14,3s</td><td class="num">8,7s</td><td class="num">7,3s</td><td class="num">26,9s</td></tr>
+            <tr><td>Luna, high</td><td class="num">8</td><td class="num">26,7s</td><td class="num">25,6s</td><td class="num">17,2s</td><td class="num">49,1s</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Lille n med vilje — dette er en målrettet timing-test, ikke 156-kørsels kvalitetssuiten. Se de absolutte tal som retningsgivende; det er rækkefølgen og spredningen der er signalet.</p>
+      <p>Konsistens betyder lige så meget som gennemsnittet. GPT-5.1 på Completions API har den tætteste spredning af alle konfigurationer (7,5–11,6s). Begge Responses API-konfigurationer med aktiv reasoning — uanset model — viser reel hale-risiko: en kunde der af og til venter 20–23 sekunder, selv når det typiske tilfælde er hurtigt. Luna på "none" er den ene undtagelse, og er samtidig det tætteste, hurtigste resultat i hele tabellen.</p>
+      <p>Ved "high" effort fejlede kald direkte første gang — ikke timeout, men "Response cut off due to max output token limit": reasoning-tokens brugte hele budgettet før noget synligt svar blev produceret. Enhver, der tester højere reasoning effort, bør hæve <code>maxTokens</code> markant først, ellers vil ethvert resultat se ud som en fejl, der slet ikke handler om kvalitet.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">06</span> Adfærdsobservationer</summary>
+    <div class="body">
+      <p>Ud over tallene afslørede en gennemlæsning af selve transskriptionerne reel, modelspecifik adfærd — ikke bare tilfældig pass/fail-støj.</p>
+      <ul>
+        <li>Uden nogen promptændringer læses Luna som mærkbart mere kortfattet og mindre "varm" end GPT-5.1 — kortere svar, færre bløde vendinger (emoji, anerkendende fraser som "det lyder irriterende"), en mere transaktionel tone generelt. Det gjaldt på tværs af effort-niveauer, tydeligst ved "none". Det er en reel personlighedsforskel, ikke en scoringsartefakt — og den slår forskelligt ud afhængigt af kanal (se punkt 1).</li>
+        <li>Ved medium/high effort stolede Luna for lidt på sine egne tool-resultater. I flere tilfælde blev værktøjet kaldt og returnerede korrekt data, men svarteksten brugte det ikke — og faldt i stedet tilbage på en generisk afvisning eller et tilbud om opkald. Delvist forklaret af punkt 2-buggen (tomme argumenter → reelt tomme tool-resultater), men ikke fuldt ud — mønstret gjaldt også steder, buggen ikke ramte.</li>
+        <li>Ved medium effort tog Luna nogle gange ikke en udtrykt præference for pålydende. Et transskript havde kunden sige "jeg vil ikke vente i kø, ring mig bare op" to gange, før botten stoppede med at tilbyde chat først. GPT-5.1's svar på samme scenarie respekterede ønsket med det samme.</li>
+        <li>Ved "none" forsvandt den friktion. Transskripter var mærkbart mere direkte: tool-data nævnt klart i én tur, eksplicitte præferencer respekteret straks, ingen uopfordrede opklarende spørgsmål — den bedst opførende Luna-konfiguration, og samtidig den hurtigste og mest præcise.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">07</span> Utestet variabel: prompten</summary>
+    <div class="body">
+      <p>Alle resultater i denne rapport bruger produktionsprompten præcis som skrevet til GPT-5.1. Den er aldrig tilpasset GPT-5.6. Det kunne flytte tallene begge veje — og OpenAI's egen vejledning tyder på, at det formentlig ville hjælpe.</p>
+      <p>OpenAI udgiver modelspecifikke prompt-guides for hver GPT-5-generation og er eksplicitte om, at en prompt tunet til én version ikke er garanteret optimal til den næste: "prompts der virkede med GPT-4.1 eller andre modeller oversætter ikke altid direkte" til GPT-5-klasse modeller, og at udnytte deres fulde potentiale kræver at tilpasse prompten til deres specifikke adfærd.</p>
+      <p>To konkrete punkter fra den vejledning er direkte relevante for projektets prompt (den store instruktionsblok, der driver Answer Agent og Tool-calling Agent):</p>
+      <ul>
+        <li><b>Overdrevent præskriptive "vær grundig"-instruktioner bliver kontraproduktive.</b> OpenAI fandt, at instruktioner om udtømmende kontekstindsamling — et almindeligt mønster i Completions-æraens prompts — får GPT-5-klasse modeller til at overbruge værktøjer og bruge reasoning-tokens unødvendigt, da "GPT-5 allerede er naturligt introspektiv og proaktiv med at indsamle kontekst". Vores nuværende prompt indeholder flere instruktioner i den stil.</li>
+        <li><b>Reasoning-tilstand mellem tool-kald er en Responses API-specifik funktion, vi ikke bruger.</b> OpenAI anbefaler at kæde tool-calling-runder sammen med <code>previous_response_id</code>, så modellens reasoning-tilstand føres videre i stedet for at blive genopbygget ved hvert kald — både hurtigere og billigere. Cognigys tool-calling-abstraktion ser ikke ud til at eksponere dette, hvilket i sig selv kan bidrage til latency-variansen i punkt 5.</li>
+      </ul>
+      <p>Luna når allerede 91,7 % på en prompt bygget til en anden model. En prompt faktisk tilpasset GPT-5.6's adfærd — mindre præskriptiv grundighed, klarere instruktionshierarki, tool-preambler til agentiske trin — kunne plausibelt lukke det resterende gab, eller regressere hvis ændringerne laves skødesløst. Det skal testes bevidst, ikke antages i nogen retning, før en endelig beslutning om API-strategi.</p>
+      <p style="font-size:.85rem">Kilder: <a href="https://cookbook.openai.com/examples/gpt-5/gpt-5-1_prompting_guide" target="_blank" rel="noopener">GPT-5 prompting guide (OpenAI Cookbook)</a> · <a href="https://openai.com/index/gpt-5-new-params-and-tools-for-developers/" target="_blank" rel="noopener">A practical guide to building with GPT-5 (OpenAI)</a></p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">08</span> Hvilken "5.6", præcis?</summary>
+    <div class="body">
+      <p>Sammenholdt med den offentlige τ³-Banking agentic-benchmark (Artificial Analysis) viser det sig, at "Luna" er en af flere navngivne kapacitets-tiers inden for GPT-5.6-familien — ikke et størrelsesneutralt navn, og ikke kun et spørgsmål om reasoning effort.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Placering</th><th>Model</th><th class="num">Score</th></tr></thead>
+          <tbody>
+            <tr><td>2 / 18</td><td>GPT-5.6 Sol</td><td class="num">33,0 %</td></tr>
+            <tr><td>4 / 18</td><td>GPT-5.6 Terra</td><td class="num">31,8 %</td></tr>
+            <tr class="hi"><td>8 / 18</td><td>GPT-5.6 Luna</td><td class="num">27,2 %</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>GPT-5.1 optræder ikke på dette specifikke leaderboard. Kilde: <a href="https://artificialanalysis.ai/evaluations/tau3-banking" target="_blank" rel="noopener">artificialanalysis.ai/evaluations/tau3-banking</a>.</p>
+      <p>Sol og Terra ligger nær toppen af hele feltet på 18 modeller; Luna ligger cirka seks point efter Sol, i den nedre midte. At Luna på "none" alligevel når 91,7 % på vores egen suite, selvom den er den lettere tier af GPT-5.6, er bemærkelsesværdigt i sig selv.</p>
+      <p>Sol og Terra er bevidst ikke testet i denne evaluering — begge har et markant højere prispunkt end den nuværende GPT-5.1 Completions-baseline, og Luna besvarer allerede det spørgsmål, evalueringen var afgrænset til (er en reasoning-model på Responses API brugbar til produktionspris). Om de dyrere tiers ville retfærdiggøre merprisen på kvalitet er et separat cost/benefit-spørgsmål, bevidst uden for scope her.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">09</span> Platform-modenhed</summary>
+    <div class="body">
+      <p>Punkt 2-buggen handler egentlig ikke om Luna eller GPT-5.1 — det er, at projektets etablerede tool-argument-mønster er ældre end Responses API'et, og intet i værktøjerne fangede uoverensstemmelsen, da et flow skiftede API-type. Det hul er rapporteret opstrøms til cogx-vedligeholderne som to issues:</p>
+      <ul>
+        <li><b>Dokumentationshul</b> — tool-calling-referencen advarer ikke om, at formen på <code>context.tool_responses</code> er apiType-specifik, eller peger bygherrer mod den provider-agnostiske <code>input.llmPrompt.toolArgs.&lt;param&gt;</code>-mekanisme i stedet.</li>
+        <li><b>Debugging-hul</b> — der er ingen måde at læse levende <code>input</code>/<code>context</code>/<code>profile</code>-værdier under fejlsøgning; at bekræfte denne bug krævede midlertidigt at skrive debug-værdier ind i en kundevendt svar-streng, hvilket ikke er en sikker vane at støtte sig til.</li>
+      </ul>
+      <p>Begge afventer maintainer-triage på tidspunktet for denne rapport. Ethvert brand, der planlægger en lignende migrering, bør tjekke om disse er løst, før de går i gang — at gå ind blindt betyder at genopdage samme fejlmønster fra bunden.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">10</span> Migrations-tjekliste til andre brands</summary>
+    <div class="body">
+      <p>Hvis et andet brand på platformen vil evaluere en nyere eller reasoning-kapabel model, er dette rækkefølgen vi ville ønske, vi havde haft fra start.</p>
+      <ul class="checklist">
+        <li><span class="i">01</span><span><b>Gennemgå tool-argument-udtræk før noget skiftes.</b> Grep enhver addToContext/CognigyScript-node, der læser rå <code>tool_responses.*</code>, for en hardcodet form. Brug dual-path-mønstret fra punkt 2, eller migrer til <code>input.llmPrompt.toolArgs</code>.</span></li>
+        <li><span class="i">02</span><span><b>Test om målmodellen accepterer temperature/top_p.</b> Reasoning-låste modeller afviser dem helt. Nulstil begge via Custom Model Options hvis det er tilfældet — og forvent at det krav ændrer sig igen, når reasoning aktiveres eksplicit.</span></li>
+        <li><span class="i">03</span><span><b>Antag aldrig en reasoning-standard — test den.</b> Nogle modeller er slået fra som standard, andre er låst til et mellemniveau. Den eneste måde at vide det på er at sammenligne ukonfigureret timing/adfærd med en eksplicit "none"-kørsel.</span></li>
+        <li><span class="i">04</span><span><b>Genskriv prompten til den model, I lander på — portér den ikke uændret.</b> Se punkt 7: OpenAI udgiver versionsspecifik prompt-vejledning af en grund. En prompt tunet til en Completions-æra-model er ikke automatisk optimal til en reasoning-model, i nogen retning.</span></li>
+        <li><span class="i">05</span><span><b>Hæv maxTokens før I tester højere reasoning effort.</b> Reasoning-tokens trækker fra samme budget som det synlige svar. Underdimensionering giver en hård afskæringsfejl, der ikke ligner et reasoning-problem.</span></li>
+        <li><span class="i">06</span><span><b>Hæv node-timeout over den værste latency, I faktisk har observeret.</b> En kort timeout omdirigerer tavst langsomme-men-korrekte svar til fejlhåndteringsveje, hvilket derefter fremstår som en kvalitetsfejl, det aldrig var.</span></li>
+        <li><span class="i">07</span><span><b>Kør hvert scenarie mindst tre gange, før I konkluderer noget.</b> Denne suites egen støjbund ligger på cirka 5–10 point pass-rate-varians mellem identiske, uændrede gentagne kørsler.</span></li>
+        <li><span class="i">08</span><span><b>Bekræft hvilken model-tier I faktisk deployer.</b> Familie-kodenavne (punkt 8) kan repræsentere markant forskellige kapacitetsniveauer, ikke bare en variant af samme underliggende model.</span></li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="n">11</span> Åbne punkter</summary>
+    <div class="body">
+      <ul>
+        <li><b>Afklaret:</b> Luna ved reasoning: none — nu valideret i fuld skala (156 kørsler, 91,7 %). Ikke længere en stikprøve.</li>
+        <li><b>Utestet:</b> Produktionsprompten er ikke tilpasset en reasoning-model (punkt 7). Det er den enkeltstående største uudnyttede løftestang, og kunne ændre anbefalingen i punkt 1 i begge retninger.</li>
+        <li><b>Bevidst udeladt:</b> GPT-5.6 Sol/Terra — ikke testet med vilje: begge er prissat markant over den nuværende GPT-5.1-baseline, og Luna besvarer allerede evalueringens afgrænsede spørgsmål (punkt 8).</li>
+        <li><b>Afventer opstrøms:</b> cogx-plugin issues #150 (dokumentation) og #151 (debugging-værktøjer) — afventer maintainer-triage.</li>
+      </ul>
+    </div>
+  </details>
+
+  <footer>
+    Jacobs Agent · yousee-dev · internt test/POC-projekt, ikke et produktionssystem med rigtige kunder — pt. sat til Luna/Responses API som fungerende POC-reference.<br>
+    Intern reference på tværs af AAO-brands.
+  </footer>
+
+</div>
+</body>
+</html>
