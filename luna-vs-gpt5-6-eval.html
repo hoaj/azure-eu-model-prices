@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPT‑5.1 vs. GPT‑5.6 Luna — YouSee chatbot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f1ede3; --paper:#faf7f0; --ink:#16212c; --muted:#62707a;
+  --line:#ddd6c7; --line-strong:#c6bda9;
+  --blue:#27509e; --gold:#c0892a; --rust:#b3502f;
+  --ok:#2f7d5b; --no:#b6ad9c;
+  --shadow:0 1px 0 rgba(22,33,44,.04), 0 18px 40px -28px rgba(22,33,44,.5);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif; font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 12% -8%, rgba(192,137,42,.10), transparent 42%),
+    radial-gradient(circle at 96% 0%, rgba(39,80,158,.10), transparent 38%);
+  background-attachment:fixed;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+}
+.wrap{position:relative; z-index:1; max-width:960px; margin:0 auto; padding:46px 28px 90px}
+
+header{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:9px; font-size:11.5px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--muted); font-weight:600;
+}
+.eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(47,125,91,.5);animation:pulse 2.4s infinite}
+h1{
+  font-family:"Fraunces",serif; font-weight:900; font-optical-sizing:auto;
+  font-size:clamp(30px,5.2vw,50px); line-height:1.04; letter-spacing:-.02em;
+  margin:.32em 0 .18em; max-width:20ch;
+}
+h1 em{font-style:italic; font-weight:500; color:var(--blue)}
+.lede{max-width:64ch; color:#33414c; font-size:16px; margin:0 0 6px}
+.meta-row{
+  display:flex; flex-wrap:wrap; gap:10px 22px; align-items:center; margin-top:18px;
+  padding-top:16px; border-top:1px solid var(--line); font-size:13px; color:var(--muted);
+}
+.meta-row b{color:var(--ink); font-weight:600}
+.stamp{font-family:"JetBrains Mono",monospace; font-size:12.5px}
+.related{margin:10px 0 0; font-size:13.5px}
+.related a{color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(39,80,158,.3)}
+.related a:hover{border-color:var(--blue)}
+
+/* ---------- recommendation cards ---------- */
+.reco-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:30px 0 8px; animation:rise .7s .08s cubic-bezier(.2,.7,.2,1) both}
+@media (max-width:760px){.reco-grid{grid-template-columns:1fr}}
+.reco{background:var(--paper); border:1px solid var(--line-strong); border-radius:16px; box-shadow:var(--shadow); padding:20px 22px 22px; border-top:4px solid var(--ok)}
+.reco.test{border-top-color:var(--gold)}
+.reco .tag{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:700; margin:0 0 6px}
+.reco h2{font-family:"Fraunces",serif; font-weight:600; font-size:1.18rem; margin:0 0 10px; line-height:1.25}
+.reco .action{
+  display:inline-flex; align-items:center; gap:7px; font-family:"JetBrains Mono",monospace; font-size:12.5px;
+  font-weight:600; padding:6px 13px; border-radius:999px; margin-bottom:14px;
+}
+.reco:not(.test) .action{color:var(--ok); background:rgba(47,125,91,.12)}
+.reco.test .action{color:#7a5a12; background:rgba(192,137,42,.16)}
+.reco ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+.reco li{font-size:13.5px; color:#3b4751; padding-left:1.1rem; position:relative; line-height:1.45}
+.reco li.pro::before{content:"+"; position:absolute; left:0; color:var(--ok); font-family:"JetBrains Mono",monospace; font-weight:700}
+.reco li.con::before{content:"\2212"; position:absolute; left:0; color:var(--rust); font-family:"JetBrains Mono",monospace; font-weight:700}
+
+.bridge{max-width:66ch; color:var(--muted); font-size:13.5px; margin:16px 0 30px; padding-left:2px}
+
+/* ---------- accordion ---------- */
+.acc{display:flex; flex-direction:column; gap:12px; animation:rise .7s .16s cubic-bezier(.2,.7,.2,1) both}
+details.acc-item{background:var(--paper); border:1px solid var(--line-strong); border-radius:14px; box-shadow:var(--shadow); overflow:hidden}
+details.acc-item summary{
+  cursor:pointer; list-style:none; padding:15px 20px; display:flex; align-items:center; gap:12px;
+  font-family:"Fraunces",serif; font-weight:600; font-size:1.02rem; color:var(--ink);
+}
+details.acc-item summary::-webkit-details-marker{display:none}
+.exp{
+  flex:0 0 auto; border:0; background:rgba(22,33,44,.06); color:var(--muted); font:700 11px/1 "JetBrains Mono",monospace;
+  width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px;
+  transition:transform .15s, background .15s, color .15s;
+}
+details.acc-item[open] .exp{transform:rotate(90deg); background:rgba(22,33,44,.1); color:var(--ink)}
+.acc-item .sub{font-family:"Archivo"; font-weight:500; font-size:12.5px; color:var(--muted); margin-left:auto; white-space:nowrap}
+.acc-body{padding:0 22px 22px 54px; border-top:1px solid var(--line)}
+.acc-body p{max-width:70ch; color:#3b4751; font-size:14px}
+.acc-body h4{font-family:"Archivo"; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; margin:20px 0 8px}
+.acc-body h4:first-child{margin-top:18px}
+.acc-body ul{max-width:70ch; padding-left:1.2rem; margin:0 0 12px; color:#3b4751; font-size:14px}
+.acc-body li{margin-bottom:6px}
+.acc-body code{font-family:"JetBrains Mono",monospace; font-size:.85em; background:rgba(22,33,44,.06); padding:.12em .4em; border-radius:4px; color:#7a3c12}
+.acc-body pre{background:#f5f1e7; border:1px solid var(--line); border-radius:8px; padding:12px 14px; overflow-x:auto; font-family:"JetBrains Mono",monospace; font-size:12.5px; max-width:70ch}
+.note{font-size:12.5px; color:var(--muted); max-width:70ch; margin:6px 0 12px}
+
+.callout{background:#f5f1e7; border:1px solid var(--line-strong); border-left:3px solid var(--gold); border-radius:8px; padding:12px 16px; margin:10px 0 16px; font-size:13.5px; color:#3b4751; max-width:70ch}
+.callout b{color:var(--ink)}
+
+.table-wrap{overflow-x:auto; border:1px solid var(--line-strong); border-radius:10px; margin:10px 0 16px}
+table{border-collapse:collapse; width:100%; min-width:480px; font-family:"JetBrains Mono",monospace; font-size:13px}
+th,td{padding:9px 13px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap}
+thead th{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); background:#f5f1e7; font-weight:700}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.hi td{background:rgba(192,137,42,.08)}
+td.num,th.num{text-align:right}
+td.model,th.model{font-family:"Archivo"; white-space:normal; color:var(--ink)}
+
+.checklist{display:flex; flex-direction:column; gap:12px; max-width:70ch; margin:0 0 8px; padding:0; list-style:none}
+.checklist li{display:grid; grid-template-columns:1.9rem 1fr; gap:10px}
+.checklist .i{font-family:"JetBrains Mono",monospace; color:var(--blue); font-weight:700; font-size:13px}
+.checklist b{color:var(--ink)}
+.checklist span span{color:#3b4751; font-size:13.5px}
+
+.flag{background:rgba(179,80,47,.08); border:1px solid rgba(179,80,47,.28); border-radius:10px; padding:14px 18px; margin-top:26px; font-size:13px; color:#7a3c12}
+.flag b{color:var(--rust)}
+
+footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 18px; justify-content:space-between}
+
+@keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,125,91,.5)} 70%{box-shadow:0 0 0 7px rgba(47,125,91,0)} 100%{box-shadow:0 0 0 0 rgba(47,125,91,0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow"><span class="pulse"></span>AAO · Model- &amp; API-evaluering</span>
+    <h1>GPT‑5.1 vs. GPT‑5.6 <em>Luna</em></h1>
+    <p class="lede">156 kørsler mod YouSee's chatbot. Konklusionen først — tal og metode er i boksene nedenfor.</p>
+    <div class="meta-row">
+      <span>Omfang <b class="stamp">52 scenarier × 3 gentagelser</b></span>
+      <span>Projekt <b>Jacobs Agent (yousee-dev)</b></span>
+      <span>Status <b>evaluering afsluttet</b></span>
+    </div>
+    <p class="related"><a href="index.html">← Tilbage til pris- og modeloversigten</a></p>
+  </header>
+
+  <div class="reco-grid">
+    <div class="reco">
+      <p class="tag">Voicebot &amp; alt uden direkte kunde-output</p>
+      <h2>Fx tool-calling/routing-prompter — svar kunden aldrig ser</h2>
+      <span class="action">→ Skift til Luna, reasoning = none</span>
+      <ul>
+        <li class="pro">Lavere pris</li>
+        <li class="pro">~2× hurtigere</li>
+        <li class="pro">Kortfattet stil er en fordel her — ingen kunde oplever tonen direkte</li>
+      </ul>
+    </div>
+    <div class="reco test">
+      <p class="tag">Chatbot-svar der går direkte til kunden</p>
+      <h2>Det prompt som definerer den tekst kunden læser</h2>
+      <span class="action">→ Test &amp; juster prompten kvalitativt først</span>
+      <ul>
+        <li class="pro">Potentiale for lavere pris og ~2× hurtigere, hvis svarstilen godkendes</li>
+        <li class="con">Luna svarer tørrere/køligere som standard — skal valideres kvalitativt, ikke kun på pass-rate, før I skifter</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="bridge">Begge anbefalinger kommer fra samme test: GPT‑5.1 og Luna ligger ca. 2 procentpoint fra hinanden på kvalitet, men Luna svarer på en tredjedel af tiden. Forskellen mellem de to anbefalinger er tone, ikke evne — se "Begrundelse" for tallene.</p>
+
+  <div class="acc">
+
+    <details class="acc-item">
+      <summary><button class="exp" aria-hidden="true">▸</button>Begrundelse<span class="sub">Svarkvalitet · latency · svarstil</span></summary>
+      <div class="acc-body">
+        <h4>Svarkvalitet — 156 kørsler pr. konfiguration (52 scenarier × 3 runder)</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th class="model">Konfiguration</th><th class="num">Beståelse</th><th class="num">Perfekt (3/3)</th><th class="num">Total fejl (0/3)</th></tr></thead>
+            <tbody>
+              <tr class="hi"><td class="model">GPT-5.1, Completions API, reasoning: none</td><td class="num">93,6 % (146/156)</td><td class="num">43</td><td class="num">0</td></tr>
+              <tr class="hi"><td class="model">GPT-5.6-luna, Responses API, reasoning: none</td><td class="num">91,7 % (143/156)</td><td class="num">40</td><td class="num">0</td></tr>
+              <tr><td class="model">GPT-5.1, Responses API, reasoning: none</td><td class="num">91,0 % (142/156)</td><td class="num">39</td><td class="num">0</td></tr>
+              <tr><td class="model">GPT-5.6-luna, Responses API, reasoning: medium</td><td class="num">89,1 % (139/156)</td><td class="num">40</td><td class="num">1</td></tr>
+              <tr><td class="model">GPT-5.6-luna, Responses API, reasoning: high</td><td class="num">86,5 % (135/156)</td><td class="num">36</td><td class="num">1</td></tr>
+              <tr><td class="model">GPT-5.6-luna, Responses API, reasoning: low</td><td class="num">78,8 % (123/156)</td><td class="num">26</td><td class="num">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Luna på "none" er dens bedste resultat, uanset hvad man kigger på — ikke en afvejning mellem kvalitet og hastighed, men en gevinst på begge. Den slår GPT-5.1 på Responses API og lukker det meste af gabet til Completions-baselinen, på en tredjedel af GPT-5.1's svartid.</p>
+        <p>To ting er værd at huske, før man skruer reasoning op på nogen model: mere reasoning gav ikke bedre kvalitet her — high scorede lavere end medium, med ca. tre gange så høj latency. Og low kostede mest kvalitet for mindst grund, et fald på ~10 point fra medium.</p>
+
+        <h4>Latency — isoleret måling af selve modelkaldet</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th class="model">Konfiguration</th><th class="num">n</th><th class="num">Gns.</th><th class="num">Median</th><th class="num">Min</th><th class="num">Max</th></tr></thead>
+            <tbody>
+              <tr class="hi"><td class="model">GPT-5.6-luna, Responses API, reasoning: none</td><td class="num">8</td><td class="num">4,3s</td><td class="num">4,1s</td><td class="num">3,9s</td><td class="num">5,6s</td></tr>
+              <tr><td class="model">GPT-5.6-luna, Responses API, reasoning: low</td><td class="num">11</td><td class="num">7,9s</td><td class="num">6,4s</td><td class="num">5,0s</td><td class="num">20,8s</td></tr>
+              <tr><td class="model">GPT-5.1, Completions API, reasoning: none</td><td class="num">8</td><td class="num">9,9s</td><td class="num">10,3s</td><td class="num">7,5s</td><td class="num">11,6s</td></tr>
+              <tr><td class="model">GPT-5.1, Responses API, reasoning: none</td><td class="num">8</td><td class="num">11,3s</td><td class="num">9,8s</td><td class="num">7,0s</td><td class="num">23,0s</td></tr>
+              <tr><td class="model">GPT-5.6-luna, Responses API, reasoning: medium</td><td class="num">3</td><td class="num">14,3s</td><td class="num">8,7s</td><td class="num">7,3s</td><td class="num">26,9s</td></tr>
+              <tr><td class="model">GPT-5.6-luna, Responses API, reasoning: high</td><td class="num">8</td><td class="num">26,7s</td><td class="num">25,6s</td><td class="num">17,2s</td><td class="num">49,1s</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Lille n med vilje — det er en målrettet timing-test, ikke 156-kørsels suiten. Rækkefølgen og spredningen er signalet, ikke de absolutte tal.</p>
+        <p>Konsistens betyder lige så meget som gennemsnittet. GPT-5.1 på Completions API har den tætteste spredning af alle konfigurationer. Begge Responses API-konfigurationer med aktiv reasoning har en reel hale-risiko: en kunde der af og til venter 20–23 sekunder, selv når det typiske svar er hurtigt. Luna på "none" er undtagelsen — det tætteste og hurtigste resultat i hele tabellen.</p>
+        <p class="note">Ved "high" effort fejlede kald direkte første gang: "Response cut off due to max output token limit" — reasoning-tokens brugte hele budgettet, før der kom noget synligt svar. Hæv <code>maxTokens</code>, før I tester højere reasoning effort.</p>
+
+        <h4>Svarstil — læst direkte i transskripterne</h4>
+        <ul>
+          <li>Uden promptændringer er Luna mærkbart mere kortfattet og mindre "varm" end GPT-5.1 — kortere svar, færre bløde vendinger, mere transaktionel tone. Gjaldt på tværs af alle effort-niveauer, tydeligst ved "none". En reel personlighedsforskel, ikke en scoringsartefakt.</li>
+          <li>Ved medium/high effort stolede Luna for lidt på sine egne tool-resultater. Værktøjet returnerede korrekt data, men svarteksten brugte det ikke og faldt tilbage på en generisk afvisning.</li>
+          <li>Ved medium effort tog Luna nogle gange ikke en kundepræference for pålydende — kunden måtte gentage sig, før botten rettede sig. GPT-5.1 respekterede samme ønske med det samme.</li>
+          <li>Ved "none" var den friktion væk. Mest direkte, hurtigste og mest præcise Luna-konfiguration af alle.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="acc-item">
+      <summary><button class="exp" aria-hidden="true">▸</button>At gå fra Completions til Responses API<span class="sub">Workaround nødvendig · kun et krav for Luna</span></summary>
+      <div class="acc-body">
+        <div class="callout">
+          <b>Vigtigt:</b> Vi anbefaler ikke at skifte GPT‑5.1 fra Completions API til Responses API — det giver ingen fordel (91,0 % vs. 93,6 % beståelse, og mere ustabil latency). Skiftet til Responses API er kun nødvendigt, fordi GPT‑5.6 Luna kræver det. Det er Luna, der er interessant — ikke Responses API i sig selv.
+        </div>
+
+        <h4>Bug'en der blokerede alt</h4>
+        <p>At skifte en flows LLM til en Responses API-model (Luna, eller GPT-5.1 på Responses) ødelagde tavst ethvert tool-kald med et påkrævet argument. Ingen fejl, intet crash — argumentet ankom bare tomt, og botten svarede som om værktøjet havde fejlet. Det lignede en bred kvalitetsregression. Det var det ikke.</p>
+        <p>Tool-nodes læser LLM'ens udfyldte argumenter direkte fra provider-svaret, i et format der kun er korrekt for <code>apiType: chatCompletion</code>:</p>
+        <pre>context.tool_responses.detailedResult.choices[0].message.tool_calls[0].function.arguments</pre>
+        <p>Under <code>apiType: responses</code> ligger samme data et andet sted, uden <code>.detailedResult.choices[0].message</code>-wrapperen:</p>
+        <pre>context.tool_responses.toolCalls[0].function.arguments</pre>
+        <p>Rettet i alle 12 berørte nodes med et udtryk, der prøver det nye format først og falder tilbage til det gamle:</p>
+        <pre>{{context.tool_responses?.toolCalls?.[0]?.function?.arguments
+  || context.tool_responses?.detailedResult?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments}}</pre>
+        <p><b>Status:</b> Fixet og valideret i alle kørsler i denne rapport. Ikke overført endnu til VOICE-kanal-flowet, hvor samme mønster findes, men urørt — det er kun tavst, fordi det flow endnu ikke peger på en Responses API-model. Antag samme bug findes overalt, hvor tool-argumenter hentes på denne måde.</p>
+
+        <h4>Platform-modenhed</h4>
+        <p>Buggen handler ikke om Luna eller GPT-5.1 — projektets tool-argument-mønster er ældre end Responses API'et, og intet fangede uoverensstemmelsen, da et flow skiftede API-type. Rapporteret til cogx-vedligeholderne som to issues:</p>
+        <ul>
+          <li><b>Dokumentationshul</b> — tool-calling-referencen nævner ikke, at formen på <code>context.tool_responses</code> er apiType-specifik, eller peger mod den provider-agnostiske <code>input.llmPrompt.toolArgs.&lt;param&gt;</code>-mekanisme.</li>
+          <li><b>Debugging-hul</b> — der er ingen måde at læse levende <code>input</code>/<code>context</code>/<code>profile</code>-værdier under fejlsøgning; at bekræfte denne bug krævede midlertidigt at skrive debug-værdier ind i en kundevendt svar-streng.</li>
+        </ul>
+        <p class="note">Begge afventer maintainer-triage (cogx-plugin #150 og #151). Tjek status før I går i gang med en lignende migrering.</p>
+      </div>
+    </details>
+
+    <details class="acc-item">
+      <summary><button class="exp" aria-hidden="true">▸</button>Findings omkring reasoning<span class="sub">Standarder · prompt utestet</span></summary>
+      <div class="acc-body">
+        <h4>Reasoning-standarder er ikke hvad man tror</h4>
+        <p>Ingen af modellerne viser dette i Cognigy UI'et — der er ikke noget "reasoning effort"-felt. Det ligger kun i Custom Model Options, og de to modeller starter i hver sin tilstand.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th class="model">Model</th><th class="model">API</th><th class="model">Gyldige niveauer</th><th class="model">Standard uden konfiguration</th></tr></thead>
+            <tbody>
+              <tr><td class="model">GPT-5.1</td><td class="model">Completions</td><td class="model">low, medium, high, xhigh — intet "none"</td><td class="model">felt fraværende (off)</td></tr>
+              <tr><td class="model">GPT-5.1</td><td class="model">Responses</td><td class="model">none, minimal, low, medium, high, xhigh</td><td class="model">off = eksplicit "none"</td></tr>
+              <tr><td class="model">GPT-5.6-luna</td><td class="model">Responses</td><td class="model">none, low, medium, high, xhigh</td><td class="model">medium — altid reasoning-låst</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Luna afviser <code>temperature</code>, så snart en anden effort end "none" er aktiv — inklusive dens egen standard. Det var sådan vi fandt ud af, at standarden svarer til "medium".</p>
+
+        <h4>Prompten er aldrig tilpasset en reasoning-model</h4>
+        <p>Alle resultater bruger produktionsprompten præcis som skrevet til GPT-5.1 — aldrig tilpasset GPT-5.6. Det kunne flytte tallene begge veje, og OpenAI's egen vejledning tyder på, at det formentlig ville hjælpe: en prompt tunet til én version er ikke garanteret optimal til den næste.</p>
+        <ul>
+          <li><b>"Vær grundig"-instruktioner virker mod hensigten.</b> Reasoning-modeller er allerede proaktive med at indsamle kontekst. Vores prompt har flere instruktioner i den ældre stil, som kan få modellen til at overbruge værktøjer og bruge tokens unødvendigt.</li>
+          <li><b>Reasoning-tilstand mellem tool-kald (<code>previous_response_id</code>) bruges ikke.</b> Den lader modellens reasoning-tilstand føres videre i stedet for at blive genopbygget ved hvert kald — hurtigere og billigere. Cognigys tool-calling-abstraktion ser ikke ud til at understøtte det.</li>
+        </ul>
+        <p>Luna når allerede 91,7 % på en prompt bygget til en anden model. Det er den enkeltstående største uudnyttede løftestang for at lukke gabet til GPT-5.1 — og grunden til, vi anbefaler at teste Answer Agent-prompten kvalitativt, frem for et blindt skift.</p>
+        <p class="note">Kilder: <a href="https://cookbook.openai.com/examples/gpt-5/gpt-5-1_prompting_guide" target="_blank" rel="noopener">GPT-5 prompting guide (OpenAI Cookbook)</a> · <a href="https://openai.com/index/gpt-5-new-params-and-tools-for-developers/" target="_blank" rel="noopener">A practical guide to building with GPT-5 (OpenAI)</a></p>
+      </div>
+    </details>
+
+    <details class="acc-item">
+      <summary><button class="exp" aria-hidden="true">▸</button>Tjekliste ved migrering<span class="sub">8 punkter til andre brands</span></summary>
+      <div class="acc-body">
+        <p>Hvis et andet brand vil evaluere en nyere eller reasoning-kapabel model, er dette rækkefølgen vi ville ønske, vi havde haft fra start.</p>
+        <ul class="checklist">
+          <li><span class="i">01</span><span><b>Gennemgå tool-argument-udtræk før noget skiftes.</b> <span>Grep enhver node der læser rå <code>tool_responses.*</code>, for en hardcodet form. Brug dual-path-mønstret ovenfor, eller migrer til <code>input.llmPrompt.toolArgs</code>.</span></span></li>
+          <li><span class="i">02</span><span><b>Test om målmodellen accepterer temperature/top_p.</b> <span>Reasoning-låste modeller afviser dem helt. Nulstil begge via Custom Model Options hvis nødvendigt.</span></span></li>
+          <li><span class="i">03</span><span><b>Antag aldrig en reasoning-standard — test den.</b> <span>Sammenlign ukonfigureret timing/adfærd med en eksplicit "none"-kørsel.</span></span></li>
+          <li><span class="i">04</span><span><b>Genskriv prompten til den model, I lander på.</b> <span>En prompt tunet til en Completions-æra-model er ikke automatisk optimal til en reasoning-model.</span></span></li>
+          <li><span class="i">05</span><span><b>Hæv maxTokens før I tester højere reasoning effort.</b> <span>Reasoning-tokens trækker fra samme budget som det synlige svar.</span></span></li>
+          <li><span class="i">06</span><span><b>Hæv node-timeout over den værste latency, I faktisk har observeret.</b> <span>En kort timeout omdirigerer tavst langsomme-men-korrekte svar til fejlhåndteringsveje.</span></span></li>
+          <li><span class="i">07</span><span><b>Kør hvert scenarie mindst tre gange, før I konkluderer noget.</b> <span>Denne suites egen støjbund ligger på ca. 5–10 point pass-rate-varians mellem identiske, gentagne kørsler.</span></span></li>
+          <li><span class="i">08</span><span><b>Bekræft hvilken model-tier I faktisk deployer.</b> <span>Familie-kodenavne kan repræsentere markant forskellige kapacitetsniveauer.</span></span></li>
+        </ul>
+      </div>
+    </details>
+
+  </div>
+
+  <footer>
+    <span>Jacobs Agent · yousee-dev · internt test/POC-projekt, ikke et produktionssystem med rigtige kunder</span>
+    <span>Intern reference på tværs af AAO-brands</span>
+  </footer>
+
+</div>
+</body>
+</html>
