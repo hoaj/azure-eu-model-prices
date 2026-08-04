@@ -709,6 +709,9 @@ h1 em{font-style:italic; font-weight:500; color:var(--blue)}
 .stamp{font-family:"JetBrains Mono",monospace; font-size:12.5px}
 .srcs a{color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(39,80,158,.3)}
 .srcs a:hover{border-color:var(--blue)}
+.related{margin:14px 0 0; font-size:14px}
+.related a{color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(39,80,158,.3)}
+.related a:hover{border-color:var(--blue)}
 
 /* ---------- controls ---------- */
 .controls{
@@ -866,6 +869,7 @@ footer{margin-top:34px; padding-top:20px; border-top:1px solid var(--line); font
         <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reasoning" target="_blank" rel="noopener">reasoning effort</a>
       </span>
     </div>
+    <p class="related"><a href="luna-vs-gpt5-6-eval.html">→ GPT‑5.1 vs. GPT‑5.6 Luna: head‑to‑head evaluation for Cognigy chat/voice agents</a></p>
   </header>
 
   <div class="controls">
