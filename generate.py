@@ -60,6 +60,10 @@ MODELS = [
     {"id": "gpt-5-nano",   "family": "GPT", "released": "2025-08-07", "meterIn": "GPT 5 Nano Inpt DZone 1M Tokens",    "meterOut": "GPT 5 Nano outpt DZone 1M Tokens",    "regions": [SC, WE]},
     {"id": "gpt-5.1",      "family": "GPT", "released": "2025-11-13", "meterIn": "GPT 5.1 inp Dz 1M Tokens",           "meterOut": "GPT 5.1 opt Dz 1M Tokens",            "regions": [SC]},
     {"id": "gpt-5.4",      "family": "GPT", "released": "2026-03-05", "meterIn": "5.4 inp Dz 1M Tokens",               "meterOut": "5.4 opt Dz 1M Tokens",                "regions": [SC, WE], "note": "short-context tier"},
+    # No ShortCo/LongCo split exists for the mini SKU (all 18 of its meters are single-tier), so
+    # unlike its siblings it carries no "short-context tier" note. Note the capitalised Inp/Opt —
+    # gpt-5.4's own meters are lowercase; the price lookup is an exact, case-sensitive dict hit.
+    {"id": "gpt-5.4-mini", "family": "GPT", "released": "2026-03-17", "meterIn": "5.4 mini Inp Dz 1M Tokens",     "meterOut": "5.4 mini Opt Dz 1M Tokens",           "regions": [SC, WE]},
     {"id": "gpt-5.5",      "family": "GPT", "released": "2026-04-24", "meterIn": "5.5 ShortCo inp Dz 1M Tokens",       "meterOut": "5.5 ShortCo opt Dz 1M Tokens",        "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.6-sol",   "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 sol ShortCo Inp Std DZ 1M Tokens",   "meterOut": "5.6 sol ShortCo Opt Std DZ 1M Tokens",   "regions": [SC, WE], "note": "short-context tier"},
     {"id": "gpt-5.6-terra", "family": "GPT", "released": "2026-07-09", "meterIn": "5.6 terra ShortCo Inp Std DZ 1M Tokens", "meterOut": "5.6 terra ShortCo Opt Std DZ 1M Tokens", "regions": [SC, WE], "note": "short-context tier"},
@@ -94,6 +98,14 @@ REASONING = {
     "gpt-5-nano": {"options": ["minimal", "low", "medium", "high"], "default": "medium"},
     "gpt-5.1": {"options": ["none", "low", "medium", "high"], "default": "none"},
     "gpt-5.4": {"options": ["none", "low", "medium", "high", "xhigh"], "default": None},
+    # The doc never names gpt-5.4-mini in its two exclusive lists — footnote 7 ("none") and "xhigh is
+    # only supported with gpt-5.6, gpt-5.5, gpt-5.4, and gpt-5.1-codex-max" — it names "gpt-5.4",
+    # which could be the family or the exact id. Artificial Analysis settles it: it ran this model at
+    # xhigh (see its tau3_variant), so the family reading holds for that list. Both lists use the same
+    # token, so both read the same way — hence gpt-5.4's set. "minimal" stays out either way ("minimal
+    # isn't supported with gpt-5.1 or greater"). Read strictly by id this would be low/medium/high,
+    # but that would have the page claim xhigh unsupported next to a score it measured at xhigh.
+    "gpt-5.4-mini": {"options": ["none", "low", "medium", "high", "xhigh"], "default": None},
     "gpt-5.5": {"options": ["none", "low", "medium", "high", "xhigh"], "default": "medium"},
     # gpt-5.6 adds a `max` level (Responses API only). Neither Azure's reasoning doc nor OpenAI's
     # guide documents a default for 5.6 — the guide states one only for gpt-5.5 — so: None.
