@@ -1,5 +1,15 @@
 # CLAUDE.md
 
+> ## ⚠️ Retired — moved to an internal repository
+>
+> This project now lives at **`nuuday/aao-llm-guidedance`**, and the site is served privately at
+> <https://solid-adventure-9mq575m.pages.github.io/index.html> (sign-in required).
+>
+> Nothing here is maintained any more. The daily price refresh workflow has been **deleted from
+> this repository** and runs in the new home instead, so `index.html` here is a signpost page,
+> not a generated artifact. `generate.py` is left in place for history only — running it would
+> overwrite the signpost with a stale table.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
